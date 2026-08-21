@@ -29182,8 +29182,24 @@ async function _conciSaveVirtualAirlineOverride(client, tr, value) {
 // existente se guarda siempre (ahí "sin captura nueva" ya se filtra por
 // columnas modificadas más adelante).
 function _conciFilaNuevaListaParaGuardar(tr, hayCapturaDelUsuario) {
-    const esNuevaSinGuardar = tr.dataset.conciNew === '1' && !String(tr.dataset.rowId || '').trim();
-    return !esNuevaSinGuardar || hayCapturaDelUsuario;
+    // Las filas espejo del itinerario tienen su propio camino mas abajo, con sus
+    // propias condiciones: aqui no se tocan.
+    if (tr.dataset.rowFuente === 'Solo Vuelos') return true;
+    // La condicion real para que guardar signifique CREAR es no tener id.
+    //
+    // Antes esto exigia ademas la marca conciNew, y ahi estaba el hueco: esa
+    // marca es una pista de como nacio la fila, no la verdad sobre si existe en
+    // la base. Se pone al crearla en pantalla y se quita cuando el insert
+    // responde con un id. Cualquier fila que se quede sin la marca pero sin id
+    // --un insert que respondio sin id, un repintado que no la copio, una via
+    // futura que no se acuerde de ponerla-- dejaba de estar protegida y se
+    // insertaba con lo que llevara encima, que en una fila recien nacida es solo
+    // lo que rellena el sistema.
+    //
+    // Mirando el id, el invariante se cumple venga la fila de donde venga: sin
+    // captura del usuario, no se crea nada.
+    const vaACrearse = !String(tr.dataset.rowId || '').trim();
+    return !vaACrearse || hayCapturaDelUsuario;
 }
 
 // Una fila recién agregada en la que el usuario no llegó a escribir nada: no

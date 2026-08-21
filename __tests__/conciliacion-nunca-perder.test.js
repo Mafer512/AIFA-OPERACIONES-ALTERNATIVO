@@ -52,6 +52,9 @@ const api = new Function('document', 'setTimeout', 'clearTimeout', 'estado', 'en
   function _conciRefreshCalculatedCellsForRow() {}
   function _conciQueueAutoSave(tr) { encolados.push(tr); }
   function showNotification(msg, tipo) { avisos.push({ msg, tipo }); }
+  // Devuelve la fila, igual que la real: quien la llama no puede deducirla
+  // mirando el tbody, porque cuando se reutiliza una fila en blanco no se anade
+  // ninguna al final.
   function _conciAddBlankRow() {
     const tbody = document.querySelector('#table-conci-manifiestos tbody');
     const tr = document.createElement('tr');
@@ -62,6 +65,7 @@ const api = new Function('document', 'setTimeout', 'clearTimeout', 'estado', 'en
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
+    return tr;
   }
   ${extraer('_conciProgramarReintento')}
   ${extraer('_conciReiniciarEsperaReintento')}

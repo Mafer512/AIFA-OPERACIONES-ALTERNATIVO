@@ -57,8 +57,13 @@ describe('una fila nueva no se crea sola', () => {
   // Una fila ya guardada se sigue escribiendo aunque en esta pasada no haya
   // captura nueva: es el camino de los rellenos automáticos y de las columnas
   // calculadas, que más adelante se filtran por columnas realmente modificadas.
+  //
+  // "Ya existente" es TENER ID. Antes esta prueba lo daba por bueno con una fila
+  // sin id y sin la marca conciNew, y esa combinación no es una fila existente:
+  // sin id, guardarla no la actualiza, la CREA. La guarda pasó a mirar el id
+  // justamente por eso, así que aquí se le da uno.
   test('una fila ya existente no se ve afectada', () => {
-    expect(api._conciFilaNuevaListaParaGuardar(fila(), false)).toBe(true);
+    expect(api._conciFilaNuevaListaParaGuardar(fila({ rowId: '4321' }), false)).toBe(true);
   });
 
   // Tras el primer guardado la fila conserva un momento data-conci-new pero ya
