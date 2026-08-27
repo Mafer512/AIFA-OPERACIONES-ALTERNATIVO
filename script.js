@@ -17480,8 +17480,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // pestana sin preguntar, y en movil cuando la aplicacion pasa a segundo
     // plano —dos casos que beforeunload no cubre—.
     window.addEventListener('pagehide', _conciEnviarPendientesAlCerrar);
+    // Cambiar de pestaña o de aplicación NO cierra la página: aquí sí da tiempo
+    // de guardar de verdad. Encolar sin intentarlo antes llenaba la cola del
+    // servidor de capturas que se habrían guardado solas 400 ms después — y esos
+    // renglones ya no los retiraba nadie.
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') _conciEnviarPendientesAlCerrar();
+        if (document.visibilityState === 'hidden') _conciGuardarPendientesYa();
     });
     if (btnConciAirlineColors) btnConciAirlineColors.addEventListener('click', _conciOpenAirlineColors);
     if (btnConciMatriculaCatalog) btnConciMatriculaCatalog.addEventListener('click', _conciOpenMatriculaCatalog);
@@ -23753,6 +23757,47 @@ function _conciShouldPersistCalculatedColumn(column) {
         || /demora\s*\+\s*-?\s*15\s*min/.test(key);
 }
 
+// De qué celdas sale cada columna calculada que sí se guarda.
+const _CONCI_INSUMOS_CALCULADAS = [
+    {
+        salida: /^total\s+exentos$/,
+        insumos: /^(diplomaticos|en comision|infantes|transitos|conexiones|otros exentos)$/,
+    },
+    {
+        salida: /^pax\s+que\s+pagan\s+tua$/,
+        insumos: /^(total pax|tipo de manifiesto|diplomaticos|en comision|infantes|transitos|conexiones|otros exentos)$/,
+    },
+    {
+        salida: /^kgs?\.?\s*de\s*carga\s+total$/,
+        insumos: /^kgs?\.?\s*de\s*carga\s+(nacional|internacional)$/,
+    },
+    {
+        salida: /demora\s*\+\s*-?\s*15\s*min/,
+        insumos: /^(slot asignado|slot coordinado|hr\.?\s*de\s*operacion)$/,
+    },
+];
+
+// ¿Hay que reenviar esta columna calculada en un UPDATE?
+//
+// Sólo si la captura actual tocó alguno de sus insumos. Antes se mandaban
+// SIEMPRE, con el valor que tuviera la pantalla: dos personas capturando la
+// misma fila al mismo tiempo se pisaban los totales de exentos y de carga sin
+// haberlos tocado ninguna de las dos — la que guardaba última reponía en la
+// base el total viejo que ella traía en pantalla. Es el cruce de datos que hay
+// que evitar cuando varias sesiones capturan a la vez: cada UPDATE debe llevar
+// lo que esa persona cambió, y nada más.
+function _conciCalculadaDebeEnviarse(column, dirtyCols) {
+    if (!_conciShouldPersistCalculatedColumn(column)) return false;
+    const key = _conciNormalizedColumnName(column);
+    const regla = _CONCI_INSUMOS_CALCULADAS.find(r => r.salida.test(key));
+    if (!regla) return true;
+    const tocadas = dirtyCols instanceof Set ? [...dirtyCols] : (dirtyCols || []);
+    return tocadas.some(col => {
+        const claveTocada = _conciNormalizedColumnName(col);
+        return claveTocada === key || regla.insumos.test(claveTocada);
+    });
+}
+
 // Columnas de captura de pasajeros. En vuelos de carga (incluye mixtos
 // clasificados como carga) no aplican y se bloquea su edición.
 // Contadores que la base guarda como numero. Un solo caracter no numerico en
@@ -26141,6 +26186,10 @@ function _conciStageCellDraft(td, rawValue) {
 function _conciQueueAutoSave(tr) {
     if (!tr || !tr.isConnected || !_conciEditMode || !_conciCanCurrentUserEdit()) return;
     if (tr.dataset.conciDescartada === '1') return;
+    // Una captura nueva estrena la espera: el retraso acumulado castigaba a los
+    // intentos anteriores, no a este. Sin esto, una fila que fallo mientras se
+    // completaba arrastraba su penalizacion hasta cuando ya estaba lista.
+    _conciReiniciarEsperaReintento();
     if (tr._conciAutoSaveTimer) clearTimeout(tr._conciAutoSaveTimer);
     tr._conciAutoSaveTimer = setTimeout(() => {
         tr._conciAutoSaveTimer = null;
@@ -26544,7 +26593,12 @@ function _conciRestaurarBorradores() {
 // segundos— y a partir de ahi se va espaciando igual que antes, para no
 // martillear a un servidor que de verdad este caido.
 const _CONCI_REINTENTO_MIN_MS = 1500;
-const _CONCI_REINTENTO_MAX_MS = 120000;
+// Dos minutos era una eternidad en un modulo de captura: si los primeros
+// intentos fallaban, la espera crecia y el guardado bueno se quedaba esperando
+// ese temporizador. Quien capturaba lo veia como "guarda si te esperas unos
+// minutos", y si refrescaba antes daba por perdido lo tecleado. Diez segundos
+// sigue siendo suave con el servidor y ya no se siente como una espera.
+const _CONCI_REINTENTO_MAX_MS = 10000;
 let _conciReintentoTimer = null;
 let _conciReintentoEspera = _CONCI_REINTENTO_MIN_MS;
 
@@ -26706,11 +26760,25 @@ function _conciActualizarIndicadorBorradores() {
     const el = document.getElementById('conci-pendientes-indicador');
     if (!el) return;
     const { filas, celdas } = _conciBorradoresPendientes();
-    // Lo que quedo a medias en OTRA computadora. Eso no se reintenta solo aqui:
-    // hay que rescatarlo a mano, y por eso se muestra aparte.
+    // Lo que quedo a medias en OTRA computadora y TODAVIA se puede colocar.
+    //
+    // El contador decia "N capturas pendientes de otro equipo" y sumaba tambien
+    // las huerfanas: encoladas contra una fila que ya no existe, imposibles de
+    // aplicar y de retirar. Un numero enorme y creciente que nadie podia bajar
+    // se leia como "el guardado esta roto", cuando el dato si estaba guardado.
+    // Aqui solo se cuenta lo accionable; las huerfanas se descartan desde el
+    // panel, que es el unico sitio donde hay algo que hacer con ellas.
     const ajenos = (typeof _conciPendientesAjenos === 'function') ? _conciPendientesAjenos() : [];
+    // El aviso "N capturas de Fulano sin aplicar" se retiro de la barra: ponia
+    // el nombre de un companero delante de toda la sala y desde ahi no habia
+    // nada que hacer con ese numero. Lo pendiente de otra computadora sigue en
+    // la cola, se aplica solo y se sigue viendo completo en el panel.
+    const MOSTRAR_PENDIENTES_AJENOS = false;
+    const rescatables = MOSTRAR_PENDIENTES_AJENOS
+        ? ajenos.filter(p => !_conciPendienteEsHuerfano(p))
+        : [];
 
-    if (!celdas && !ajenos.length) {
+    if (!celdas && !rescatables.length) {
         el.classList.add('d-none');
         el.removeAttribute('title');
         el.classList.remove('conci-pendientes-ajenos');
@@ -26718,26 +26786,39 @@ function _conciActualizarIndicadorBorradores() {
     }
     el.classList.remove('d-none');
 
-    if (celdas && ajenos.length) {
-        el.textContent = `${celdas} sin guardar · ${ajenos.length} de otro equipo`;
+    // "N capturas por revisar" no decia de que iba: quien lo lee no sabe si es
+    // suyo, si perdio algo o que tiene que hacer. Con el nombre de quien las
+    // tecleo y un "sin aplicar" se entiende en un vistazo: no son tuyas, se
+    // quedaron a medias en otra computadora, y se pueden colocar con un clic.
+    const quienes = [...new Set(rescatables
+        .map(a => String(a.usuario || '').trim())
+        .filter(Boolean))];
+    const deQuien = quienes.length === 1 ? `de ${quienes[0]}`
+        : quienes.length > 1 ? `de ${quienes.length} personas`
+        : 'de otro equipo';
+    const ajenoTexto = rescatables.length === 1
+        ? `1 captura ${deQuien} sin aplicar`
+        : `${rescatables.length} capturas ${deQuien} sin aplicar`;
+
+    if (celdas && rescatables.length) {
+        // Con las dos cosas a la vez, el nombre no cabe: se deja para el tooltip.
+        el.textContent = `${celdas} guardándose · ${rescatables.length} sin aplicar`;
     } else if (celdas) {
-        el.textContent = celdas === 1 ? '1 captura sin guardar' : `${celdas} capturas sin guardar`;
+        el.textContent = celdas === 1 ? '1 captura guardándose' : `${celdas} capturas guardándose`;
     } else {
-        el.textContent = ajenos.length === 1
-            ? '1 captura pendiente de otro equipo'
-            : `${ajenos.length} capturas pendientes de otro equipo`;
+        el.textContent = ajenoTexto;
     }
-    el.classList.toggle('conci-pendientes-ajenos', ajenos.length > 0);
+    el.classList.toggle('conci-pendientes-ajenos', rescatables.length > 0);
 
     const partes = [];
     if (celdas) {
         partes.push(`${celdas === 1 ? '1 captura' : `${celdas} capturas`} en `
-            + `${filas === 1 ? '1 fila' : `${filas} filas`} de esta computadora. Se reintentan solas.`);
+            + `${filas === 1 ? '1 fila' : `${filas} filas`} de esta computadora. Se guardan solas.`);
     }
-    if (ajenos.length) {
-        const quienes = [...new Set(ajenos.map(a => a.usuario))].join(', ');
-        partes.push(`${ajenos.length === 1 ? '1 captura quedo' : `${ajenos.length} capturas quedaron`} `
-            + `sin guardar en otro equipo (${quienes}). Clic para verlas y rescatarlas.`);
+    if (rescatables.length) {
+        partes.push(`${rescatables.length === 1 ? '1 captura se quedo' : `${rescatables.length} capturas se quedaron`} `
+            + `a medias en otra computadora (${quienes.join(', ') || 'otro equipo'}) y nunca llegaron a la base. `
+            + `No es un dato perdido tuyo. Clic para ver vuelo, campo y valor, y colocarlas o descartarlas.`);
     }
     el.title = partes.join(' ');
 }
@@ -26856,16 +26937,7 @@ function _conciAplicarPendienteRemoto(reg) {
     // que todavia no tenia manifiesto propio: ahi la fila puede haber cambiado
     // de estado —seguir siendo espejo del Itinerario, o haber conseguido ya su
     // id— y lo unico estable es el vuelo al que pertenece.
-    let td = null;
-    if (tabla && _conciPendienteEsIdentidad(reg)) {
-        const fila = _conciBuscarFilaPorIdentidad(tabla, String(reg.row_id));
-        td = fila
-            ? [...fila.querySelectorAll('td[data-col]')]
-                .find(c => String(c.dataset.col || '') === String(reg.columna)) || null
-            : null;
-    } else if (tabla) {
-        td = _conciFindLiveCell(tabla, String(reg.row_id), String(reg.columna));
-    }
+    const td = _conciCeldaDePendiente(tabla, reg);
     if (!td) {
         if (typeof showNotification === 'function') {
             // Distinguir los dos casos importa: uno se arregla cambiando el
@@ -26898,12 +26970,33 @@ function _conciAplicarPendienteRemoto(reg) {
     }
 }
 
+// La celda a la que apunta un renglón de la cola, si está a la vista.
+function _conciCeldaDePendiente(tabla, reg) {
+    if (!tabla || !reg) return null;
+    if (_conciPendienteEsIdentidad(reg)) {
+        const fila = _conciBuscarFilaPorIdentidad(tabla, String(reg.row_id));
+        return fila
+            ? [...fila.querySelectorAll('td[data-col]')]
+                .find(c => String(c.dataset.col || '') === String(reg.columna)) || null
+            : null;
+    }
+    return _conciFindLiveCell(tabla, String(reg.row_id), String(reg.columna));
+}
+
 async function _conciBorrarPendienteRemoto(id) {
+    return _conciBorrarPendientesRemotos([id]);
+}
+
+async function _conciBorrarPendientesRemotos(ids) {
+    const lista = (ids || []).filter(id => id !== null && id !== undefined);
+    if (!lista.length) return;
     const client = await _conciClientePendientes();
     if (!client) return;
     try {
-        await client.from(_CONCI_TABLA_PENDIENTES).delete().eq('id', id);
-        _conciPendientesRemotos = _conciPendientesRemotos.filter(p => String(p.id) !== String(id));
+        const { error } = await client.from(_CONCI_TABLA_PENDIENTES).delete().in('id', lista);
+        if (error) return _conciColaFalla(error);
+        const fuera = new Set(lista.map(String));
+        _conciPendientesRemotos = _conciPendientesRemotos.filter(p => !fuera.has(String(p.id)));
         _conciActualizarIndicadorBorradores();
     } catch (e) { _conciColaFalla(e); }
 }
@@ -26922,6 +27015,52 @@ async function _conciBorrarPendienteRemoto(id) {
 // Requiere db/conciliacion_capturas_pendientes.sql. Si la tabla no existe, todo
 // esto se desactiva solo y la captura sigue funcionando igual que antes.
 const _CONCI_TABLA_PENDIENTES = 'conciliacion_capturas_pendientes';
+
+// Quién es el dueño de un renglón de la cola.
+//
+// Esto era el id de la pestaña, que vive en sessionStorage y muere con ella.
+// Como un renglón sólo lo borra quien lo creó, cada pestaña que se cerraba
+// dejaba pendientes que ya nadie podía retirar: al volver a entrar el equipo
+// tenía otro id y los veía —los suyos— como "capturas pendientes de otro
+// equipo", aunque el dato hubiera acabado guardándose. Así se acumularon.
+//
+// El id de pestaña sigue siendo el de presencia en vivo (dos pestañas son dos
+// presencias), pero la cola se cuelga de una identidad de EQUIPO, estable entre
+// recargas y entre pestañas del mismo navegador.
+const _CONCI_DEVICE_KEY = 'aifa-conci-device-id';
+let _conciDeviceIdCache = '';
+
+// Un uuid v4. crypto.randomUUID no existe en navegadores viejos ni fuera de
+// contexto seguro, y sin respaldo la fila se quedaria sin nombre justo donde
+// mas falta hace.
+function _conciNuevoUuid() {
+    try {
+        if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+        if (window.crypto && typeof crypto.getRandomValues === 'function') {
+            const b = crypto.getRandomValues(new Uint8Array(16));
+            b[6] = (b[6] & 0x0f) | 0x40;
+            b[8] = (b[8] & 0x3f) | 0x80;
+            const hex = [...b].map(n => n.toString(16).padStart(2, '0')).join('');
+            return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+        }
+    } catch (_) { /* se cae al respaldo de abajo */ }
+    const az = () => Math.floor(Math.random() * 0x10000).toString(16).padStart(4, '0');
+    return `${az()}${az()}-${az()}-4${az().slice(1)}-a${az().slice(1)}-${az()}${az()}${az()}`;
+}
+
+function _conciDeviceId() {
+    if (_conciDeviceIdCache) return _conciDeviceIdCache;
+    try {
+        const guardado = localStorage.getItem(_CONCI_DEVICE_KEY);
+        if (guardado) { _conciDeviceIdCache = guardado; return _conciDeviceIdCache; }
+    } catch (_) { /* sin almacenamiento: se cae al id de pestaña, como antes */ }
+    const nuevo = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`;
+    try { localStorage.setItem(_CONCI_DEVICE_KEY, nuevo); } catch (_) { }
+    _conciDeviceIdCache = nuevo || _conciLiveClientId || 'sin-id';
+    return _conciDeviceIdCache;
+}
 let _conciPendientesRemotos = [];
 let _conciColaDisponible = null;   // null = aún no se sabe
 
@@ -26965,7 +27104,7 @@ function _conciCeldasPendientesDeFila(tr) {
 function _conciIdTemporalDeFila(tr) {
     if (!tr) return '';
     if (!tr.dataset.conciTempId) {
-        tr.dataset.conciTempId = `nueva:${_conciLiveClientId || 'sin-id'}:`
+        tr.dataset.conciTempId = `nueva:${_conciDeviceId()}:`
             + `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
     }
     return tr.dataset.conciTempId;
@@ -27090,7 +27229,7 @@ async function _conciEncolarPendientesDeFila(tr, mensajeError) {
             await client.from(_CONCI_TABLA_PENDIENTES)
                 .delete()
                 .eq('row_id', idPrevio)
-                .eq('cliente_id', _conciLiveClientId || 'sin-id');
+                .eq('cliente_id', _conciDeviceId());
         } catch (e) { _conciColaFalla(e); }
     }
     tr.dataset.conciColaId = rowId;
@@ -27100,7 +27239,7 @@ async function _conciEncolarPendientesDeFila(tr, mensajeError) {
         columna: c.col,
         valor: c.valor,
         usuario: _conciCurrentUserDisplayName() || 'Sin nombre',
-        cliente_id: _conciLiveClientId || 'sin-id',
+        cliente_id: _conciDeviceId(),
         // La fecha del vuelo de ESTA fila, no la del filtro: con un rango
         // activo el filtro archivaba el pendiente en el primer dia del rango.
         fecha_vuelo: _conciFechaIsoDeFila(tr)
@@ -27139,9 +27278,48 @@ async function _conciDesencolarPendientesDeFila(tr, columnas) {
             .from(_CONCI_TABLA_PENDIENTES)
             .delete()
             .in('row_id', ids)
-            .eq('cliente_id', _conciLiveClientId || 'sin-id')
+            .eq('cliente_id', _conciDeviceId())
             .in('columna', cols);
         if (error) _conciColaFalla(error);
+    } catch (e) {
+        _conciColaFalla(e);
+    }
+    await _conciPurgarPendientesConfirmados(tr, ids, cols);
+}
+
+// Lo que otro equipo dejó encolado para estas mismas celdas deja de estar
+// pendiente en cuanto la base confirma ESE MISMO valor. Sin esto se quedaba ahí
+// para siempre: quien lo encoló ya no puede retirarlo —su pestaña murió— y el
+// contador lo seguía sumando como captura sin guardar aunque el dato ya
+// estuviera a salvo.
+//
+// Sólo se borra cuando el valor coincide. Un valor distinto es una captura
+// ajena de verdad, todavía sin aplicar, y ésa no se toca.
+async function _conciPurgarPendientesConfirmados(tr, ids, cols) {
+    if (!tr || _conciColaDisponible === false) return;
+    const client = await _conciClientePendientes();
+    if (!client) return;
+    const confirmado = new Map();
+    [...tr.querySelectorAll('td[data-col]')].forEach(td => {
+        const col = String(td.dataset.col || '');
+        // Una celda que sigue sucia no confirma nada: su valor aún no está en la base.
+        if (!col || td.dataset.dirty === '1') return;
+        confirmado.set(col, _conciNormalizeEditableCellText(td.dataset.raw ?? td.textContent));
+    });
+    if (!confirmado.size) return;
+    try {
+        const { data, error } = await client
+            .from(_CONCI_TABLA_PENDIENTES)
+            .select('id,columna,valor')
+            .in('row_id', ids)
+            .in('columna', cols);
+        if (error) return _conciColaFalla(error);
+        const obsoletos = (data || []).filter(p => {
+            const col = String(p.columna || '');
+            return confirmado.has(col)
+                && confirmado.get(col) === _conciNormalizeEditableCellText(p.valor);
+        }).map(p => p.id);
+        if (obsoletos.length) await _conciBorrarPendientesRemotos(obsoletos);
     } catch (e) {
         _conciColaFalla(e);
     }
@@ -27165,6 +27343,7 @@ async function _conciCargarPendientesRemotos() {
         _conciColaDisponible = true;
         _conciPendientesRemotos = Array.isArray(data) ? data : [];
         _conciActualizarIndicadorBorradores();
+        _conciReconciliarPendientesRemotos();
     } catch (e) {
         _conciColaFalla(e);
     }
@@ -27173,8 +27352,68 @@ async function _conciCargarPendientesRemotos() {
 // Los pendientes que dejó OTRA persona, o esta misma desde otra computadora.
 // Son los que nadie va a rescatar solo, porque su borrador local está en una
 // máquina a la que quizá nadie vuelva.
+// La cola puede traer renglones que YA están guardados —quedaron ahí porque
+// quien los encoló no pudo retirarlos—. Si la celda está a la vista y su valor
+// confirmado es idéntico al pendiente, ese renglón es historia y se retira
+// solo, sin que nadie tenga que ir a rescatarlo a mano.
+//
+// Conservador a propósito: si la celda no está a la vista, o su valor difiere,
+// el renglón se queda. Nunca se descarta una captura que pudiera ser real.
+async function _conciReconciliarPendientesRemotos() {
+    if (!_conciPendientesRemotos.length) return;
+    const tabla = document.getElementById('table-conci-manifiestos');
+    if (!tabla) return;
+
+    // UNA sola pasada por la tabla, no una por cada pendiente.
+    //
+    // La primera version llamaba a _conciCeldaDePendiente dentro del bucle, y
+    // esa funcion recorre la tabla entera calculando la identidad de cada fila.
+    // Con 119 pendientes y una tabla de miles de filas salian millones de
+    // lecturas de celda sincronas al abrir el modulo: la pestana se quedaba
+    // congelada. Ahora se indexa primero y cada pendiente se resuelve directo.
+    const filas = [...tabla.querySelectorAll('tbody tr')];
+    const porRowId = new Map();
+    for (const tr of filas) {
+        const rowId = String(tr.dataset.rowId || '').trim();
+        if (rowId && !porRowId.has(rowId)) porRowId.set(rowId, tr);
+    }
+    // Calcular identidades es lo caro: solo se hace si algun pendiente la usa.
+    const porIdentidad = new Map();
+    if (_conciPendientesRemotos.some(_conciPendienteEsIdentidad)) {
+        for (const tr of filas) {
+            const id = _conciIdentidadDeFila(tr);
+            if (id && !porIdentidad.has(id)) porIdentidad.set(id, tr);
+        }
+    }
+    // Las celdas de cada fila, indexadas por columna, tambien de una pasada.
+    const celdasDe = new Map();
+    const celda = (tr, col) => {
+        if (!tr) return null;
+        if (!celdasDe.has(tr)) {
+            const mapa = new Map();
+            tr.querySelectorAll('td[data-col]').forEach(td => {
+                mapa.set(String(td.dataset.col || ''), td);
+            });
+            celdasDe.set(tr, mapa);
+        }
+        return celdasDe.get(tr).get(String(col)) || null;
+    };
+
+    const obsoletos = [];
+    for (const reg of _conciPendientesRemotos) {
+        const tr = _conciPendienteEsIdentidad(reg)
+            ? porIdentidad.get(String(reg.row_id || '').trim())
+            : porRowId.get(String(reg.row_id || '').trim());
+        const td = celda(tr, reg.columna);
+        if (!td || td.dataset.dirty === '1') continue;
+        const actual = _conciNormalizeEditableCellText(td.dataset.raw ?? td.textContent);
+        if (actual === _conciNormalizeEditableCellText(reg.valor)) obsoletos.push(reg.id);
+    }
+    if (obsoletos.length) await _conciBorrarPendientesRemotos(obsoletos);
+}
+
 function _conciPendientesAjenos() {
-    const mio = _conciLiveClientId || 'sin-id';
+    const mio = _conciDeviceId();
     return _conciPendientesRemotos.filter(p => String(p.cliente_id) !== mio);
 }
 
@@ -27215,9 +27454,10 @@ function _conciAbrirInstrucciones() {
                 salir: es solo una advertencia, no una amenaza.</p>
 
                 <h6 class="mt-3">Si tu computadora se apaga o te cambias de equipo</h6>
-                <p class="mb-2">Lo pendiente queda registrado en el servidor. Cualquiera lo ve en la
-                etiqueta <span class="badge" style="background:#f8d7da;color:#842029;border:1px solid #dc3545">capturas pendientes de otro equipo</span>
-                de la barra de arriba, y puede aplicarlo desde ahí con un clic.</p>
+                <p class="mb-2">Lo pendiente queda registrado en el servidor: no se pierde. Al volver a
+                entrar en esa misma computadora se reintenta solo hasta que la base lo acepte. Si ya no
+                vuelves a ese equipo, vuelve a capturar esa celda desde donde estés; en cuanto la base
+                confirma el valor, el pendiente se retira de la cola por su cuenta.</p>
 
                 <h6 class="mt-3">Si alguien captura la misma celda que tú</h6>
                 <p class="mb-2">Manda lo tuyo: tu captura no se pisa nunca. La celda queda marcada en
@@ -27263,14 +27503,92 @@ function _conciRecordarToken(token) {
     if (token) _conciTokenSesion = String(token);
 }
 
+// Fuerza ahora lo que el autoguardado tenía en espera. Escribe una celda 400 ms
+// después del último tecleo; al perder el foco no hay ninguna razón para seguir
+// esperando ese hueco.
+function _conciGuardarPendientesYa() {
+    const tbody = document.querySelector('#table-conci-manifiestos tbody');
+    if (!tbody) return;
+    tbody.querySelectorAll('tr').forEach(tr => {
+        if (tr._conciAutoSaveTimer) {
+            clearTimeout(tr._conciAutoSaveTimer);
+            tr._conciAutoSaveTimer = null;
+        }
+        if (!_conciCeldasPendientesDeFila(tr).length) return;
+        try { _conciAutoSaveRow(tr, { keepEditorsOpen: true }); } catch (_) { }
+    });
+}
+
+// La tabla real, tal cual se llama en la base.
+const _CONCI_TABLA_MANIFIESTOS = 'Conciliación Manifiestos';
+
+// Lo pendiente de una fila que YA existe, escrito directamente en la tabla real
+// con `keepalive`.
+//
+// Antes, al cerrar o refrescar solo se dejaba una nota en la cola de rescate: el
+// dato no llegaba a la tabla, asi que al recargar la fila aparecia sin lo
+// capturado y para quien capturo eso es exactamente "se perdio". Refrescar es lo
+// primero que hace la gente cuando duda de si guardo, y era justo el gesto que
+// se lo llevaba.
+//
+// Una peticion con keepalive se la queda el sistema operativo y sobrevive a que
+// la pagina muera, asi que esto funciona aunque la conexion vaya lenta. La cola
+// de rescate se conserva para lo que no se puede escribir asi: una fila nueva
+// todavia no tiene id contra el que hacer PATCH.
+function _conciEscribirFilaAlCerrar(tr, url, apikey) {
+    const rowId = String(tr.dataset.rowId || '').trim();
+    const uuid = String(tr.dataset.clienteUuid || '').trim();
+    // Sin id y sin nombre propio no hay contra que escribir: eso ya solo le pasa
+    // a las filas de antes de este mecanismo, y para esas queda la cola.
+    if (!rowId && !uuid) return false;
+    const celdas = _conciCeldasPendientesDeFila(tr);
+    if (!celdas.length) return false;
+    const payload = {};
+    celdas.forEach(c => {
+        payload[c.col] = c.valor === '' ? null : _conciPrepareValueForDatabase(c.col, c.valor);
+    });
+    if (!Object.keys(payload).length) return false;
+
+    const tabla = encodeURIComponent(_CONCI_TABLA_MANIFIESTOS);
+    // Con id se corrige la fila; sin id se crea o se corrige por su nombre. El
+    // upsert es lo que hace seguro reintentar: dos envios del mismo dato dejan
+    // una sola fila, no dos.
+    const url_ = rowId
+        ? `${url}/rest/v1/${tabla}?id=eq.${encodeURIComponent(rowId)}`
+        : `${url}/rest/v1/${tabla}?on_conflict=cliente_uuid`;
+    const cuerpo = rowId ? payload : { ...payload, cliente_uuid: uuid };
+    try {
+        fetch(url_, {
+            method: rowId ? 'PATCH' : 'POST',
+            keepalive: true,
+            headers: {
+                'Content-Type': 'application/json',
+                apikey,
+                Authorization: `Bearer ${_conciTokenSesion || apikey}`,
+                Prefer: rowId ? 'return=minimal' : 'resolution=merge-duplicates,return=minimal',
+            },
+            body: JSON.stringify(cuerpo),
+        }).catch(() => { /* si no sale, queda encolado abajo como respaldo */ });
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
 function _conciEnviarPendientesAlCerrar() {
-    if (_conciColaDisponible === false) return;
     const tabla = document.getElementById('table-conci-manifiestos');
     if (!tabla) return;
     const url = window.SUPABASE_URL;
     const apikey = window.SUPABASE_ANON_KEY;
     if (!url || !apikey) return;
 
+    // Primero lo que puede guardarse de verdad. Se intenta SIEMPRE, aunque la
+    // cola de rescate no este disponible: son cosas independientes.
+    tabla.querySelectorAll('tbody tr').forEach(tr => {
+        _conciEscribirFilaAlCerrar(tr, url, apikey);
+    });
+
+    if (_conciColaDisponible === false) return;
     const filas = [];
     tabla.querySelectorAll('tbody tr').forEach(tr => {
         const rowId = String(tr.dataset.rowId || '').trim()
@@ -27281,7 +27599,7 @@ function _conciEnviarPendientesAlCerrar() {
                 columna: c.col,
                 valor: c.valor,
                 usuario: _conciCurrentUserDisplayName() || 'Sin nombre',
-                cliente_id: _conciLiveClientId || 'sin-id',
+                cliente_id: _conciDeviceId(),
                 fecha_vuelo: (typeof _conciFechaUnicaDelFiltro === 'function' ? _conciFechaUnicaDelFiltro() : '') || null,
                 vuelo: _conciVueloDeFila(rowId) || null,
                 ultimo_error: 'La pestaña se cerró antes de confirmar el guardado.',
@@ -27353,7 +27671,12 @@ function _conciActualizarBotonGuardarTodo() {
     if (!btn) return;
     const grupo = document.getElementById('grp-conci-save-all');
     const caret = document.getElementById('btn-conci-save-all-more');
-    const visible = _conciEditMode && _conciCanCurrentUserEdit();
+    // La captura se guarda sola, celda por celda, en cuanto se sale de ella. El
+    // boton solo repetia ese trabajo y ocupaba sitio en la barra, asi que se
+    // deja fuera de pantalla a peticion de operaciones. La funcion sigue viva:
+    // Ctrl+G y window.conciGuardarTodo fuerzan el guardado sin el boton.
+    const MOSTRAR_BOTON_GUARDAR_TODO = false;
+    const visible = MOSTRAR_BOTON_GUARDAR_TODO && _conciEditMode && _conciCanCurrentUserEdit();
     (grupo || btn).classList.toggle('d-none', !visible);
     // La reescritura completa puede pisar capturas ajenas: no es una accion de
     // captura, es de administracion del modulo. Un capturista guarda lo suyo,
@@ -28736,18 +29059,42 @@ function _conciErrorEsperaCorreccion(error) {
     return String(error?.code || '') === 'CONCI_CAPTURA_NO_ACEPTADA';
 }
 
+// Lo que la celda manda es SIEMPRE texto ("1.50", "07", "+15"); lo que Postgres
+// devuelve de una columna numérica es el número ya normalizado (1.5, 7, 15).
+// Comparar esos dos como cadenas daba "no coincide" en un guardado que sí se
+// escribió. Aquí se reduce cada lado a número sólo cuando de verdad lo es, para
+// compararlos por su valor y no por cómo se escriben.
+function _conciNumeroComparable(valor) {
+    if (valor === null || valor === undefined) return null;
+    if (typeof valor === 'number') return Number.isFinite(valor) ? valor : null;
+    const texto = String(valor).trim();
+    if (!texto) return null;
+    // Sin notación de miles ni coma decimal: eso lo resuelve antes la captura.
+    // Aquí sólo interesa el caso "es un número escrito de otra manera".
+    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(texto)) return null;
+    const numero = Number(texto);
+    return Number.isFinite(numero) ? numero : null;
+}
+
 function _conciDatabaseValueEquals(expected, actual) {
     if (expected === null || expected === undefined) {
-        return actual === null || actual === undefined;
-    }
-    if (typeof expected === 'number') {
-        return Number.isFinite(Number(actual)) && Number(actual) === expected;
+        // Una columna not-null que recibe null se queda con su default (''
+        // o 0 según el tipo). El borrado sí ocurrió: no es un guardado fallido.
+        if (actual === null || actual === undefined) return true;
+        const vacio = String(actual).trim();
+        return vacio === '' || vacio === '0';
     }
     if (typeof expected === 'boolean') {
         return String(actual).toLowerCase() === String(expected).toLowerCase();
     }
     if (typeof expected === 'object') {
         try { return JSON.stringify(actual) === JSON.stringify(expected); } catch (_) { return false; }
+    }
+    const esperadoNumero = _conciNumeroComparable(expected);
+    const realNumero = _conciNumeroComparable(actual);
+    if (esperadoNumero !== null && realNumero !== null) return esperadoNumero === realNumero;
+    if (typeof expected === 'number') {
+        return Number.isFinite(Number(actual)) && Number(actual) === expected;
     }
     return String(actual ?? '').trim() === String(expected).trim();
 }
@@ -28906,7 +29253,14 @@ async function _conciWriteRowSafe(client, payload, rowId, options = {}) {
         // y comprobamos los valores antes de considerar la captura guardada.
         let result = effectiveRowId
             ? await req.update(currentPayload).eq('id', effectiveRowId).select('*').maybeSingle()
-            : await req.insert(currentPayload).select('*').maybeSingle();
+            // Crear con nombre propio es un upsert sobre ese nombre, no un
+            // insert a ciegas. Asi, si la peticion si llego pero su respuesta se
+            // perdio, el reintento cae sobre la misma fila en vez de crear una
+            // gemela. Sin cliente_uuid (filas de antes de ese mecanismo, o la
+            // migracion 029 sin aplicar) se comporta igual que siempre.
+            : currentPayload.cliente_uuid
+                ? await req.upsert(currentPayload, { onConflict: 'cliente_uuid' }).select('*').maybeSingle()
+                : await req.insert(currentPayload).select('*').maybeSingle();
 
         if (!result.error) {
             const persistedRow = Array.isArray(result.data) ? result.data[0] : result.data;
@@ -29037,7 +29391,19 @@ const typeValueMatch = message.match(/invalid input syntax for (?:type\s+)?(?:bi
             }
         }
 
-        if (!mutated) return { ok: false, error: result.error, droppedColumns: [...droppedColumns] };
+        // Se devuelve también la fila que la base alcanzó a escribir. Un INSERT
+        // puede haber creado el registro y fallar después la comprobación de
+        // valores: sin este dato el llamador no se entera de que ya existe y el
+        // siguiente intento vuelve a insertarlo — una fila duplicada por cada
+        // reintento. Con el id a la vista, insistir se convierte en UPDATE.
+        if (!mutated) {
+            return {
+                ok: false,
+                error: result.error,
+                data: result.data || (recoveredRowId !== null ? { id: recoveredRowId } : null),
+                droppedColumns: [...droppedColumns],
+            };
+        }
     }
 
     return { ok: false, error: { message: 'Error desconocido al guardar.' }, droppedColumns: [...droppedColumns] };
@@ -29193,10 +29559,100 @@ function _conciBuscarFilaNuevaEnBlanco(tbody) {
         .find(tr => _conciFilaNuevaSinCapturar(tr)) || null;
 }
 
+// ── Bitácora del guardado ────────────────────────────────────────────────────
+//
+// El autoguardado tiene varios puntos donde ABANDONA una fila sin decir nada:
+// la fila ya no está en el DOM, se salió del modo captura, el permiso cambió,
+// la fila se descartó. Cada uno es razonable por separado, pero todos juntos
+// significan que una fila puede quedarse sin guardar sin dejar rastro — y eso
+// es exactamente lo que se ve como "capturé 16 filas y sólo se guardaron 8",
+// sin error, sin pendiente en la cola, sin nada que mirar después.
+//
+// Aquí queda constancia de cada abandono, con el vuelo y el motivo. No cambia
+// el comportamiento: solo deja de ser invisible. Se consulta desde la consola
+// del navegador con conciBitacora().
+const _CONCI_BITACORA_MAX = 300;
+const _conciBitacora = [];
+let _conciAvisoOmitidaAt = 0;
+
+function _conciAnotar(tr, evento, detalle) {
+    try {
+        // Solo interesa lo que tenía algo que perder.
+        const celdas = tr ? _conciCeldasPendientesDeFila(tr) : [];
+        if (evento === 'omitida' && !celdas.length) return;
+        _conciBitacora.push({
+            hora: new Date().toLocaleTimeString('es-MX'),
+            vuelo: tr ? (_conciVueloDeFilaElemento(tr) || '(sin vuelo)') : '',
+            fila: tr ? (String(tr.dataset.rowId || '').trim() || 'nueva') : '',
+            evento,
+            detalle: String(detalle || ''),
+            celdas: celdas.map(c => c.col).join(', '),
+        });
+        if (_conciBitacora.length > _CONCI_BITACORA_MAX) _conciBitacora.shift();
+        // Un abandono con captura encima es lo unico que merece ruido: sin esto
+        // el problema solo se nota horas despues, contando filas a mano.
+        if (evento === 'omitida') {
+            console.warn('[Conciliación] fila NO guardada:', detalle, _conciBitacora[_conciBitacora.length - 1]);
+            // Enterarse en el momento, no al final del dia contando filas. Con
+            // freno: varias filas seguidas suelen ser la misma causa, y un aviso
+            // por cada una se vuelve ruido que se aprende a ignorar.
+            const ahora = Date.now();
+            if (ahora - _conciAvisoOmitidaAt > 8000 && typeof showNotification === 'function') {
+                _conciAvisoOmitidaAt = ahora;
+                const ultima = _conciBitacora[_conciBitacora.length - 1];
+                showNotification(
+                    `Una captura no se guardó (${ultima.vuelo}): ${detalle}. `
+                    + 'Escribe conciBitacora() en la consola para ver el detalle.',
+                    'error'
+                );
+            }
+        }
+    } catch (_) { /* la bitacora jamas puede estorbar a la captura */ }
+}
+
+window.conciBitacora = function () {
+    if (!_conciBitacora.length) {
+        console.log('[Conciliación] sin incidencias registradas en esta sesión.');
+        return [];
+    }
+    console.table(_conciBitacora);
+    return _conciBitacora;
+};
+
+// La escritura falló DESPUÉS de que la base ya creó (o localizó) el registro.
+// Pasa cuando el INSERT entra pero la comprobación de valores no cuadra, y
+// también cuando el conflicto de movement_key se resolvió sobre una fila ajena.
+// Sin adoptar aquí ese id, la fila sigue creyéndose "nueva" y el siguiente
+// guardado —el reintento automático, o la siguiente celda que el usuario
+// toque— vuelve a insertarla: una fila repetida por cada intento. Con el id
+// adoptado, lo capturado se termina de guardar con UPDATE sobre la fila que ya
+// existe, que es justo lo que se pidió: guardar en la fila que corresponde y no
+// crear filas nuevas.
+function _conciAdoptarFilaPersistida(tr, result) {
+    if (!tr || String(tr.dataset.rowId || '').trim()) return false;
+    const fila = Array.isArray(result?.data) ? result.data[0] : result?.data;
+    const id = fila?.id;
+    if (id === undefined || id === null || id === '') return false;
+    if (typeof _conciBorradorTrasladarFilaNueva === 'function') _conciBorradorTrasladarFilaNueva(tr, id);
+    tr.dataset.rowId = String(id);
+    tr.dataset.conciSummaryPersisted = '1';
+    tr.removeAttribute('data-conci-new');
+    if (tr.dataset.rowFuente === 'Solo Vuelos') {
+        tr.dataset.rowFuente = 'Manifiestos + Vuelos';
+        tr.classList.remove('conci-missing-manifiesto');
+    }
+    const actionTd = tr.querySelector('td.conci-row-action-col');
+    if (actionTd && typeof _conciFillRowActionCell === 'function') _conciFillRowActionCell(actionTd, String(id));
+    return true;
+}
+
 async function _conciAutoSaveRow(tr, options = {}) {
-    if (!tr || !tr.isConnected || !_conciEditMode || !_conciCanCurrentUserEdit()) return;
+    if (!tr) return;
+    if (!tr.isConnected) return _conciAnotar(tr, 'omitida', 'la fila ya no estaba en la tabla');
+    if (!_conciEditMode) return _conciAnotar(tr, 'omitida', 'el modo captura estaba apagado');
+    if (!_conciCanCurrentUserEdit()) return _conciAnotar(tr, 'omitida', 'sin permiso de captura');
     // La fila se descarto mientras esto esperaba su turno: no debe crearse.
-    if (tr.dataset.conciDescartada === '1') return;
+    if (tr.dataset.conciDescartada === '1') return _conciAnotar(tr, 'omitida', 'la fila se descartó');
     if (tr._conciAutoSavePromise) {
         tr._conciAutoSaveQueued = true;
         return tr._conciAutoSavePromise;
@@ -29304,7 +29760,9 @@ async function _conciAutoSaveRow(tr, options = {}) {
     //
     // Va antes de esos dos rellenos automáticos a propósito: son ellos los que
     // hacían pasar por "con datos" a una fila que el usuario nunca tocó.
-    if (!_conciFilaNuevaListaParaGuardar(tr, hasUserCapture)) return;
+    if (!_conciFilaNuevaListaParaGuardar(tr, hasUserCapture)) {
+        return _conciAnotar(tr, 'omitida', 'fila nueva sin nada capturado todavía');
+    }
     // Una fila nueva sin fecha capturada hereda la del filtro, pero SOLO cuando
     // el filtro apunta a un unico dia. Con un rango activo (del 1 al 15, por
     // ejemplo) se tomaba siempre el dia de inicio, sin importar en que parte de
@@ -29374,7 +29832,7 @@ async function _conciAutoSaveRow(tr, options = {}) {
                 // crear un registro real ahí, no perderse en la fila espejo.
                 const duplicateUpdatePayload = {};
                 Object.keys(payload).forEach(col => {
-                    if (dirtyCols.has(col) || autoPersistedCols.has(col) || _conciShouldPersistCalculatedColumn(col)) {
+                    if (dirtyCols.has(col) || autoPersistedCols.has(col) || _conciCalculadaDebeEnviarse(col, dirtyCols)) {
                         duplicateUpdatePayload[col] = payload[col];
                     }
                 });
@@ -29384,6 +29842,10 @@ async function _conciAutoSaveRow(tr, options = {}) {
                     columnasDeCaptura: identidadCapturada,
                 });
                 if (!result.ok) {
+                    // Si la base alcanzó a crear el registro, esta fila ya tiene
+                    // id: lo que falta se completará con UPDATE, no insertándola
+                    // otra vez (ver _conciAdoptarFilaPersistida).
+                    _conciAdoptarFilaPersistida(tr, result);
                     const msg = result.error?.message || 'error de base de datos';
                     tr.title = `Pendiente de guardar: ${msg}`;
                     tr.classList.add('table-secondary');
@@ -29438,9 +29900,12 @@ async function _conciAutoSaveRow(tr, options = {}) {
             }
             const rowId = String(tr.dataset.rowId || '').trim();
             const writePayload = rowId ? {} : { ...payload };
+            // Al crear, la fila lleva su nombre: eso convierte el INSERT en un
+            // upsert idempotente y permite escribirla aunque todavia no tenga id.
+            if (!rowId && tr.dataset.clienteUuid) writePayload.cliente_uuid = tr.dataset.clienteUuid;
             if (rowId) {
                 Object.keys(payload).forEach(col => {
-                    if (dirtyCols.has(col) || autoPersistedCols.has(col) || _conciShouldPersistCalculatedColumn(col)) {
+                    if (dirtyCols.has(col) || autoPersistedCols.has(col) || _conciCalculadaDebeEnviarse(col, dirtyCols)) {
                         writePayload[col] = payload[col];
                     }
                 });
@@ -29475,6 +29940,9 @@ async function _conciAutoSaveRow(tr, options = {}) {
                 return;
             }
             if (!result.ok) {
+                // Igual que arriba: si el registro llegó a crearse, se adopta su
+                // id para que el reintento actualice en vez de duplicar la fila.
+                _conciAdoptarFilaPersistida(tr, result);
                 // Conserva la fila y sus valores para que el usuario pueda corregir
                 // el campo que causó el error; nunca se elimina silenciosamente.
                 const msg = result.error?.message || 'error de base de datos';
@@ -29511,9 +29979,37 @@ async function _conciAutoSaveRow(tr, options = {}) {
             // cual estaba antes en la base de datos, y el usuario necesita
             // saberlo explícitamente en vez de asumir que todo se guardó.
             const droppedSet = new Set(result.droppedColumns || []);
+            // Una celda mala no puede tumbar a sus vecinas.
+            //
+            // Postgres rechaza el UPDATE ENTERO por un solo caracter invalido en
+            // una columna numerica, y la auto-correccion de _conciWriteRowSafe
+            // responde quitando TODAS las columnas numericas del envio: un dedazo
+            // en un campo se llevaba por delante hasta catorce campos bien
+            // capturados, y quien capturaba solo veia que "no se guardo".
+            //
+            // Aqui cada columna descartada se reintenta SOLA. Lo que si entra se
+            // guarda, y solo queda fuera la celda que de verdad no entra. Es la
+            // propiedad que se espera de una hoja de calculo: el error se queda
+            // donde se cometio.
+            const rescatadas = new Set();
+            if (rowId && droppedSet.size > 1) {
+                for (const col of droppedSet) {
+                    const sola = { [col]: writePayload[col] };
+                    try {
+                        const solo = await _conciWriteRowSafe(client, sola, rowId, {
+                            duplicateUpdatePayload: sola,
+                        });
+                        if (solo && solo.ok && !(solo.droppedColumns || []).includes(col)) {
+                            rescatadas.add(col);
+                        }
+                    } catch (_) { /* esa celda no entra: se queda reportada abajo */ }
+                }
+                rescatadas.forEach(col => droppedSet.delete(col));
+            }
             const confirmedColumns = new Set(
                 Object.keys(result.payload || writePayload).filter(col => !droppedSet.has(col))
             );
+            rescatadas.forEach(col => confirmedColumns.add(col));
             settleSavedCells(confirmedColumns);
             // Avisa al resto qué campos acaban de cambiar y quién lo hizo, para
             // que puedan verlo atribuido en vez de que el dato mute en silencio.
@@ -29536,6 +30032,7 @@ async function _conciAutoSaveRow(tr, options = {}) {
             tr.title = `Pendiente de guardar: ${msg}`;
             tr.classList.add('table-secondary');
             console.warn('[Conciliación] error de guardado automático:', error);
+            _conciAnotar(tr, 'error', msg);
             // Insiste solo hasta que la base lo acepte.
             _conciProgramarReintento();
             if (typeof showNotification === 'function') showNotification(`No se pudo guardar la fila: ${msg}`, 'error');
@@ -29736,6 +30233,15 @@ function _conciAddBlankRow() {
     tr.dataset.rowIndex = 'new';
     tr.dataset.conciNew = '1';
     tr.dataset.dirty = '1';
+    // La fila se NOMBRA en el momento de crearse, sin esperar a la base.
+    //
+    // Hasta que el INSERT termina no hay id, y sin id no habia contra que
+    // escribir: si alguien refrescaba antes, lo capturado solo alcanzaba a
+    // dejar una nota en la cola de rescate. Con un uuid propio, toda escritura
+    // de esta fila es un upsert sobre el, asi que se puede guardar de verdad
+    // desde el primer instante — y reintentar no duplica la fila, porque el
+    // segundo intento cae sobre el mismo nombre. Ver 029_conciliacion_cliente_uuid.sql
+    tr.dataset.clienteUuid = _conciNuevoUuid();
     headerCells.forEach((th) => {
         const col = th.dataset.conciColumnKey;
         const td = document.createElement('td');
@@ -29813,6 +30319,13 @@ function _conciEnterEditMode() {
 
 async function _conciCancelBulkEdits() {
     if (!_conciEditMode) return;
+    // Cancelar SÍ descarta a propósito, pero descartar sin avisar lo capturado
+    // es indistinguible de perderlo.
+    if (_conciHasUnsavedCaptures()
+        && typeof confirm === 'function'
+        && !confirm('Hay capturas sin guardar. Si cancelas ahora se pierden. ¿Cancelar de todos modos?')) {
+        return;
+    }
     _conciEditMode = false;
     _conciUndoHistory.length = 0;
     _conciSetTableEditableState(false);
@@ -29859,9 +30372,19 @@ async function _conciSaveBulkEdits() {
 
         // Las filas nuevas se identifican explícitamente: al salir del último
         // editor una fila vacía puede perder la marca dirty aunque ya tenga datos.
+        //
+        // Y sobre todo: la captura ensucia CELDAS (td[data-dirty]), mientras que
+        // aquí sólo se miraba la marca de FILA. Una fila cuyas celdas seguían
+        // pendientes pero que había perdido su marca de fila no entraba en el
+        // guardado... y justo después se recargaba la tabla reemplazando el
+        // tbody, así que lo capturado en ella desaparecía sin decir nada. Eso es
+        // lo que se veía como "capturé 16 filas y sólo se guardaron 8".
         const dirtyRows = Array.from(new Set([
             ...tbody.querySelectorAll('tr[data-dirty="1"]'),
             ...tbody.querySelectorAll('tr[data-conci-new="1"]'),
+            ...[...tbody.querySelectorAll('td[data-dirty="1"]')]
+                .map(td => td.closest('tr'))
+                .filter(Boolean),
         ]));
         dirtyRows.forEach(tr => {
             const rowId = String(tr.dataset.rowId || '').trim();
@@ -30001,7 +30524,14 @@ async function _conciSaveBulkEdits() {
         _conciEditMode = false;
         _conciSetTableEditableState(false);
         _conciRefreshEditToolbar();
-        await loadConciliacionManifiestos({ forceRefresh: true, allowLocalEditsReplace: true });
+        // Red de seguridad: si algo quedó sin confirmar pese a todo lo anterior,
+        // NO se pasa por encima del aplazamiento. Que la tabla tarde un momento
+        // en refrescarse es molesto; que se lleve una captura por delante, no
+        // tiene arreglo. El refresco se reintenta solo al confirmarse la fila.
+        await loadConciliacionManifiestos({
+            forceRefresh: true,
+            allowLocalEditsReplace: !_conciHasUnsavedCaptures(),
+        });
     } catch (e) {
         alert('Error al guardar cambios: ' + e.message);
     } finally {
