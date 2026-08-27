@@ -1,0 +1,325 @@
+                    <style>
+                        #gtrans-energia-section{ --gx-real:#16a34a; --gx-real-d:#14532d; --gx-prog:#2563eb; --gx-prog-d:#1e3a8a;
+                            --gx-corr:#ea580c; --gx-corr-d:#9a3412; --gx-meta:#7c3aed; --gx-meta-d:#5b21b6; --gx-cumpl:#0891b2; --gx-cumpl-d:#155e75; }
+                        #gtrans-energia-section .card{ border-radius:18px; }
+                        #gtrans-energia-section .section-title{ font-weight:800; letter-spacing:-.01em; }
+
+                        /* KPI */
+                        #gtrans-energia-section .gx-kpi{ border-radius:18px; padding:18px 20px; color:#fff;
+                            box-shadow:0 14px 28px -16px rgba(15,23,42,.35), 0 6px 14px -10px rgba(15,23,42,.25);
+                            position:relative; overflow:hidden; min-height:138px;
+                            display:flex; flex-direction:column; justify-content:space-between; transition:transform .18s, box-shadow .18s; }
+                        #gtrans-energia-section .gx-kpi:hover{ transform:translateY(-3px); box-shadow:0 22px 38px -16px rgba(15,23,42,.42); }
+                        #gtrans-energia-section .gx-kpi::before{ content:""; position:absolute; right:-40px; top:-40px;
+                            width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.14); }
+                        #gtrans-energia-section .gx-kpi::after{ content:""; position:absolute; right:30px; bottom:-50px;
+                            width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.08); }
+                        #gtrans-energia-section .gx-kpi--real { background:linear-gradient(135deg,var(--gx-real-d),var(--gx-real)); }
+                        #gtrans-energia-section .gx-kpi--prog { background:linear-gradient(135deg,var(--gx-prog-d),var(--gx-prog)); }
+                        #gtrans-energia-section .gx-kpi--corr { background:linear-gradient(135deg,var(--gx-corr-d),var(--gx-corr)); }
+                        #gtrans-energia-section .gx-kpi--meta { background:linear-gradient(135deg,var(--gx-meta-d),var(--gx-meta)); }
+                        #gtrans-energia-section .gx-kpi--cumpl{ background:linear-gradient(135deg,var(--gx-cumpl-d),var(--gx-cumpl)); }
+                        #gtrans-energia-section .gx-kpi-ico{ position:absolute; right:18px; top:18px; width:36px; height:36px;
+                            border-radius:10px; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center;
+                            backdrop-filter:blur(4px); font-size:1rem; }
+                        #gtrans-energia-section .gx-kpi-lbl{ font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; opacity:.92; font-weight:700; }
+                        #gtrans-energia-section .gx-kpi-val{ font-size:1.95rem; font-weight:800; line-height:1.1; margin-top:6px; text-shadow:0 1px 2px rgba(0,0,0,.18); }
+                        #gtrans-energia-section .gx-kpi-unit{ font-size:.74rem; opacity:.92; margin-top:4px; font-weight:500; }
+
+                        /* Charts */
+                        #gtrans-energia-section .gx-chart-card{ background:#fff; border:1px solid #e2e8f0; border-radius:16px;
+                            padding:18px 20px 14px; box-shadow:0 6px 18px -10px rgba(15,23,42,.18); height:100%;
+                            transition:box-shadow .18s, transform .18s; }
+                        #gtrans-energia-section .gx-chart-card:hover{ box-shadow:0 14px 28px -14px rgba(15,23,42,.25); }
+                        #gtrans-energia-section .gx-chart-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:10px; flex-wrap:wrap; }
+                        #gtrans-energia-section .gx-chart-title{ font-size:.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px; }
+                        #gtrans-energia-section .gx-chart-sub{ font-size:.7rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+                        #gtrans-energia-section .gx-chart-pill{ font-size:.7rem; padding:2px 10px; border-radius:999px; background:#f1f5f9; color:#334155; font-weight:700; }
+
+                        /* Tablas */
+                        #gtrans-energia-section .gx-table-card{ border:1px solid #e2e8f0; border-radius:14px; overflow:hidden;
+                            box-shadow:0 6px 18px -10px rgba(15,23,42,.18); background:#fff; height:100%; transition:box-shadow .18s, transform .18s; }
+                        #gtrans-energia-section .gx-table-card:hover{ transform:translateY(-2px); box-shadow:0 14px 28px -14px rgba(15,23,42,.25); }
+                        #gtrans-energia-section .gx-th-bar{ padding:14px 16px; color:#0f172a; font-weight:800;
+                            text-align:center; font-size:.86rem; line-height:1.3; background:#fef9c3; border-bottom:2px solid #facc15; }
+                        #gtrans-energia-section table.gx-tbl{ width:100%; margin:0; font-size:.86rem; font-variant-numeric:tabular-nums; }
+                        #gtrans-energia-section table.gx-tbl th.gx-h1{ background:#f1f5f9; color:#0f172a; font-weight:800;
+                            font-size:.74rem; letter-spacing:.4px; text-transform:uppercase; padding:10px 12px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; }
+                        #gtrans-energia-section table.gx-tbl th.gx-h2{ background:#f8fafc; color:#475569; font-weight:700;
+                            font-size:.7rem; letter-spacing:.3px; padding:8px 10px; border-bottom:2px solid #e2e8f0; text-align:center; }
+                        #gtrans-energia-section table.gx-tbl td{ padding:10px 12px; border-bottom:1px solid #f1f5f9; text-align:center; }
+                        #gtrans-energia-section table.gx-tbl td.gx-mes{ font-weight:700; color:#0f172a; text-align:left; }
+                        #gtrans-energia-section table.gx-tbl tbody tr:nth-child(even) td{ background:#fafbfd; }
+                        #gtrans-energia-section table.gx-tbl tbody tr:hover td{ background:#eff6ff; }
+                        #gtrans-energia-section table.gx-tbl tr.gx-total td{ font-weight:800; background:#fef9c3 !important; border-top:2px solid #facc15; color:#0f172a; }
+                        #gtrans-energia-section .gx-mini-card{ background:#fff; border:1px solid #e2e8f0; border-radius:14px;
+                            padding:18px; box-shadow:0 6px 18px -10px rgba(15,23,42,.18); }
+                        #gtrans-energia-section .gx-mini-lbl{ font-size:.7rem; text-transform:uppercase; letter-spacing:.4px; color:#64748b; font-weight:700; }
+                        #gtrans-energia-section .gx-mini-val{ font-size:1.6rem; font-weight:800; color:#0f172a; line-height:1.1; }
+                        #gtrans-energia-section .gx-progress-bar{ height:14px; border-radius:999px; background:#e2e8f0; overflow:hidden; }
+                        #gtrans-energia-section .gx-progress-bar > span{ display:block; height:100%; border-radius:999px;
+                            background:linear-gradient(90deg,var(--gx-real),#86efac); transition:width .6s ease; }
+                    </style>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+                            <div>
+                                <h2 class="section-title mb-0">
+                                    <i class="fas fa-screwdriver-wrench me-2" style="color:#f59e0b;"></i>Gerencia de Transformación · Mantenimientos B.T.
+                                </h2>
+                                <small class="text-muted">Mantenimientos preventivos / correctivos para la utilización de la energía eléctrica en baja tensión</small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <label class="small fw-semibold text-muted mb-0">Año:</label>
+                                <select id="gtrans-anio-select" class="form-select form-select-sm" style="width:auto;"></select>
+                                <button id="gtrans-refresh-btn" type="button" class="btn btn-sm btn-outline-secondary" title="Recargar datos">
+                                    <i class="fas fa-sync-alt me-1"></i>Actualizar
+                                </button>
+                                <button id="gtrans-upsert-btn" type="button" class="btn btn-sm btn-warning fw-semibold d-none"
+                                        data-bs-toggle="modal" data-bs-target="#gtransUpsertModal">
+                                    <i class="fas fa-pen-to-square me-1"></i>Capturar / actualizar mes
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="gtrans-status" class="alert alert-info d-none small" role="status"></div>
+
+                            <!-- KPIs YTD -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gx-kpi gx-kpi--real">
+                                        <div class="gx-kpi-ico"><i class="fas fa-circle-check"></i></div>
+                                        <div>
+                                            <div class="gx-kpi-lbl">Preventivos Realizados</div>
+                                            <div class="gx-kpi-val" id="gtrans-kpi-real">—</div>
+                                        </div>
+                                        <div class="gx-kpi-unit">acumulados YTD</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gx-kpi gx-kpi--prog">
+                                        <div class="gx-kpi-ico"><i class="fas fa-calendar-check"></i></div>
+                                        <div>
+                                            <div class="gx-kpi-lbl">Preventivos Programados</div>
+                                            <div class="gx-kpi-val" id="gtrans-kpi-prog">—</div>
+                                        </div>
+                                        <div class="gx-kpi-unit">acumulados YTD</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gx-kpi gx-kpi--meta">
+                                        <div class="gx-kpi-ico"><i class="fas fa-gauge-high"></i></div>
+                                        <div>
+                                            <div class="gx-kpi-lbl">Avance vs Meta Anual</div>
+                                            <div class="gx-kpi-val" id="gtrans-kpi-avance">—</div>
+                                        </div>
+                                        <div class="gx-kpi-unit"><span id="gtrans-kpi-meta-txt">—</span></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gx-kpi gx-kpi--cumpl">
+                                        <div class="gx-kpi-ico"><i class="fas fa-percentage"></i></div>
+                                        <div>
+                                            <div class="gx-kpi-lbl">Cumplimiento YTD</div>
+                                            <div class="gx-kpi-val" id="gtrans-kpi-cumpl">—</div>
+                                        </div>
+                                        <div class="gx-kpi-unit">realizados / programados</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gx-kpi gx-kpi--corr">
+                                        <div class="gx-kpi-ico"><i class="fas fa-lightbulb"></i></div>
+                                        <div>
+                                            <div class="gx-kpi-lbl">Luminarias Reemplazadas</div>
+                                            <div class="gx-kpi-val" id="gtrans-kpi-lum">—</div>
+                                        </div>
+                                        <div class="gx-kpi-unit">correctivos acumulados</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ════════ GRÁFICOS (primero) ════════ -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-xl-8">
+                                    <div class="gx-chart-card" style="border-top:4px solid var(--gx-real);">
+                                        <div class="gx-chart-head">
+                                            <div>
+                                                <div class="gx-chart-title"><i class="fas fa-chart-column" style="color:var(--gx-real);"></i>Preventivos: Realizados vs Programados</div>
+                                                <div class="gx-chart-sub">Comparativo mensual</div>
+                                            </div>
+                                            <span class="gx-chart-pill">mantenimientos</span>
+                                        </div>
+                                        <div style="position:relative;height:340px;"><canvas id="gtrans-chart-prev"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-4">
+                                    <div class="gx-chart-card">
+                                        <div class="gx-chart-head">
+                                            <div>
+                                                <div class="gx-chart-title"><i class="fas fa-gauge-high" style="color:var(--gx-meta);"></i>Avance del Programa Anual</div>
+                                                <div class="gx-chart-sub">Realizados vs Meta</div>
+                                            </div>
+                                        </div>
+                                        <div style="position:relative;height:340px;"><canvas id="gtrans-chart-avance"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-7">
+                                    <div class="gx-chart-card">
+                                        <div class="gx-chart-head">
+                                            <div>
+                                                <div class="gx-chart-title"><i class="fas fa-lightbulb" style="color:var(--gx-corr);"></i>Luminarias Reemplazadas</div>
+                                                <div class="gx-chart-sub">Correctivos mensuales</div>
+                                            </div>
+                                            <span class="gx-chart-pill">unidades</span>
+                                        </div>
+                                        <div style="position:relative;height:300px;"><canvas id="gtrans-chart-lum"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-5">
+                                    <div class="gx-chart-card">
+                                        <div class="gx-chart-head">
+                                            <div>
+                                                <div class="gx-chart-title"><i class="fas fa-percentage" style="color:var(--gx-cumpl);"></i>Cumplimiento mensual</div>
+                                                <div class="gx-chart-sub">% Realizados / Programados</div>
+                                            </div>
+                                            <span class="gx-chart-pill">%</span>
+                                        </div>
+                                        <div style="position:relative;height:300px;"><canvas id="gtrans-chart-cumpl"></canvas></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ════════ TABLAS (después) ════════ -->
+                            <div class="row g-3 align-items-stretch">
+                                <div class="col-12 col-xl-8">
+                                    <div class="gx-table-card">
+                                        <div class="gx-th-bar">
+                                            MANTENIMIENTOS PREVENTIVOS Y CORRECTIVOS DEL SERVICIO DE MANTENIMIENTO Y<br>
+                                            CONSERVACIÓN PARA LA UTILIZACIÓN DE LA ENERGÍA ELÉCTRICA EN BAJA TENSIÓN
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="gx-tbl">
+                                                <thead>
+                                                    <tr class="gx-h1-row">
+                                                        <th class="gx-h1" rowspan="2">Mes</th>
+                                                        <th class="gx-h1" colspan="2">Mantenimientos Preventivos</th>
+                                                        <th class="gx-h1" rowspan="2">Mantenimientos correctivos<br><span class="fw-normal text-muted" style="font-size:.7rem">(Luminarias Reemplazadas)</span></th>
+                                                    </tr>
+                                                    <tr class="gx-h2-row">
+                                                        <th class="gx-h2">Realizados</th>
+                                                        <th class="gx-h2">Programados</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="gtrans-tbl-bt"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-4">
+                                    <div class="row g-3 h-100">
+                                        <div class="col-12">
+                                            <div class="gx-table-card">
+                                                <div class="gx-th-bar">RESUMEN · MANTENIMIENTOS PREVENTIVOS</div>
+                                                <div class="table-responsive">
+                                                    <table class="gx-tbl">
+                                                        <thead>
+                                                            <tr class="gx-h2-row">
+                                                                <th class="gx-h2">Realizados</th>
+                                                                <th class="gx-h2">Programados</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="gtrans-tbl-resumen"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="gx-mini-card">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="gx-mini-lbl"><i class="fas fa-gauge-high me-1" style="color:var(--gx-meta);"></i>Porcentaje de Avance</span>
+                                                    <span class="gx-mini-val" id="gtrans-mini-pct">—</span>
+                                                </div>
+                                                <div class="gx-progress-bar"><span id="gtrans-mini-bar" style="width:0%"></span></div>
+                                                <div class="d-flex justify-content-between mt-2 small text-muted">
+                                                    <span><strong id="gtrans-mini-real">0</strong> realizados</span>
+                                                    <span>Meta anual: <strong id="gtrans-mini-meta">0</strong></span>
+                                                </div>
+                                                <div class="mt-2 small text-muted text-center" style="font-size:.7rem">
+                                                    Periodo evaluado: <strong id="gtrans-mini-rango">—</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal: Captura / actualización mensual -->
+                    <div class="modal fade" id="gtransUpsertModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning-subtle">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="fas fa-pen-to-square me-2 text-warning"></i>Captura mensual · Mantenimientos B.T.
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small fw-semibold">Año</label>
+                                            <input type="number" id="gtrans-up-anio" class="form-control" min="2020" max="2099" step="1">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small fw-semibold">Mes</label>
+                                            <select id="gtrans-up-mes" class="form-select">
+                                                <option value="1">ENERO</option><option value="2">FEBRERO</option>
+                                                <option value="3">MARZO</option><option value="4">ABRIL</option>
+                                                <option value="5">MAYO</option><option value="6">JUNIO</option>
+                                                <option value="7">JULIO</option><option value="8">AGOSTO</option>
+                                                <option value="9">SEPTIEMBRE</option><option value="10">OCTUBRE</option>
+                                                <option value="11">NOVIEMBRE</option><option value="12">DICIEMBRE</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-4 d-flex align-items-end">
+                                            <button type="button" id="gtrans-up-load" class="btn btn-outline-secondary w-100">
+                                                <i class="fas fa-rotate-left me-1"></i>Cargar valores actuales
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <div class="border rounded-3 p-3 h-100" style="border-left:4px solid #16a34a !important;">
+                                                <div class="fw-bold mb-2 small text-uppercase" style="color:#15803d;"><i class="fas fa-circle-check me-1"></i>Mantenimientos Preventivos</div>
+                                                <label class="form-label small">Realizados</label>
+                                                <input type="number" id="gtrans-up-real" class="form-control" min="0" step="1">
+                                                <label class="form-label small mt-2">Programados</label>
+                                                <input type="number" id="gtrans-up-prog" class="form-control" min="0" step="1">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="border rounded-3 p-3 h-100" style="border-left:4px solid #ea580c !important;">
+                                                <div class="fw-bold mb-2 small text-uppercase" style="color:#9a3412;"><i class="fas fa-lightbulb me-1"></i>Mantenimientos Correctivos</div>
+                                                <label class="form-label small">Luminarias Reemplazadas</label>
+                                                <input type="number" id="gtrans-up-lum" class="form-control" min="0" step="1">
+                                                <hr class="my-3">
+                                                <div class="fw-bold mb-2 small text-uppercase" style="color:#5b21b6;"><i class="fas fa-gauge-high me-1"></i>Programa Anual</div>
+                                                <label class="form-label small">Meta de Preventivos al año</label>
+                                                <input type="number" id="gtrans-up-meta" class="form-control" min="0" step="1" placeholder="Ej. 40">
+                                                <div class="form-text" style="font-size:.7rem">Se aplica al año seleccionado (compartida entre meses).</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="gtrans-up-msg" class="small mt-3"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" id="gtrans-up-save" class="btn btn-warning fw-semibold">
+                                        <i class="fas fa-save me-1"></i>Guardar mes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>

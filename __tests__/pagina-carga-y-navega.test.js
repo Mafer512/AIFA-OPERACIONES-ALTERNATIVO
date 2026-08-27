@@ -36,7 +36,11 @@ beforeAll(async () => {
   errores = [];
   avisos = [];
 
-  const dom = new JSDOM(fs.readFileSync(path.join(raiz, 'index.html'), 'utf8'), {
+  // Los modulos extraidos traen su marcado en view.html y solo llega al DOM al
+  // abrirlos. Aqui se compone la pagina como queda en runtime; mas abajo se le
+  // da al loader un fetch de disco y los marcadores de script ya cargados, para
+  // que su camino perezoso corra de verdad dentro de jsdom.
+  const dom = new JSDOM(require('../test-utils/modulos.js').htmlCompleto(), {
     url: 'http://localhost:3000/',
     runScripts: 'outside-only',
     pretendToBeVisual: true,
@@ -158,6 +162,15 @@ beforeAll(async () => {
   });
   win.HTMLCanvasElement.prototype.getContext = () => doble;
   win.HTMLElement.prototype.scrollIntoView = noop;
+
+  // jsdom no trae stack de video: play/pause/load llaman a notImplemented(),
+  // que escupe un error por la consola virtual sin lanzar, asi que ni el
+  // try/catch del modulo lo silencia. La vista de Aviacion General pausa sus
+  // clips al cerrarse, y esa llamada legitima ensuciaba la corrida entera.
+  // Se dobla el reproductor: aqui no se comprueba que el video suene.
+  win.HTMLMediaElement.prototype.play = () => Promise.resolve();
+  win.HTMLMediaElement.prototype.pause = noop;
+  win.HTMLMediaElement.prototype.load = noop;
   win.console.error = (...a) => errores.push('console.error: ' + a.map(String).join(' '));
   win.console.warn = (...a) => avisos.push(a.map(String).join(' '));
   win.console.log = noop;
@@ -171,6 +184,18 @@ beforeAll(async () => {
     if (fs.existsSync(path.join(raiz, ruta))) archivos.push(ruta);
   }
 
+  // El shell ya no los referencia: los carga el loader. Se evaluan aqui para
+  // que el modulo exista cuando el loader llame a su init().
+  const modulosJs = [];
+  (function recorrer(dir) {
+    for (const e of fs.readdirSync(path.join(raiz, dir), { withFileTypes: true })) {
+      const rel = dir + '/' + e.name;
+      if (e.isDirectory()) recorrer(rel);
+      else if (e.name.endsWith('.js')) modulosJs.push(rel);
+    }
+  })('modules');
+  archivos.push(...modulosJs);
+
   for (const f of archivos) {
     try {
       win.eval(fs.readFileSync(path.join(raiz, f), 'utf8'));
@@ -178,6 +203,42 @@ beforeAll(async () => {
       errores.push('AL CARGAR ' + f + ': ' + ((e && e.stack) || e));
     }
   }
+
+  // El loader pide la vista con fetch y luego inyecta un <script>. jsdom no
+  // resuelve ninguna de las dos por su cuenta: se le sirve la vista desde disco
+  // y se dejan puestos los marcadores que el propio loader usa para no volver a
+  // cargar un script ya presente.
+  // Solo las vistas de los modulos: el resto de la aplicacion tambien usa fetch
+  // (data/*.json, etc.) y quedarse con TODAS las peticiones convertia sus fallos
+  // normales en errores de esta prueba.
+  const fetchOriginal = win.fetch;
+  win.fetch = (url, opciones) => {
+    const ruta = String(url).split('?')[0];
+    if (!/^modules\/.+\/view\.html$/.test(ruta)) {
+      return fetchOriginal ? fetchOriginal.call(win, url, opciones) : Promise.reject(new Error('sin red'));
+    }
+    const abs = path.join(raiz, ruta);
+    const hay = fs.existsSync(abs);
+    return Promise.resolve({
+      ok: hay,
+      status: hay ? 200 : 404,
+      text: () => Promise.resolve(hay ? fs.readFileSync(abs, 'utf8') : ''),
+    });
+  };
+  for (const f of modulosJs) {
+    const marca = win.document.createElement('script');
+    marca.dataset.moduloSrc = f + '?v=1';
+    win.document.body.appendChild(marca);
+  }
+
+  // Sesion iniciada, que es el estado en el que se usa el menu.
+  //
+  // Los modulos extraidos validan la sesion ANTES de mostrarse: sin user_role,
+  // el loader deniega el acceso y vacia el contenedor, que es justo lo que debe
+  // hacer. Navegar el menu sin haber entrado no es un estado real de la
+  // aplicacion, y darlo por bueno haria pasar la prueba ocultando esa garantia.
+  // La denegacion se comprueba aparte, en modulacion-gestion-energetica.
+  try { win.sessionStorage.setItem('user_role', 'admin'); } catch (_) {}
 
   try {
     win.document.dispatchEvent(new win.Event('DOMContentLoaded', { bubbles: true }));

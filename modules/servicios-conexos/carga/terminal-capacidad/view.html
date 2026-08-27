@@ -1,0 +1,297 @@
+
+        <style>
+            #capacidad-carga-section { --cc-orange:#f97316; --cc-orange-d:#c2410c; --cc-blue:#1d4ed8; --cc-blue-d:#1e3a8a; --cc-slate:#0f172a; }
+            #capacidad-carga-section .cc-badge-header {
+                display:inline-flex; align-items:center; gap:.45rem; font-weight:800; font-size:.72rem;
+                letter-spacing:.05em; text-transform:uppercase; color:#fff; padding:.4rem .8rem; border-radius:.7rem;
+                background:linear-gradient(135deg,var(--cc-orange),var(--cc-orange-d));
+            }
+            /* HERO */
+            #capacidad-carga-section .cc-hero {
+                position:relative; overflow:hidden; border-radius:1.25rem; color:#fff;
+                background:linear-gradient(135deg,#0b1220 0%,#13233f 45%,#7c2d12 130%);
+                padding:1.6rem 1.8rem; box-shadow:0 24px 60px -24px rgba(15,23,42,.55);
+            }
+            #capacidad-carga-section .cc-hero::after {
+                content:""; position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%;
+                background:radial-gradient(circle at center, rgba(249,115,22,.35), transparent 70%);
+            }
+            #capacidad-carga-section .cc-hero-total { font-size:3.1rem; font-weight:800; line-height:1; letter-spacing:-.02em; }
+            #capacidad-carga-section .cc-hero-unit  { font-size:1rem; font-weight:600; opacity:.85; }
+            #capacidad-carga-section .cc-hero-split { display:flex; gap:1.4rem; flex-wrap:wrap; margin-top:1.1rem; }
+            #capacidad-carga-section .cc-hero-split .v { font-size:1.45rem; font-weight:800; line-height:1; }
+            #capacidad-carga-section .cc-hero-split .l { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; opacity:.8; margin-top:.25rem; }
+            #capacidad-carga-section .cc-hero-bar { height:10px; border-radius:6px; background:rgba(255,255,255,.18); overflow:hidden; margin-top:1.1rem; display:flex; }
+            #capacidad-carga-section .cc-hero-bar i { display:block; height:100%; }
+            /* KPI */
+            #capacidad-carga-section .cc-kpi {
+                position:relative; overflow:hidden; border-radius:1rem; padding:1.05rem 1.15rem; color:#fff; height:100%;
+                box-shadow:0 12px 28px -12px rgba(0,0,0,.3); transition:transform .18s ease, box-shadow .18s ease;
+            }
+            #capacidad-carga-section .cc-kpi:hover { transform:translateY(-3px); box-shadow:0 18px 38px -10px rgba(0,0,0,.34); }
+            #capacidad-carga-section .cc-kpi .ico { font-size:1.4rem; opacity:.9; }
+            #capacidad-carga-section .cc-kpi .val { font-size:1.9rem; font-weight:800; line-height:1; }
+            #capacidad-carga-section .cc-kpi .lbl { font-size:.66rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; opacity:.9; margin-top:.25rem; }
+            #capacidad-carga-section .cc-kpi .sub { font-size:.66rem; opacity:.8; margin-top:.15rem; }
+            #capacidad-carga-section .cc-kpi--blue   { background:linear-gradient(135deg,#2563eb,#1e3a8a); }
+            #capacidad-carga-section .cc-kpi--orange { background:linear-gradient(135deg,#f97316,#c2410c); }
+            #capacidad-carga-section .cc-kpi--teal   { background:linear-gradient(135deg,#0d9488,#115e59); }
+            #capacidad-carga-section .cc-kpi--violet { background:linear-gradient(135deg,#7c3aed,#5b21b6); }
+            #capacidad-carga-section .cc-kpi--slate  { background:linear-gradient(135deg,#475569,#1e293b); }
+            #capacidad-carga-section .cc-kpi--rose   { background:linear-gradient(135deg,#e11d48,#9f1239); }
+            #capacidad-carga-section .cc-card-title { font-weight:800; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:#475569; }
+            #capacidad-carga-section .cc-chart-wrap { position:relative; height:260px; }
+            /* MARS */
+            #capacidad-carga-section .cc-mars { display:flex; align-items:center; gap:.9rem; padding:.85rem 1rem; border-radius:.9rem; background:#f8fafc; border:1px solid #eef2f7; height:100%; }
+            #capacidad-carga-section .cc-mars .key { width:46px; height:46px; flex:none; border-radius:.7rem; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem; color:#fff; }
+            #capacidad-carga-section .cc-mars .n  { font-size:1.5rem; font-weight:800; line-height:1; color:#0f172a; }
+            #capacidad-carga-section .cc-mars .t  { font-size:.72rem; color:#64748b; }
+            /* chips (aerolíneas) */
+            #capacidad-carga-section .cc-chip {
+                display:inline-flex; align-items:center; gap:.45rem; font-size:.74rem; font-weight:600; color:#0f172a;
+                background:#fff; border:1px solid #e2e8f0; border-radius:2rem; padding:.4rem .85rem; box-shadow:0 2px 5px -3px rgba(0,0,0,.15);
+                transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+            }
+            #capacidad-carga-section .cc-chip:hover { transform:translateY(-2px); box-shadow:0 8px 16px -8px rgba(0,0,0,.25); border-color:#fbbf24; }
+            #capacidad-carga-section .cc-chip i { color:#f97316; font-size:.72rem; }
+            /* recintos (entity tiles) */
+            #capacidad-carga-section .cc-tile {
+                display:flex; align-items:center; gap:.7rem; padding:.7rem .85rem; border-radius:.85rem; height:100%;
+                background:#fff; border:1px solid #e7ecf3; box-shadow:0 6px 18px -14px rgba(15,23,42,.35);
+                transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+            }
+            #capacidad-carga-section .cc-tile:hover { transform:translateY(-3px); box-shadow:0 16px 30px -16px rgba(15,23,42,.4); border-color:#fbbf24; }
+            #capacidad-carga-section .cc-tile-ico {
+                flex:none; width:38px; height:38px; border-radius:.6rem; display:flex; align-items:center; justify-content:center;
+                font-size:.95rem; color:#b45309; background:linear-gradient(135deg,#fef3c7,#fde68a);
+            }
+            #capacidad-carga-section .cc-tile-name { font-size:.78rem; font-weight:700; color:#0f172a; line-height:1.22; }
+            /* handlers */
+            #capacidad-carga-section .cc-handler {
+                position:relative; display:flex; align-items:center; gap:.7rem; padding:.7rem .85rem .7rem 1rem; border-radius:.85rem; height:100%;
+                background:#fff; border:1px solid #ece7f6; box-shadow:0 6px 18px -14px rgba(76,29,149,.4); overflow:hidden;
+                transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+            }
+            #capacidad-carga-section .cc-handler::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg,#7c3aed,#5b21b6); }
+            #capacidad-carga-section .cc-handler:hover { transform:translateY(-3px); box-shadow:0 16px 30px -16px rgba(76,29,149,.45); border-color:#c4b5fd; }
+            #capacidad-carga-section .cc-handler-num { flex:none; width:30px; height:30px; border-radius:.55rem; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.76rem; color:#fff; background:linear-gradient(135deg,#7c3aed,#5b21b6); box-shadow:0 4px 10px -4px rgba(91,33,182,.6); }
+            #capacidad-carga-section .cc-handler-name { font-size:.78rem; font-weight:700; color:#0f172a; line-height:1.2; }
+            #capacidad-carga-section .cc-handler-sub { font-size:.66rem; font-weight:600; color:#94a3b8; letter-spacing:.02em; margin-top:.05rem; }
+            /* infra mini-cards */
+            #capacidad-carga-section .cc-infra { border-radius:1rem; padding:1.1rem; height:100%; border:1px solid #eef2f7; background:#fff; box-shadow:0 8px 22px -16px rgba(0,0,0,.3); }
+            #capacidad-carga-section .cc-infra .big { font-size:2.1rem; font-weight:800; line-height:1; }
+            #capacidad-carga-section .cc-infra .cap { font-size:.7rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#64748b; margin-top:.2rem; }
+            #capacidad-carga-section .cc-sec-title { font-weight:800; font-size:1rem; color:#0f172a; display:flex; align-items:center; gap:.55rem; }
+            #capacidad-carga-section .cc-sec-title i { color:#f97316; }
+        </style>
+
+        <div class="card border-0 shadow-sm">
+            <!-- HEADER -->
+            <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between gap-2 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="cc-badge-header"><i class="fas fa-warehouse"></i> Carga</span>
+                    <div>
+                        <h2 class="section-title mb-0" style="font-size:1.1rem;">Terminal de Carga AIFA</h2>
+                        <p class="text-muted mb-0" style="font-size:.75rem;">Capacidad de procesamiento e infraestructura logística</p>
+                    </div>
+                </div>
+                <span class="badge rounded-pill text-bg-light border" style="font-size:.7rem;"><i class="fas fa-circle-check text-success me-1"></i>Gerencia de Carga · GC</span>
+            </div>
+
+            <div class="card-body p-3 p-md-4" style="background:#f1f5f9;">
+
+                <!-- ===================== HERO ===================== -->
+                <div class="cc-hero mb-4">
+                    <div class="row align-items-center g-4 position-relative" style="z-index:1;">
+                        <div class="col-lg-5">
+                            <div class="text-uppercase fw-semibold mb-1" style="font-size:.72rem; letter-spacing:.12em; opacity:.85;">Capacidad total anual</div>
+                            <div class="d-flex align-items-end gap-2">
+                                <span class="cc-hero-total">782,000</span>
+                                <span class="cc-hero-unit mb-2">toneladas / año</span>
+                            </div>
+                            <div class="cc-hero-bar">
+                                <i style="width:90.2%; background:linear-gradient(90deg,#fb923c,#f97316);"></i>
+                                <i style="width:9.8%; background:linear-gradient(90deg,#38bdf8,#0ea5e9);"></i>
+                            </div>
+                            <div class="cc-hero-split">
+                                <div>
+                                    <div class="v" style="color:#fdba74;">705,000 <span style="font-size:.8rem; font-weight:600; opacity:.85;">ton</span></div>
+                                    <div class="l"><i class="fas fa-globe-americas me-1"></i>Carga internacional</div>
+                                </div>
+                                <div>
+                                    <div class="v" style="color:#7dd3fc;">77,000 <span style="font-size:.8rem; font-weight:600; opacity:.85;">ton</span></div>
+                                    <div class="l"><i class="fas fa-flag me-1"></i>Carga nacional</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <p class="mb-0" style="font-size:.86rem; line-height:1.55; opacity:.92;">
+                                La Terminal de Carga está ubicada de forma estratégica por su conexión con las principales vías de
+                                autotransporte hacia los puntos de mayor actividad logística del país, así como con los centros de
+                                desarrollo industrial proyectados como <strong>hubs</strong> en la Zona Metropolitana del Valle de México,
+                                ofreciendo instalaciones que permiten la eficiencia operativa para las empresas del sector.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== KPI ROW ===================== -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg">
+                        <div class="cc-kpi cc-kpi--orange">
+                            <i class="fas fa-box ico"></i>
+                            <div class="val">782<span style="font-size:1rem; font-weight:600;">k</span></div>
+                            <div class="lbl">Ton / año totales</div>
+                            <div class="sub">Capacidad de procesamiento</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg">
+                        <div class="cc-kpi cc-kpi--blue">
+                            <i class="fas fa-warehouse ico"></i>
+                            <div class="val">18</div>
+                            <div class="lbl">Recintos fiscalizados</div>
+                            <div class="sub">Operados por 15 empresas</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg">
+                        <div class="cc-kpi cc-kpi--teal">
+                            <i class="fas fa-plane ico"></i>
+                            <div class="val">34</div>
+                            <div class="lbl">Aerolíneas de carga</div>
+                            <div class="sub">Nacionales e internacionales</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg">
+                        <div class="cc-kpi cc-kpi--violet">
+                            <i class="fas fa-people-carry-box ico"></i>
+                            <div class="val">13</div>
+                            <div class="lbl">Handlers</div>
+                            <div class="sub">En la terminal de carga</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg">
+                        <div class="cc-kpi cc-kpi--slate">
+                            <i class="fas fa-plane-circle-check ico"></i>
+                            <div class="val">25</div>
+                            <div class="lbl">Posiciones MARS</div>
+                            <div class="sub">9 clave F · 16 clave D</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg">
+                        <div class="cc-kpi cc-kpi--rose">
+                            <i class="fas fa-boxes-stacked ico"></i>
+                            <div class="val">5</div>
+                            <div class="lbl">Almacenes nac. / fisc.</div>
+                            <div class="sub">3 nacional · 2 fiscalizados</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== CHARTS ===================== -->
+                <div class="row g-3 mb-4">
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="cc-card-title mb-2"><i class="fas fa-chart-pie text-warning me-1"></i> Distribución de la capacidad</div>
+                                <div class="cc-chart-wrap"><canvas id="cc-chart-distrib"></canvas></div>
+                                <div class="d-flex justify-content-center gap-4 mt-2 small">
+                                    <span><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#f97316;"></span>Internacional · 705,000 t (90.2%)</span>
+                                    <span><span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:#0ea5e9;"></span>Nacional · 77,000 t (9.8%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="cc-card-title mb-3"><i class="fas fa-plane-departure text-warning me-1"></i> Posiciones de estacionamiento MARS</div>
+                                <p class="text-muted mb-3" style="font-size:.74rem;">Multi Aircraft Ramp System — posiciones para aeronaves de fuselaje ancho.</p>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <div class="cc-mars">
+                                            <div class="key" style="background:linear-gradient(135deg,#f97316,#c2410c);">F</div>
+                                            <div><div class="n">9</div><div class="t">Aeronaves clave “F”</div></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="cc-mars">
+                                            <div class="key" style="background:linear-gradient(135deg,#2563eb,#1e3a8a);">D</div>
+                                            <div><div class="n">16</div><div class="t">Aeronaves clave “D”</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cc-chart-wrap" style="height:150px;"><canvas id="cc-chart-mars"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== INFRAESTRUCTURA ===================== -->
+                <div class="cc-sec-title mb-3"><i class="fas fa-industry"></i> Infraestructura de almacenamiento</div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="cc-infra">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="big text-warning">18</div>
+                                <i class="fas fa-warehouse fa-2x text-warning opacity-25"></i>
+                            </div>
+                            <div class="cap">Recintos fiscalizados</div>
+                            <p class="text-muted mb-0 mt-2" style="font-size:.76rem;">Carga internacional · operados por <strong>15 empresas</strong> · capacidad de <strong>705,000 t/año</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="cc-infra">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="big text-primary">3</div>
+                                <i class="fas fa-truck-ramp-box fa-2x text-primary opacity-25"></i>
+                            </div>
+                            <div class="cap">Almacenes de carga nacional</div>
+                            <p class="text-muted mb-0 mt-2" style="font-size:.76rem;">Capacidad de <strong>77,000 t/año</strong>. Operadores: <strong>Nexen e-Logistics</strong>, <strong>Estafeta Mexicana</strong> y <strong>TMM Almacenadora</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="cc-infra">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="big text-teal" style="color:#0d9488;">2</div>
+                                <i class="fas fa-boxes-packing fa-2x opacity-25" style="color:#0d9488;"></i>
+                            </div>
+                            <div class="cap">Almacenes fiscalizados</div>
+                            <p class="text-muted mb-0 mt-2" style="font-size:.76rem;"><strong>AAACESA</strong> · 2 recintos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===================== EMPRESAS OPERADORAS (RECINTOS FISCALIZADOS) ===================== -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="cc-sec-title mb-1"><i class="fas fa-building-shield"></i> Empresas operadoras de recintos fiscalizados <span class="badge text-bg-warning ms-1">15</span></div>
+                        <p class="text-muted mb-3" style="font-size:.76rem;">Empresas que operan los 18 recintos fiscalizados de carga internacional.</p>
+                        <div id="cc-recintos" class="row g-2"></div>
+                    </div>
+                </div>
+
+                <!-- ===================== HANDLERS ===================== -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="cc-sec-title mb-1"><i class="fas fa-people-carry-box"></i> Handlers en la terminal de carga <span class="badge text-bg-warning ms-1">13</span></div>
+                        <p class="text-muted mb-3" style="font-size:.76rem;">Empresas de servicios en tierra (handling) autorizadas en la terminal de carga.</p>
+                        <div id="cc-handlers" class="row g-2"></div>
+                    </div>
+                </div>
+
+                <!-- ===================== AEROLÍNEAS ===================== -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="cc-sec-title mb-1"><i class="fas fa-plane"></i> Aerolíneas de carga <span class="badge text-bg-warning ms-1">34</span></div>
+                        <p class="text-muted mb-3" style="font-size:.76rem;">Operadores nacionales e internacionales con presencia en la terminal.</p>
+                        <div id="cc-airlines" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- ===================== FUENTE ===================== -->
+                <p class="text-muted text-center mt-4 mb-0" style="font-size:.7rem;">
+                    <i class="fas fa-circle-info me-1"></i>Fuente: Capacidad de la Terminal de Carga AIFA · Gerencia de Carga (GC).
+                </p>
+
+            </div>
+        </div>

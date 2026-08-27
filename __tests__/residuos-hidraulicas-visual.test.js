@@ -56,7 +56,7 @@ describe('Residuos GOMIH · configuración visual de gráficas', () => {
             writeFile: jest.fn()
         };
 
-        const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'residuos-hidraulicas.js'), 'utf8');
+        const source = fs.readFileSync(path.join(__dirname, '..', 'modules', 'ingenieria', 'hidraulicas', 'residuos.js'), 'utf8');
         window.eval(source);
         await window.residuosHidraulicasModule.init();
 

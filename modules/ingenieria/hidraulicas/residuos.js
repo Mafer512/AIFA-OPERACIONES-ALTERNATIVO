@@ -68,6 +68,10 @@
 
     function canEdit() {
         try {
+            // Primero el nucleo compartido; el respaldo de abajo conserva el
+            // comportamiento exacto que tenia antes de extraer el modulo.
+            if (window.appPermisos) return !!window.appPermisos.puedeCapturar('hidraulicas');
+
             if (typeof window.canCaptureSection === 'function') return !!window.canCaptureSection('hidraulicas');
             if (typeof window.canCapture === 'function') return !!window.canCapture();
         } catch (_) {}
@@ -595,4 +599,24 @@
     bind();
     window.addEventListener('hidraulicas:visible', () => init().catch(error => console.error('[residuos-hidraulicas] init error:', error)));
     window.residuosHidraulicasModule = { init, load, state };
+
+    // Contrato de ciclo de vida del modulo.
+    //
+    // Lo que de verdad se acumulaba visita tras visita eran las instancias de
+    // Chart.js: cada render creaba las suyas y nadie las soltaba al salir de la
+    // seccion. Aqui se liberan.
+    //
+    // Los listeners de los controles NO se retiran a proposito: se registran una
+    // sola vez (guardados por initDone / state.bound) sobre nodos que viven
+    // dentro de la vista, y la vista se queda cacheada en el DOM. No se duplican
+    // al volver a entrar, asi que retirarlos obligaria a volver a cablearlos sin
+    // ganar nada.
+    window.destroyResiduosHidraulicas = function () {
+        try {
+            Object.keys(charts || {}).forEach(function (k) {
+                try { if (charts[k]) charts[k].destroy(); } catch (_) {}
+                charts[k] = null;
+            });
+        } catch (_) {}
+    };
 })();

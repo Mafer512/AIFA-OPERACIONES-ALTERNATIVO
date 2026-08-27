@@ -710,4 +710,24 @@
         }
     };
     window.ingenieriaCivilReload = reloadAll;
+
+    // Contrato de ciclo de vida del modulo.
+    //
+    // Lo que de verdad se acumulaba visita tras visita eran las instancias de
+    // Chart.js: cada render creaba las suyas y nadie las soltaba al salir de la
+    // seccion. Aqui se liberan.
+    //
+    // Los listeners de los controles NO se retiran a proposito: se registran una
+    // sola vez (guardados por initDone / state.bound) sobre nodos que viven
+    // dentro de la vista, y la vista se queda cacheada en el DOM. No se duplican
+    // al volver a entrar, asi que retirarlos obligaria a volver a cablearlos sin
+    // ganar nada.
+    window.destroyIngenieriaCivil = function () {
+        try {
+            Object.keys(_charts || {}).forEach(function (k) {
+                try { if (_charts[k]) _charts[k].destroy(); } catch (_) {}
+                _charts[k] = null;
+            });
+        } catch (_) {}
+    };
 })();

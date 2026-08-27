@@ -1,0 +1,422 @@
+        <div class="card border-0 shadow-sm">
+
+            <!-- ESTILOS LOCALES ING. CIVIL -->
+            <style>
+                #ingenieria-civil-section .ic-badge-header {
+                    display:inline-flex; align-items:center; gap:.4rem; font-weight:800; font-size:.72rem;
+                    letter-spacing:.04em; text-transform:uppercase; color:#fff; padding:.35rem .7rem; border-radius:.6rem;
+                    background:linear-gradient(135deg,#0f766e,#155e75);
+                }
+                #ingenieria-civil-section .ic-kpi {
+                    position:relative; overflow:hidden; border-radius:1rem; padding:1rem 1.1rem; color:#fff;
+                    display:flex; align-items:center; gap:.85rem; height:100%;
+                    box-shadow:0 10px 26px -10px rgba(0,0,0,.28); transition:transform .18s ease, box-shadow .18s ease;
+                }
+                #ingenieria-civil-section .ic-kpi:hover { transform:translateY(-3px); box-shadow:0 16px 36px -8px rgba(0,0,0,.30); }
+                #ingenieria-civil-section .ic-kpi-icon { font-size:1.55rem; opacity:.85; }
+                #ingenieria-civil-section .ic-kpi-val  { font-size:1.85rem; font-weight:800; line-height:1; }
+                #ingenieria-civil-section .ic-kpi-lbl  { font-size:.68rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; opacity:.85; margin-top:.2rem; }
+                #ingenieria-civil-section .ic-kpi--blue   { background:linear-gradient(135deg,#2563eb,#1e40af); }
+                #ingenieria-civil-section .ic-kpi--green  { background:linear-gradient(135deg,#16a34a,#14532d); }
+                #ingenieria-civil-section .ic-kpi--amber  { background:linear-gradient(135deg,#f59e0b,#b45309); }
+                #ingenieria-civil-section .ic-kpi--cyan   { background:linear-gradient(135deg,#0891b2,#155e75); }
+                #ingenieria-civil-section .ic-kpi--red    { background:linear-gradient(135deg,#dc2626,#991b1b); }
+                #ingenieria-civil-section .ic-kpi--purple { background:linear-gradient(135deg,#7c3aed,#5b21b6); }
+                #ingenieria-civil-section .ic-chart-wrap { position:relative; height:280px; }
+                #ingenieria-civil-section .ic-chart-wrap--sm { height:240px; }
+                #ingenieria-civil-section .ic-st { display:inline-block; font-size:.68rem; font-weight:700; padding:.18rem .5rem; border-radius:.5rem; }
+                #ingenieria-civil-section .ic-st--ok   { background:#dcfce7; color:#166534; }
+                #ingenieria-civil-section .ic-st--pend { background:#fef3c7; color:#92400e; }
+                #ingenieria-civil-section .ic-card-title { font-weight:700; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:#475569; margin-bottom:.5rem; }
+                #ingenieria-civil-section #ic-main-tabs .nav-link { font-weight:600; color:#64748b; border:none; border-bottom:3px solid transparent; }
+                #ingenieria-civil-section #ic-main-tabs .nav-link.active { color:#0f766e; border-bottom-color:#0f766e; background:transparent; }
+            </style>
+
+            <!-- HEADER -->
+            <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between gap-2 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="ic-badge-header"><i class="fas fa-helmet-safety"></i> Ing. Civil</span>
+                    <div>
+                        <h2 class="section-title mb-0" style="font-size:1.1rem;">Edificio Terminal de Pasajeros (ETP)</h2>
+                        <p class="text-muted mb-0" style="font-size:.75rem;">Atención a vidrios y filtraciones · Supabase en tiempo real</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS PRINCIPALES: Vidrios | Filtraciones -->
+            <div class="card-header bg-white py-0 border-bottom">
+                <ul class="nav nav-tabs card-header-tabs" id="ic-main-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ic-tab-vidrios" data-bs-toggle="tab" data-bs-target="#ic-pane-vidrios" type="button" role="tab">
+                            <i class="fas fa-square-full me-2" style="color:#2563eb;"></i>Vidrios ETP
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ic-tab-filtraciones" data-bs-toggle="tab" data-bs-target="#ic-pane-filtraciones" type="button" role="tab">
+                            <i class="fas fa-droplet me-2" style="color:#0891b2;"></i>Filtraciones
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content">
+
+                <!-- ══════════════ PANEL VIDRIOS ══════════════ -->
+                <div class="tab-pane fade show active" id="ic-pane-vidrios" role="tabpanel">
+                    <div class="card-body px-3 px-md-4 py-4">
+
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <label class="text-muted me-1 small fw-semibold" for="icv-anio-select">Año:</label>
+                                <select id="icv-anio-select" class="form-select form-select-sm" style="min-width:130px;">
+                                    <option value="all">Todos los años</option>
+                                </select>
+                                <button class="btn btn-outline-secondary btn-sm" id="icv-refresh-btn" title="Actualizar datos"><i class="fas fa-sync-alt"></i></button>
+                            </div>
+                            <button class="btn btn-sm d-none text-white" id="icv-add-btn" style="background:linear-gradient(135deg,#0f766e,#155e75);">
+                                <i class="fas fa-plus me-1"></i>Nuevo Vidrio
+                            </button>
+                        </div>
+
+                        <div id="icv-status" class="alert d-none mb-3" role="status"></div>
+
+                        <!-- KPIs -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--blue">
+                                    <div class="ic-kpi-icon"><i class="fas fa-layer-group"></i></div>
+                                    <div><div class="ic-kpi-val" id="icv-kpi-total">—</div><div class="ic-kpi-lbl">Vidrios reportados</div></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--green">
+                                    <div class="ic-kpi-icon"><i class="fas fa-circle-check"></i></div>
+                                    <div><div class="ic-kpi-val" id="icv-kpi-atendidos">—</div><div class="ic-kpi-lbl">Atendidos</div></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--amber">
+                                    <div class="ic-kpi-icon"><i class="fas fa-hourglass-half"></i></div>
+                                    <div><div class="ic-kpi-val" id="icv-kpi-pendientes">—</div><div class="ic-kpi-lbl">Pendientes</div></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--cyan">
+                                    <div class="ic-kpi-icon"><i class="fas fa-gauge-high"></i></div>
+                                    <div><div class="ic-kpi-val" id="icv-kpi-avance">—</div><div class="ic-kpi-lbl">Avance</div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GRÁFICAS -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-lg-7">
+                                <div class="card border-0 bg-light rounded-4 p-3">
+                                    <div class="ic-card-title"><i class="fas fa-chart-column me-1 text-primary"></i>Reportados vs atendidos por año</div>
+                                    <div class="ic-chart-wrap"><canvas id="icv-chart-anio"></canvas></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-5">
+                                <div class="card border-0 bg-light rounded-4 p-3">
+                                    <div class="ic-card-title"><i class="fas fa-circle-half-stroke me-1 text-success"></i>Avance en reparación</div>
+                                    <div class="ic-chart-wrap"><canvas id="icv-chart-avance"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <div class="card border-0 bg-light rounded-4 p-3">
+                                    <div class="ic-card-title"><i class="fas fa-location-dot me-1 text-danger"></i>Vidrios reportados por ubicación</div>
+                                    <div class="ic-chart-wrap"><canvas id="icv-chart-ubic"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABLA -->
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white d-flex align-items-center justify-content-between rounded-top-4 py-2 px-3">
+                                <span class="fw-bold text-uppercase" style="font-size:.75rem;letter-spacing:.05em;color:#0f172a;">
+                                    <i class="fas fa-table me-1 text-primary"></i>Registros de vidrios
+                                </span>
+                                <span class="badge bg-light text-muted border" id="icv-tbl-count"></span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm mb-0 align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center">No.</th>
+                                                <th>Fecha reporte</th>
+                                                <th>Ubicación</th>
+                                                <th class="text-center">Nivel</th>
+                                                <th>Descripción</th>
+                                                <th class="text-center">Cant.</th>
+                                                <th class="text-center">Estatus</th>
+                                                <th class="text-center">Fecha atención</th>
+                                                <th class="text-center">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="icv-tbl-body">
+                                            <tr><td colspan="9" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-1"></i>Cargando…</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div><!-- /pane vidrios -->
+
+                <!-- ══════════════ PANEL FILTRACIONES ══════════════ -->
+                <div class="tab-pane fade" id="ic-pane-filtraciones" role="tabpanel">
+                    <div class="card-body px-3 px-md-4 py-4">
+
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <div class="text-muted small fw-semibold"><i class="fas fa-warehouse me-1 text-info"></i>Servicio de Mantenimiento a Techumbres · Cubierta nivel 29</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" id="icf-refresh-btn" title="Actualizar datos"><i class="fas fa-sync-alt"></i></button>
+                                <button class="btn btn-sm d-none text-white" id="icf-add-btn" style="background:linear-gradient(135deg,#0891b2,#155e75);">
+                                    <i class="fas fa-plus me-1"></i>Nueva Filtración
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="icf-status" class="alert d-none mb-3" role="status"></div>
+
+                        <!-- KPIs -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--cyan">
+                                    <div class="ic-kpi-icon"><i class="fas fa-droplet"></i></div>
+                                    <div><div class="ic-kpi-val" id="icf-kpi-total">—</div><div class="ic-kpi-lbl">Filtraciones</div></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--green">
+                                    <div class="ic-kpi-icon"><i class="fas fa-circle-check"></i></div>
+                                    <div><div class="ic-kpi-val" id="icf-kpi-atendidas">—</div><div class="ic-kpi-lbl">Atendidas</div></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--amber">
+                                    <div class="ic-kpi-icon"><i class="fas fa-hourglass-half"></i></div>
+                                    <div><div class="ic-kpi-val" id="icf-kpi-pendientes">—</div><div class="ic-kpi-lbl">Pendientes</div></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="ic-kpi ic-kpi--purple">
+                                    <div class="ic-kpi-icon"><i class="fas fa-cubes"></i></div>
+                                    <div><div class="ic-kpi-val" id="icf-kpi-modulos">—</div><div class="ic-kpi-lbl">Módulos afectados</div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GRÁFICAS -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-lg-7">
+                                <div class="card border-0 bg-light rounded-4 p-3">
+                                    <div class="ic-card-title"><i class="fas fa-chart-column me-1 text-info"></i>Filtraciones por módulo</div>
+                                    <div class="ic-chart-wrap"><canvas id="icf-chart-modulo"></canvas></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-5">
+                                <div class="card border-0 bg-light rounded-4 p-3">
+                                    <div class="ic-card-title"><i class="fas fa-shapes me-1 text-warning"></i>Por elemento dañado</div>
+                                    <div class="ic-chart-wrap"><canvas id="icf-chart-elemento"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-lg-7">
+                                <div class="card border-0 bg-light rounded-4 p-3">
+                                    <div class="ic-card-title"><i class="fas fa-chart-line me-1 text-purple" style="color:#7c3aed;"></i>Tendencia por fecha de reporte</div>
+                                    <div class="ic-chart-wrap"><canvas id="icf-chart-tendencia"></canvas></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-5">
+                                <div class="card border-0 bg-light rounded-4 p-3">
+                                    <div class="ic-card-title"><i class="fas fa-circle-half-stroke me-1 text-success"></i>Avance en atención</div>
+                                    <div class="ic-chart-wrap"><canvas id="icf-chart-avance"></canvas></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABLA -->
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white d-flex align-items-center justify-content-between rounded-top-4 py-2 px-3">
+                                <span class="fw-bold text-uppercase" style="font-size:.75rem;letter-spacing:.05em;color:#0f172a;">
+                                    <i class="fas fa-table me-1 text-info"></i>Registros de filtraciones
+                                </span>
+                                <span class="badge bg-light text-muted border" id="icf-tbl-count"></span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm mb-0 align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center">No.</th>
+                                                <th>Fecha reporte</th>
+                                                <th class="text-center">Módulo</th>
+                                                <th>Elemento afectado</th>
+                                                <th class="text-center">Cant.</th>
+                                                <th class="text-center">Estatus</th>
+                                                <th class="text-center">Fecha atención</th>
+                                                <th class="text-center">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="icf-tbl-body">
+                                            <tr><td colspan="8" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-1"></i>Cargando…</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div><!-- /pane filtraciones -->
+
+            </div><!-- /tab-content -->
+        </div><!-- /card -->
+
+        <!-- ── MODAL: Vidrio ─────────────────────────────────────── -->
+        <div class="modal fade" id="icv-modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4 shadow-lg border-0">
+                    <div class="modal-header" style="background:linear-gradient(135deg,#0f766e,#155e75);color:#fff;border-radius:1rem 1rem 0 0;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-square-full me-2"></i><span id="icv-modal-title-txt">Nuevo Vidrio — ETP</span></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body px-4 py-3">
+                        <div class="row g-3">
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="icv-f-fecha">Fecha de reporte <span class="text-danger">*</span></label>
+                                <input type="date" id="icv-f-fecha" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label small fw-semibold" for="icv-f-ubic">Ubicación</label>
+                                <input type="text" id="icv-f-ubic" class="form-control form-control-sm" list="icv-ubic-list" placeholder="ETP Cubierta, Fachada…" />
+                                <datalist id="icv-ubic-list">
+                                    <option value="ETP Cubierta"></option><option value="ETP Fachada"></option>
+                                    <option value="ETP Zona Estéril"></option><option value="ETP Plaza Mexicana"></option>
+                                    <option value="Área Pública"></option><option value="FBO"></option>
+                                    <option value="Edificio de Servicios"></option><option value="CC Santa Lucía"></option>
+                                </datalist>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label small fw-semibold" for="icv-f-nivel">Nivel</label>
+                                <input type="text" id="icv-f-nivel" class="form-control form-control-sm" placeholder="29, 10.5, PB…" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold" for="icv-f-desc">Descripción</label>
+                                <textarea id="icv-f-desc" class="form-control form-control-sm" rows="2" placeholder="Ubicación específica del vidrio…"></textarea>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label small fw-semibold" for="icv-f-cant">Cantidad</label>
+                                <input type="number" id="icv-f-cant" class="form-control form-control-sm" min="1" value="1" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="icv-f-estatus">Estatus</label>
+                                <select id="icv-f-estatus" class="form-select form-select-sm">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Atendido">Atendido</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label small fw-semibold" for="icv-f-fatencion">Fecha de atención</label>
+                                <input type="date" id="icv-f-fatencion" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-sm-7">
+                                <label class="form-label small fw-semibold" for="icv-f-entidad">Entidad que reporta</label>
+                                <input type="text" id="icv-f-entidad" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label small fw-semibold" for="icv-f-observ">Observaciones</label>
+                                <input type="text" id="icv-f-observ" class="form-control form-control-sm" />
+                            </div>
+                        </div>
+                        <div id="icv-modal-msg" class="mt-2"></div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-sm px-4 text-white" id="icv-modal-save" style="background:linear-gradient(135deg,#0f766e,#155e75);"><i class="fas fa-save me-1"></i>Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /modal vidrio -->
+
+        <!-- ── MODAL: Filtración ─────────────────────────────────── -->
+        <div class="modal fade" id="icf-modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4 shadow-lg border-0">
+                    <div class="modal-header" style="background:linear-gradient(135deg,#0891b2,#155e75);color:#fff;border-radius:1rem 1rem 0 0;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-droplet me-2"></i><span id="icf-modal-title-txt">Nueva Filtración</span></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body px-4 py-3">
+                        <div class="row g-3">
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="icf-f-fecha">Fecha de reporte <span class="text-danger">*</span></label>
+                                <input type="date" id="icf-f-fecha" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="icf-f-modulo">Módulo</label>
+                                <input type="text" id="icf-f-modulo" class="form-control form-control-sm" list="icf-modulo-list" placeholder="A, D, E1, J…" />
+                                <datalist id="icf-modulo-list">
+                                    <option value="A"></option><option value="B"></option><option value="C"></option><option value="D"></option>
+                                    <option value="E1"></option><option value="E2"></option><option value="E3"></option><option value="E4"></option>
+                                    <option value="F"></option><option value="G1"></option><option value="G2"></option><option value="H"></option>
+                                    <option value="I"></option><option value="J"></option><option value="K"></option><option value="L"></option>
+                                    <option value="M"></option><option value="N"></option>
+                                </datalist>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="icf-f-nivel">Nivel</label>
+                                <input type="text" id="icf-f-nivel" class="form-control form-control-sm" value="29" />
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label small fw-semibold" for="icf-f-elem">Elemento afectado</label>
+                                <select id="icf-f-elem" class="form-select form-select-sm">
+                                    <option value="Panel">Panel</option>
+                                    <option value="Columna">Columna</option>
+                                    <option value="Flashing">Flashing</option>
+                                    <option value="Domo">Domo</option>
+                                    <option value="Caballete / Canalón">Caballete / Canalón</option>
+                                    <option value="Junta sísmica">Junta sísmica</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label small fw-semibold" for="icf-f-cant">Cantidad</label>
+                                <input type="number" id="icf-f-cant" class="form-control form-control-sm" min="1" value="1" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="icf-f-estatus">Estatus</label>
+                                <select id="icf-f-estatus" class="form-select form-select-sm">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Atendido">Atendido</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label small fw-semibold" for="icf-f-fatencion">Fecha de atención</label>
+                                <input type="date" id="icf-f-fatencion" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-sm-7">
+                                <label class="form-label small fw-semibold" for="icf-f-entidad">Entidad que reporta</label>
+                                <input type="text" id="icf-f-entidad" class="form-control form-control-sm" value="Comunidad aeroportuaria" />
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="icf-f-reinc" />
+                                    <label class="form-check-label small fw-semibold" for="icf-f-reinc">Pendiente con reincidencia</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="icf-modal-msg" class="mt-2"></div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-sm px-4 text-white" id="icf-modal-save" style="background:linear-gradient(135deg,#0891b2,#155e75);"><i class="fas fa-save me-1"></i>Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /modal filtracion -->
+

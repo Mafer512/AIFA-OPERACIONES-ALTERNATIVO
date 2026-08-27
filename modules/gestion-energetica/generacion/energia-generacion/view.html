@@ -1,0 +1,320 @@
+                    <style>
+                        /* ───── Paleta y tipografía ─────────────────────── */
+                        #ggen-energia-section{ --gg-elec:#16a34a; --gg-elec-d:#14532d; --gg-cfe:#2563eb; --gg-cfe-d:#1e3a8a;
+                            --gg-trh:#0891b2; --gg-trh-d:#155e75; --gg-gas:#ea580c; --gg-gas-d:#9a3412; --gg-pct:#7c3aed; --gg-pct-d:#5b21b6; }
+                        #ggen-energia-section .card{ border-radius:18px; }
+                        #ggen-energia-section .section-title{ font-weight:800; letter-spacing:-.01em; }
+
+                        /* ───── KPIs ────────────────────────────────────── */
+                        #ggen-energia-section .ggen-kpi{ border-radius:18px; padding:18px 20px; color:#fff;
+                            box-shadow:0 14px 28px -16px rgba(15,23,42,.35), 0 6px 14px -10px rgba(15,23,42,.25);
+                            position:relative; overflow:hidden; min-height:138px; transition:transform .18s ease, box-shadow .18s ease;
+                            display:flex; flex-direction:column; justify-content:space-between; }
+                        #ggen-energia-section .ggen-kpi:hover{ transform:translateY(-3px); box-shadow:0 22px 38px -16px rgba(15,23,42,.42); }
+                        #ggen-energia-section .ggen-kpi::before{ content:""; position:absolute; right:-40px; top:-40px;
+                            width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.14); }
+                        #ggen-energia-section .ggen-kpi::after{ content:""; position:absolute; right:30px; bottom:-50px;
+                            width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.08); }
+                        #ggen-energia-section .ggen-kpi--elec{ background:linear-gradient(135deg,var(--gg-elec-d),var(--gg-elec)); }
+                        #ggen-energia-section .ggen-kpi--cfe { background:linear-gradient(135deg,var(--gg-cfe-d),var(--gg-cfe)); }
+                        #ggen-energia-section .ggen-kpi--trh { background:linear-gradient(135deg,var(--gg-trh-d),var(--gg-trh)); }
+                        #ggen-energia-section .ggen-kpi--gas { background:linear-gradient(135deg,var(--gg-gas-d),var(--gg-gas)); }
+                        #ggen-energia-section .ggen-kpi--pct { background:linear-gradient(135deg,var(--gg-pct-d),var(--gg-pct)); }
+                        #ggen-energia-section .ggen-kpi-ico{ position:absolute; right:18px; top:18px; width:36px; height:36px;
+                            border-radius:10px; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center;
+                            backdrop-filter:blur(4px); font-size:1rem; }
+                        #ggen-energia-section .ggen-kpi-lbl{ font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; opacity:.92; font-weight:700; }
+                        #ggen-energia-section .ggen-kpi-val{ font-size:1.95rem; font-weight:800; line-height:1.1; margin-top:6px; text-shadow:0 1px 2px rgba(0,0,0,.18); }
+                        #ggen-energia-section .ggen-kpi-unit{ font-size:.74rem; opacity:.92; margin-top:4px; font-weight:500; }
+
+                        /* ───── Gráficos ────────────────────────────────── */
+                        #ggen-energia-section .ggen-chart-card{ background:#fff; border:1px solid #e2e8f0; border-radius:16px;
+                            padding:18px 20px 14px; box-shadow:0 6px 18px -10px rgba(15,23,42,.18); height:100%;
+                            transition:box-shadow .18s ease, transform .18s ease; }
+                        #ggen-energia-section .ggen-chart-card:hover{ box-shadow:0 14px 28px -14px rgba(15,23,42,.25); }
+                        #ggen-energia-section .ggen-chart-card--accent{ border-top:4px solid var(--gg-elec); }
+                        #ggen-energia-section .ggen-chart-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:10px; flex-wrap:wrap; }
+                        #ggen-energia-section .ggen-chart-title{ font-size:.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px; }
+                        #ggen-energia-section .ggen-chart-title i{ font-size:.95rem; }
+                        #ggen-energia-section .ggen-chart-sub{ font-size:.7rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+                        #ggen-energia-section .ggen-chart-pill{ font-size:.7rem; padding:2px 10px; border-radius:999px; background:#f1f5f9; color:#334155; font-weight:700; }
+
+                        /* ───── Tablas ──────────────────────────────────── */
+                        #ggen-energia-section .ggen-table-card{ border:1px solid #e2e8f0; border-radius:14px; overflow:hidden;
+                            box-shadow:0 6px 18px -10px rgba(15,23,42,.18); background:#fff; height:100%;
+                            transition:box-shadow .18s ease, transform .18s ease; }
+                        #ggen-energia-section .ggen-table-card:hover{ transform:translateY(-2px); box-shadow:0 14px 28px -14px rgba(15,23,42,.25); }
+                        #ggen-energia-section .ggen-th-bar{ padding:14px 16px; color:#fff; font-weight:800;
+                            text-align:center; letter-spacing:.6px; font-size:.92rem; position:relative; overflow:hidden; }
+                        #ggen-energia-section .ggen-th-bar::before{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 55%); pointer-events:none; }
+                        #ggen-energia-section .ggen-th--elec{ background:linear-gradient(135deg,var(--gg-elec-d),var(--gg-elec)); }
+                        #ggen-energia-section .ggen-th--trh { background:linear-gradient(135deg,var(--gg-cfe-d),var(--gg-cfe)); }
+                        #ggen-energia-section .ggen-th--gas { background:linear-gradient(135deg,var(--gg-gas-d),var(--gg-gas)); }
+                        #ggen-energia-section table.ggen-tbl{ width:100%; margin:0; font-size:.86rem; font-variant-numeric:tabular-nums; }
+                        #ggen-energia-section table.ggen-tbl th{ background:#f8fafc; color:#0f172a; font-weight:800; font-size:.7rem;
+                            letter-spacing:.5px; text-transform:uppercase; padding:10px 12px; border-bottom:2px solid #e2e8f0; }
+                        #ggen-energia-section table.ggen-tbl td{ padding:9px 12px; border-bottom:1px solid #f1f5f9; }
+                        #ggen-energia-section table.ggen-tbl tbody tr:nth-child(even) td{ background:#fafbfd; }
+                        #ggen-energia-section table.ggen-tbl tbody tr:hover td{ background:#eff6ff; }
+                        #ggen-energia-section table.ggen-tbl tr:last-child td{ border-bottom:0; }
+                        #ggen-energia-section table.ggen-tbl tr.ggen-total td{ font-weight:800; background:#f1f5f9 !important; border-top:2px solid #cbd5e1; color:#0f172a; }
+                        #ggen-energia-section .ggen-tbl-empty td{ text-align:center; color:#94a3b8; font-style:italic; padding:18px; }
+                    </style>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+                            <div>
+                                <h2 class="section-title mb-0">
+                                    <i class="fas fa-solar-panel me-2" style="color:#f59e0b;"></i>Gerencia de Generación · Energía
+                                </h2>
+                                <small class="text-muted">Subdirección de Gestión Energética (SGE) · Indicadores mensuales</small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <label class="small fw-semibold text-muted mb-0">Año:</label>
+                                <select id="ggen-anio-select" class="form-select form-select-sm" style="width:auto;"></select>
+                                <button id="ggen-refresh-btn" type="button" class="btn btn-sm btn-outline-secondary" title="Recargar datos">
+                                    <i class="fas fa-sync-alt me-1"></i>Actualizar
+                                </button>
+                                <button id="ggen-upsert-btn" type="button" class="btn btn-sm btn-warning fw-semibold d-none"
+                                        data-bs-toggle="modal" data-bs-target="#ggenUpsertModal">
+                                    <i class="fas fa-pen-to-square me-1"></i>Capturar / actualizar mes
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="ggen-status" class="alert alert-info d-none small" role="status"></div>
+
+                            <!-- KPIs YTD -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="ggen-kpi ggen-kpi--elec">
+                                        <div class="ggen-kpi-ico"><i class="fas fa-bolt"></i></div>
+                                        <div>
+                                            <div class="ggen-kpi-lbl">Energía Generada</div>
+                                            <div class="ggen-kpi-val" id="ggen-kpi-generada">—</div>
+                                        </div>
+                                        <div class="ggen-kpi-unit">MWh acumulados</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="ggen-kpi ggen-kpi--cfe">
+                                        <div class="ggen-kpi-ico"><i class="fas fa-plug"></i></div>
+                                        <div>
+                                            <div class="ggen-kpi-lbl">Consumo CFE</div>
+                                            <div class="ggen-kpi-val" id="ggen-kpi-cfe">—</div>
+                                        </div>
+                                        <div class="ggen-kpi-unit">MWh acumulados</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="ggen-kpi ggen-kpi--pct">
+                                        <div class="ggen-kpi-ico"><i class="fas fa-percentage"></i></div>
+                                        <div>
+                                            <div class="ggen-kpi-lbl">Autogeneración</div>
+                                            <div class="ggen-kpi-val" id="ggen-kpi-pct">—</div>
+                                        </div>
+                                        <div class="ggen-kpi-unit">del consumo total</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="ggen-kpi ggen-kpi--trh">
+                                        <div class="ggen-kpi-ico"><i class="fas fa-snowflake"></i></div>
+                                        <div>
+                                            <div class="ggen-kpi-lbl">Térmica</div>
+                                            <div class="ggen-kpi-val" id="ggen-kpi-trh">—</div>
+                                        </div>
+                                        <div class="ggen-kpi-unit">TRh acumulados</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="ggen-kpi ggen-kpi--gas">
+                                        <div class="ggen-kpi-ico"><i class="fas fa-fire"></i></div>
+                                        <div>
+                                            <div class="ggen-kpi-lbl">Gas Natural</div>
+                                            <div class="ggen-kpi-val" id="ggen-kpi-gas">—</div>
+                                        </div>
+                                        <div class="ggen-kpi-unit">Gigajoules acumulados</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ════════ GRÁFICOS (primero) ════════ -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-xl-8">
+                                    <div class="ggen-chart-card ggen-chart-card--accent">
+                                        <div class="ggen-chart-head">
+                                            <div>
+                                                <div class="ggen-chart-title"><i class="fas fa-chart-column" style="color:var(--gg-elec);"></i>Balance Eléctrico mensual</div>
+                                                <div class="ggen-chart-sub">Generación propia vs Consumo CFE</div>
+                                            </div>
+                                            <span class="ggen-chart-pill" id="ggen-chart-elec-pill">MWh</span>
+                                        </div>
+                                        <div style="position:relative;height:360px;"><canvas id="ggen-chart-elec"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-4">
+                                    <div class="ggen-chart-card">
+                                        <div class="ggen-chart-head">
+                                            <div>
+                                                <div class="ggen-chart-title"><i class="fas fa-chart-pie" style="color:var(--gg-pct);"></i>Mix Eléctrico YTD</div>
+                                                <div class="ggen-chart-sub">Distribución acumulada</div>
+                                            </div>
+                                        </div>
+                                        <div style="position:relative;height:360px;"><canvas id="ggen-chart-mix"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-6">
+                                    <div class="ggen-chart-card">
+                                        <div class="ggen-chart-head">
+                                            <div>
+                                                <div class="ggen-chart-title"><i class="fas fa-snowflake" style="color:var(--gg-trh);"></i>Energía Térmica Producida</div>
+                                                <div class="ggen-chart-sub">Toneladas de refrigeración / hora</div>
+                                            </div>
+                                            <span class="ggen-chart-pill">TRh</span>
+                                        </div>
+                                        <div style="position:relative;height:300px;"><canvas id="ggen-chart-trh"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-6">
+                                    <div class="ggen-chart-card">
+                                        <div class="ggen-chart-head">
+                                            <div>
+                                                <div class="ggen-chart-title"><i class="fas fa-fire" style="color:var(--gg-gas);"></i>Consumo de Gas Natural</div>
+                                                <div class="ggen-chart-sub">Gigajoules mensuales</div>
+                                            </div>
+                                            <span class="ggen-chart-pill">GJ</span>
+                                        </div>
+                                        <div style="position:relative;height:300px;"><canvas id="ggen-chart-gas"></canvas></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ════════ TABLAS (después, layout del Excel) ════════ -->
+                            <div class="row g-3 align-items-stretch">
+                                <div class="col-12 col-lg-7">
+                                    <div class="ggen-table-card">
+                                        <div class="ggen-th-bar ggen-th--elec">ENERGÍA ELÉCTRICA</div>
+                                        <div class="table-responsive">
+                                            <table class="ggen-tbl">
+                                                <thead>
+                                                    <tr>
+                                                        <th>MES</th>
+                                                        <th class="text-end">GENERADA MWh</th>
+                                                        <th class="text-end">CONSUMO A CFE MWh</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="ggen-tbl-elec"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-5">
+                                    <div class="ggen-table-card">
+                                        <div class="ggen-th-bar ggen-th--trh">ENERGÍA TÉRMICA PRODUCIDA</div>
+                                        <div class="table-responsive">
+                                            <table class="ggen-tbl">
+                                                <thead>
+                                                    <tr>
+                                                        <th>MES</th>
+                                                        <th class="text-end">TRh (TON. REFRIG. / HORA)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="ggen-tbl-trh"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 d-flex justify-content-center mt-2">
+                                    <div class="ggen-table-card" style="max-width:520px; width:100%;">
+                                        <div class="ggen-th-bar ggen-th--gas">CONSUMO DE GAS NATURAL</div>
+                                        <div class="table-responsive">
+                                            <table class="ggen-tbl">
+                                                <thead>
+                                                    <tr>
+                                                        <th>MES</th>
+                                                        <th class="text-end">GIGAJOULES</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="ggen-tbl-gas"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal: Captura / actualización mensual -->
+                    <div class="modal fade" id="ggenUpsertModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-warning-subtle">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="fas fa-pen-to-square me-2 text-warning"></i>Captura / actualización mensual de energía
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small fw-semibold">Año</label>
+                                            <input type="number" id="ggen-up-anio" class="form-control" min="2020" max="2099" step="1">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small fw-semibold">Mes</label>
+                                            <select id="ggen-up-mes" class="form-select">
+                                                <option value="1">ENERO</option><option value="2">FEBRERO</option>
+                                                <option value="3">MARZO</option><option value="4">ABRIL</option>
+                                                <option value="5">MAYO</option><option value="6">JUNIO</option>
+                                                <option value="7">JULIO</option><option value="8">AGOSTO</option>
+                                                <option value="9">SEPTIEMBRE</option><option value="10">OCTUBRE</option>
+                                                <option value="11">NOVIEMBRE</option><option value="12">DICIEMBRE</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-4 d-flex align-items-end">
+                                            <button type="button" id="ggen-up-load" class="btn btn-outline-secondary w-100">
+                                                <i class="fas fa-rotate-left me-1"></i>Cargar valores actuales
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row g-3">
+                                        <div class="col-12 col-md-6">
+                                            <div class="border rounded-3 p-3 h-100" style="border-left:4px solid #16a34a !important;">
+                                                <div class="fw-bold mb-2 small text-uppercase" style="color:#15803d;"><i class="fas fa-bolt me-1"></i>Energía Eléctrica</div>
+                                                <label class="form-label small">Generada (MWh)</label>
+                                                <input type="number" id="ggen-up-generada" class="form-control" step="0.01" min="0">
+                                                <label class="form-label small mt-2">Consumo CFE (MWh)</label>
+                                                <input type="number" id="ggen-up-cfe" class="form-control" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="row g-3 h-100">
+                                                <div class="col-12">
+                                                    <div class="border rounded-3 p-3" style="border-left:4px solid #0891b2 !important;">
+                                                        <div class="fw-bold mb-2 small text-uppercase" style="color:#155e75;"><i class="fas fa-snowflake me-1"></i>Energía Térmica</div>
+                                                        <label class="form-label small">TRh (Ton. Refrig./Hora)</label>
+                                                        <input type="number" id="ggen-up-trh" class="form-control" step="0.01" min="0">
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="border rounded-3 p-3" style="border-left:4px solid #ea580c !important;">
+                                                        <div class="fw-bold mb-2 small text-uppercase" style="color:#9a3412;"><i class="fas fa-fire me-1"></i>Gas Natural</div>
+                                                        <label class="form-label small">Gigajoules</label>
+                                                        <input type="number" id="ggen-up-gas" class="form-control" step="0.0001" min="0">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="ggen-up-msg" class="small mt-3"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" id="ggen-up-save" class="btn btn-warning fw-semibold">
+                                        <i class="fas fa-save me-1"></i>Guardar mes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>

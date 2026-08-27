@@ -91,8 +91,11 @@ describe('quién es "mi" fila al recuperar un borrador', () => {
 
   test('la recuperación usa esa fila y no el último <tr> del tbody', () => {
     const cuerpo = extraer('_conciRestaurarFilasNuevas');
-    expect(cuerpo).toContain('const tr = _conciAddBlankRow();');
-    // Ésta era la lectura que escribía sobre una fila ajena.
-    expect(cuerpo).not.toContain('tbody.lastElementChild');
+    expect(cuerpo).toContain('const tr = _conciAddBlankRow()');
+    // Detrás queda un `|| tbody.lastElementChild`, pero sólo como último
+    // recurso cuando no hay fila que devolver (sin permiso de captura, o sin
+    // columnas). Lo que rompía era leer el último <tr> como FUENTE: eso
+    // escribía la captura recuperada del borrador encima de una fila ajena.
+    expect(cuerpo).not.toMatch(/const tr = tbody.lastElementChild/);
   });
 });

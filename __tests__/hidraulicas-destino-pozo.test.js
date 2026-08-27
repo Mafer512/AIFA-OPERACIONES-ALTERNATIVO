@@ -111,7 +111,7 @@ async function arrancar(escrituras, instancias) {
     montarSupabase(escrituras);
     montarChart(instancias);
     window.canCaptureSection = () => true;
-    const fuente = fs.readFileSync(path.join(__dirname, '..', 'js', 'hidraulicas.js'), 'utf8');
+    const fuente = fs.readFileSync(path.join(__dirname, '..', 'modules', 'ingenieria', 'hidraulicas', 'index.js'), 'utf8');
     window.eval(fuente);
     await window.hidraulicasModule.init();
     return window.hidraulicasModule;
@@ -370,7 +370,7 @@ describe('Hidráulicas · destino del agua por pozo', () => {
     });
 
     test('la captura diaria ya no pisa el desglose histórico con ceros', () => {
-        const fuente = fs.readFileSync(path.join(__dirname, '..', 'js', 'hidraulicas.js'), 'utf8');
+        const fuente = fs.readFileSync(path.join(__dirname, '..', 'modules', 'ingenieria', 'hidraulicas', 'index.js'), 'utf8');
         expect(fuente).not.toMatch(/cd_militar_m3:\s*0,\s*aifa_m3:\s*0/);
     });
 });

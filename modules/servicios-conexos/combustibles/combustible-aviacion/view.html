@@ -1,0 +1,206 @@
+<!-- ============================================================
+     SSC · Combustibles · Combustible de Aviación
+
+     Marcado y estilos del módulo. Antes esto no existía como HTML:
+     la plantilla era un template literal dentro del JS y la hoja de
+     estilos un <link> que index.html pedía siempre. Ahora ambos
+     llegan aquí, y sólo cuando alguien abre el módulo.
+     ============================================================ -->
+<style>
+/* ============================================================
+ *  SSC · Servicios Conexos · Combustibles
+ *  Estilos del módulo (autocontenido, no se inyecta en index.html)
+ * ============================================================ */
+
+#combustibles-section .comb-tabs .nav-link { color:#0e7490; font-weight:600; }
+#combustibles-section .comb-tabs .nav-link.active { background:#cffafe; border-color:#a5f3fc #a5f3fc #fff; color:#155e75; }
+
+#combustibles-section .comb-kpi-card { border-radius:14px; padding:18px 20px; color:#fff; box-shadow:0 4px 14px rgba(0,0,0,.08); position:relative; overflow:hidden; }
+#combustibles-section .comb-kpi-card::before { content:""; position:absolute; right:-30px; top:-30px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.1); }
+#combustibles-section .comb-kpi--teal   { background:linear-gradient(135deg,#0e7490,#06b6d4); }
+#combustibles-section .comb-kpi--blue   { background:linear-gradient(135deg,#1d4ed8,#3b82f6); }
+#combustibles-section .comb-kpi--green  { background:linear-gradient(135deg,#047857,#10b981); }
+#combustibles-section .comb-kpi--violet { background:linear-gradient(135deg,#6d28d9,#8b5cf6); }
+#combustibles-section .comb-kpi-label { font-size:.78rem; opacity:.92; text-transform:uppercase; letter-spacing:.5px; }
+#combustibles-section .comb-kpi-value { font-size:2rem; font-weight:800; line-height:1.1; margin-top:4px; }
+#combustibles-section .comb-kpi-unit  { font-size:.78rem; opacity:.85; margin-top:2px; }
+
+#combustibles-section .comb-chart-card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.04); height:100%; }
+#combustibles-section .comb-chart-card--main { border-top:4px solid #0e7490; box-shadow:0 4px 16px rgba(14,116,144,.08); }
+#combustibles-section .comb-chart-title { font-size:.95rem; font-weight:700; color:#0f172a; margin-bottom:10px; }
+#combustibles-section .comb-chart-host { position:relative; height:420px; }
+
+#combustibles-section .comb-table { font-size:.85rem; }
+#combustibles-section .comb-table th { background:#f1f5f9; color:#0f172a; font-weight:700; text-align:center; vertical-align:middle; }
+#combustibles-section .comb-table td { text-align:right; font-variant-numeric:tabular-nums; color:#0f172a; font-weight:600; }
+#combustibles-section .comb-table td.comb-mes { text-align:left; font-weight:600; color:#334155; }
+#combustibles-section .comb-table tfoot td { background:#e2e8f0; font-weight:800; }
+#combustibles-section .comb-table .comb-prom { color:#64748b; font-weight:500; }
+#combustibles-section .comb-table-total { background:linear-gradient(135deg,#0e7490,#06b6d4); color:#fff; border-radius:10px; padding:12px 18px; }
+
+#combustibles-section .comb-seg-btn { border:1px solid #cbd5e1; background:#fff; color:#475569; font-weight:600; font-size:.8rem; padding:4px 12px; }
+#combustibles-section .comb-seg-btn.active { background:#0e7490; border-color:#0e7490; color:#fff; }
+
+/* Toggles de años (parte superior de la gráfica) */
+#combustibles-section .comb-year-toggles { padding:4px 2px 2px; }
+#combustibles-section .comb-toggles-label { font-size:.8rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.5px; }
+#combustibles-section .comb-year-switch { display:inline-flex; align-items:center; gap:7px; cursor:pointer; user-select:none; margin:0; }
+#combustibles-section .comb-year-switch input { position:absolute; opacity:0; width:0; height:0; }
+#combustibles-section .comb-year-track { position:relative; width:40px; height:22px; border-radius:999px; background:#cbd5e1; transition:background .15s ease; flex:0 0 auto; }
+#combustibles-section .comb-year-track::after { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:left .15s ease; }
+#combustibles-section .comb-year-switch input:checked + .comb-year-track { background:var(--comb-yc, #0e7490); }
+#combustibles-section .comb-year-switch input:checked + .comb-year-track::after { left:21px; }
+#combustibles-section .comb-year-switch input:focus-visible + .comb-year-track { outline:2px solid #0e7490; outline-offset:2px; }
+#combustibles-section .comb-year-name { font-size:.9rem; font-weight:700; color:#334155; }
+#combustibles-section .comb-year-switch input:not(:checked) ~ .comb-year-name { color:#94a3b8; }
+
+#combustibles-section .comb-edit-table input { font-size:.85rem; text-align:right; }
+#combustibles-section .comb-edit-table input.comb-changed { background:#fef3c7; }
+#combustibles-section .comb-edit-summary { background:#f1f5f9; border-radius:8px; padding:10px 14px; font-size:.9rem; color:#0f172a; }
+
+/* El editor solo se muestra a usuarios con permisos de edición */
+#combustibles-section .comb-admin-only { display:none; }
+body.admin-enabled #combustibles-section .comb-admin-only { display:block; }
+body.admin-enabled #combustibles-section li.comb-admin-only { display:list-item; }
+</style>
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3 px-4">
+              <h2 class="fw-bold mb-1" style="font-size:1.25rem;color:#0e7490;">
+                <i class="fas fa-gas-pump me-2"></i>Combustible de Aviación Suministrado
+              </h2>
+              <p class="text-muted mb-0" style="font-size:0.85rem;">
+                Servicios Conexos · Concentrado de litros suministrados desde inicio de operación
+              </p>
+            </div>
+            <div class="card-body px-3 px-md-4 pt-3">
+              <ul class="nav nav-tabs comb-tabs mb-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="comb-tabbtn-dash" data-bs-toggle="tab" data-bs-target="#comb-tab-dashboard" type="button" role="tab">
+                    <i class="fas fa-chart-line me-2"></i>Dashboard
+                  </button>
+                </li>
+                <li class="nav-item comb-admin-only" role="presentation">
+                  <button class="nav-link" id="comb-tabbtn-edit" data-bs-toggle="tab" data-bs-target="#comb-tab-editor" type="button" role="tab">
+                    <i class="fas fa-edit me-2"></i>Capturar / Editar
+                  </button>
+                </li>
+              </ul>
+
+              <div class="tab-content">
+                <!-- DASHBOARD -->
+                <div class="tab-pane fade show active" id="comb-tab-dashboard" role="tabpanel">
+                  <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-3">
+                      <div class="comb-kpi-card comb-kpi--teal">
+                        <div class="comb-kpi-label">Total suministrado</div>
+                        <div class="comb-kpi-value" id="comb-kpi-total">—</div>
+                        <div class="comb-kpi-unit">litros · desde inicio de operación</div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <div class="comb-kpi-card comb-kpi--blue">
+                        <div class="comb-kpi-label">Año en curso</div>
+                        <div class="comb-kpi-value" id="comb-kpi-anio">—</div>
+                        <div class="comb-kpi-unit"><span id="comb-kpi-anio-label">—</span></div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <div class="comb-kpi-card comb-kpi--green">
+                        <div class="comb-kpi-label">Último mes registrado</div>
+                        <div class="comb-kpi-value" id="comb-kpi-mes">—</div>
+                        <div class="comb-kpi-unit"><span id="comb-kpi-mes-label">—</span></div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <div class="comb-kpi-card comb-kpi--violet">
+                        <div class="comb-kpi-label">Promedio diario (últ. mes)</div>
+                        <div class="comb-kpi-value" id="comb-kpi-prom">—</div>
+                        <div class="comb-kpi-unit">litros / día</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="comb-chart-card comb-chart-card--main mb-4">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                      <h5 class="comb-chart-title mb-0">
+                        <i class="fas fa-chart-area me-1" style="color:#0e7490;"></i>
+                        <span id="comb-chart-title-text">Combustible de aviación suministrado</span>
+                      </h5>
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="btn-group" role="group" aria-label="Tipo de gráfica">
+                          <button type="button" class="btn comb-seg-btn active" data-mode="lineas">
+                            <i class="fas fa-chart-line me-1"></i>Líneas por año
+                          </button>
+                          <button type="button" class="btn comb-seg-btn" data-mode="histograma">
+                            <i class="fas fa-chart-column me-1"></i>Histograma continuo
+                          </button>
+                        </div>
+                        <button id="comb-btn-refresh" class="btn btn-outline-secondary btn-sm" type="button" title="Refrescar">
+                          <i class="fas fa-sync"></i>
+                        </button>
+                        <span id="comb-status-badge" class="badge bg-secondary">Sin datos</span>
+                      </div>
+                    </div>
+                    <div class="comb-year-toggles d-flex flex-wrap align-items-center gap-3 mb-2" id="comb-year-toggles"></div>
+                    <div class="comb-chart-host"><canvas id="comb-chart-main"></canvas></div>
+                  </div>
+
+                  <!-- TABLA CONCENTRADO -->
+                  <div class="comb-chart-card">
+                    <h5 class="comb-chart-title mb-3">
+                      <i class="fas fa-table me-1" style="color:#0e7490;"></i>
+                      Concentrado de litros de combustible de aviación suministrado
+                    </h5>
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-sm comb-table mb-3" id="comb-table">
+                        <thead></thead>
+                        <tbody></tbody>
+                        <tfoot></tfoot>
+                      </table>
+                    </div>
+                    <div class="comb-table-total d-inline-block">
+                      <span class="text-uppercase small fw-semibold">Total de litros suministrados desde inicio de operación:</span>
+                      <span class="fw-bold ms-2" id="comb-total-acum">—</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- EDITOR (admin) -->
+                <div class="tab-pane fade comb-admin-only" id="comb-tab-editor" role="tabpanel">
+                  <div class="row g-2 align-items-end mb-3">
+                    <div class="col-auto">
+                      <label class="form-label small mb-1 fw-bold">Año a capturar / editar</label>
+                      <select id="comb-edit-year" class="form-select form-select-sm"></select>
+                    </div>
+                    <div class="col-auto">
+                      <button id="comb-edit-load" class="btn btn-outline-primary btn-sm" type="button">
+                        <i class="fas fa-folder-open me-1"></i>Cargar año
+                      </button>
+                    </div>
+                    <div class="col text-end">
+                      <button id="comb-edit-save" class="btn btn-success btn-sm" type="button">
+                        <i class="fas fa-save me-1"></i>Guardar cambios
+                      </button>
+                    </div>
+                  </div>
+                  <div class="comb-edit-summary mb-3 d-flex flex-wrap gap-4">
+                    <span>Total del año: <strong id="comb-edit-total">0</strong> litros</span>
+                    <span>Meses con dato: <strong id="comb-edit-meses">0</strong> / 12</span>
+                    <span class="text-muted">Promedio diario = litros ÷ días del mes (calculado)</span>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-sm comb-edit-table">
+                      <thead>
+                        <tr>
+                          <th style="width:30%">Mes</th>
+                          <th style="width:35%">Litros suministrados</th>
+                          <th style="width:35%" class="text-end">Promedio diario</th>
+                        </tr>
+                      </thead>
+                      <tbody id="comb-edit-tbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>

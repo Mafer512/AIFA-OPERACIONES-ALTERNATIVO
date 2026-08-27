@@ -1,0 +1,286 @@
+                    <style>
+                        #gtrans-preventivos-section{
+                            --gp-prog:#2563eb; --gp-prog-d:#1e3a8a; --gp-prog-bg:#dbeafe;
+                            --gp-exec:#16a34a; --gp-exec-d:#14532d; --gp-exec-bg:#dcfce7;
+                            --gp-meta:#7c3aed; --gp-meta-d:#5b21b6;
+                            --gp-cumpl:#0891b2; --gp-cumpl-d:#155e75;
+                            --gp-gap:#e2e8f0;
+                        }
+                        #gtrans-preventivos-section .card{ border-radius:18px; }
+                        #gtrans-preventivos-section .section-title{ font-weight:800; letter-spacing:-.01em; }
+
+                        /* KPIs */
+                        #gtrans-preventivos-section .gp-kpi{ border-radius:18px; padding:18px 20px; color:#fff;
+                            box-shadow:0 14px 28px -16px rgba(15,23,42,.35), 0 6px 14px -10px rgba(15,23,42,.25);
+                            position:relative; overflow:hidden; min-height:138px;
+                            display:flex; flex-direction:column; justify-content:space-between; transition:transform .18s, box-shadow .18s; }
+                        #gtrans-preventivos-section .gp-kpi:hover{ transform:translateY(-3px); box-shadow:0 22px 38px -16px rgba(15,23,42,.42); }
+                        #gtrans-preventivos-section .gp-kpi::before{ content:""; position:absolute; right:-40px; top:-40px;
+                            width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,.14); }
+                        #gtrans-preventivos-section .gp-kpi--prog { background:linear-gradient(135deg,var(--gp-prog-d),var(--gp-prog)); }
+                        #gtrans-preventivos-section .gp-kpi--exec { background:linear-gradient(135deg,var(--gp-exec-d),var(--gp-exec)); }
+                        #gtrans-preventivos-section .gp-kpi--av   { background:linear-gradient(135deg,var(--gp-meta-d),var(--gp-meta)); }
+                        #gtrans-preventivos-section .gp-kpi--cu   { background:linear-gradient(135deg,var(--gp-cumpl-d),var(--gp-cumpl)); }
+                        #gtrans-preventivos-section .gp-kpi--eq   { background:linear-gradient(135deg,#9a3412,#ea580c); }
+                        #gtrans-preventivos-section .gp-kpi-ico{ position:absolute; right:18px; top:18px; width:36px; height:36px;
+                            border-radius:10px; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center;
+                            backdrop-filter:blur(4px); font-size:1rem; }
+                        #gtrans-preventivos-section .gp-kpi-lbl{ font-size:.72rem; text-transform:uppercase; letter-spacing:.6px; opacity:.92; font-weight:700; }
+                        #gtrans-preventivos-section .gp-kpi-val{ font-size:1.95rem; font-weight:800; line-height:1.1; margin-top:6px; text-shadow:0 1px 2px rgba(0,0,0,.18); }
+                        #gtrans-preventivos-section .gp-kpi-unit{ font-size:.74rem; opacity:.92; margin-top:4px; font-weight:500; }
+
+                        /* Charts */
+                        #gtrans-preventivos-section .gp-chart-card{ background:#fff; border:1px solid #e2e8f0; border-radius:16px;
+                            padding:18px 20px 14px; box-shadow:0 6px 18px -10px rgba(15,23,42,.18); height:100%;
+                            transition:box-shadow .18s, transform .18s; }
+                        #gtrans-preventivos-section .gp-chart-card:hover{ box-shadow:0 14px 28px -14px rgba(15,23,42,.25); }
+                        #gtrans-preventivos-section .gp-chart-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:10px; flex-wrap:wrap; }
+                        #gtrans-preventivos-section .gp-chart-title{ font-size:.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:8px; }
+                        #gtrans-preventivos-section .gp-chart-sub{ font-size:.7rem; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:.4px; }
+                        #gtrans-preventivos-section .gp-chart-pill{ font-size:.7rem; padding:2px 10px; border-radius:999px; background:#f1f5f9; color:#334155; font-weight:700; }
+
+                        /* Tabla pivote */
+                        #gtrans-preventivos-section .gp-pivot-card{ border:1px solid #e2e8f0; border-radius:14px; overflow:hidden;
+                            box-shadow:0 6px 18px -10px rgba(15,23,42,.18); background:#fff; }
+                        #gtrans-preventivos-section .gp-pivot-title{ padding:14px 16px; color:#0f172a; font-weight:800; text-align:center;
+                            font-size:.86rem; line-height:1.3; background:#fef9c3; border-bottom:2px solid #facc15; }
+                        #gtrans-preventivos-section .gp-pivot-wrap{ overflow-x:auto; max-height:560px; }
+                        #gtrans-preventivos-section table.gp-tbl{ width:100%; margin:0; font-size:.78rem; font-variant-numeric:tabular-nums; border-collapse:separate; border-spacing:0; }
+                        #gtrans-preventivos-section table.gp-tbl thead th{ position:sticky; top:0; z-index:5; }
+                        #gtrans-preventivos-section table.gp-tbl th.gp-eq-h{ background:#f1f5f9; color:#0f172a; font-weight:800;
+                            text-align:center; padding:10px 12px; border-bottom:2px solid #e2e8f0; vertical-align:middle; min-width:220px;
+                            position:sticky; left:0; z-index:6; }
+                        #gtrans-preventivos-section table.gp-tbl th.gp-mes-h{ background:#f8fafc; color:#0f172a; font-weight:800;
+                            text-align:center; padding:8px 6px; border-bottom:1px solid #e2e8f0; border-left:1px solid #e2e8f0;
+                            font-size:.7rem; text-transform:uppercase; letter-spacing:.3px; }
+                        #gtrans-preventivos-section table.gp-tbl th.gp-sub-prog{ background:var(--gp-prog-bg); color:var(--gp-prog-d); font-weight:700;
+                            text-align:center; padding:6px 4px; border-bottom:2px solid var(--gp-prog); font-size:.66rem; letter-spacing:.2px; text-transform:uppercase; min-width:62px; }
+                        #gtrans-preventivos-section table.gp-tbl th.gp-sub-exec{ background:var(--gp-exec-bg); color:var(--gp-exec-d); font-weight:700;
+                            text-align:center; padding:6px 4px; border-bottom:2px solid var(--gp-exec); font-size:.66rem; letter-spacing:.2px; text-transform:uppercase; min-width:62px; }
+                        #gtrans-preventivos-section table.gp-tbl td{ padding:8px 6px; border-bottom:1px solid #f1f5f9; text-align:center; }
+                        #gtrans-preventivos-section table.gp-tbl td.gp-eq-c{ font-weight:700; color:#0f172a; text-align:left; padding:10px 14px;
+                            background:#fff; position:sticky; left:0; z-index:4; border-right:1px solid #e2e8f0; min-width:220px; }
+                        #gtrans-preventivos-section table.gp-tbl td.gp-cell-prog{ color:var(--gp-prog); font-weight:700; }
+                        #gtrans-preventivos-section table.gp-tbl td.gp-cell-exec{ color:var(--gp-exec); font-weight:700; }
+                        #gtrans-preventivos-section table.gp-tbl td.gp-z{ color:#cbd5e1; font-weight:500; }
+                        #gtrans-preventivos-section table.gp-tbl tbody tr:hover td{ background:#f8fafc; }
+                        #gtrans-preventivos-section table.gp-tbl tbody tr:hover td.gp-eq-c{ background:#f1f5f9; }
+                        #gtrans-preventivos-section table.gp-tbl tr.gp-total td{ background:#fef9c3 !important; border-top:2px solid #facc15; font-weight:800; color:#0f172a; }
+                        #gtrans-preventivos-section table.gp-tbl tr.gp-pct   td{ background:#fff7ed !important; font-weight:700; color:#9a3412; font-size:.72rem; }
+                        #gtrans-preventivos-section table.gp-tbl tr.gp-pct td.gp-eq-c, #gtrans-preventivos-section table.gp-tbl tr.gp-total td.gp-eq-c{ background:inherit !important; }
+                        #gtrans-preventivos-section .gp-avance-final{ display:flex; align-items:center; justify-content:flex-end; gap:14px;
+                            padding:14px 18px; background:linear-gradient(90deg,#fef3c7,#fde68a); border-top:1px solid #facc15; }
+                        #gtrans-preventivos-section .gp-avance-final .lbl{ font-weight:800; color:#7c2d12; letter-spacing:.4px; text-transform:uppercase; font-size:.78rem; }
+                        #gtrans-preventivos-section .gp-avance-final .val{ font-weight:800; color:#0f172a; font-size:1.4rem; min-width:96px; text-align:center;
+                            background:#fff; border-radius:8px; padding:6px 14px; box-shadow:0 4px 10px -4px rgba(15,23,42,.2); }
+
+                        /* Modal capture rows */
+                        #gtrans-preventivos-section .gp-cap-row{ display:grid; grid-template-columns: minmax(0,1fr) 110px 110px; gap:10px; align-items:center;
+                            padding:8px 12px; border-bottom:1px dashed #e2e8f0; }
+                        #gtrans-preventivos-section .gp-cap-row:last-child{ border-bottom:none; }
+                        #gtrans-preventivos-section .gp-cap-row label{ font-weight:600; font-size:.85rem; color:#0f172a; margin:0; }
+                        #gtrans-preventivos-section .gp-cap-row input{ font-size:.85rem; text-align:center; }
+                        #gtrans-preventivos-section .gp-cap-hd{ display:grid; grid-template-columns: minmax(0,1fr) 110px 110px; gap:10px;
+                            padding:6px 12px; border-bottom:1px solid #e2e8f0; font-size:.7rem; text-transform:uppercase; letter-spacing:.4px; color:#475569; font-weight:700; text-align:center; }
+                        #gtrans-preventivos-section .gp-cap-hd .lbl{ text-align:left; }
+                    </style>
+
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2 py-3">
+                            <div>
+                                <h2 class="section-title mb-0">
+                                    <i class="fas fa-calendar-check me-2" style="color:#2563eb;"></i>Servicio de Mantenimiento Preventivo (Programado)
+                                </h2>
+                                <small class="text-muted">Programa anual por tipo de equipo · Programado vs Ejecutado mensual</small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <label class="small fw-semibold text-muted mb-0">Año:</label>
+                                <select id="gprev-anio-select" class="form-select form-select-sm" style="width:auto;"></select>
+                                <button id="gprev-refresh-btn" type="button" class="btn btn-sm btn-outline-secondary" title="Recargar datos">
+                                    <i class="fas fa-sync-alt me-1"></i>Actualizar
+                                </button>
+                                <button id="gprev-upsert-btn" type="button" class="btn btn-sm btn-primary fw-semibold d-none"
+                                        data-bs-toggle="modal" data-bs-target="#gprevUpsertModal">
+                                    <i class="fas fa-pen-to-square me-1"></i>Capturar / actualizar mes
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="gprev-status" class="alert alert-info d-none small" role="status"></div>
+
+                            <!-- KPIs YTD -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gp-kpi gp-kpi--prog">
+                                        <div class="gp-kpi-ico"><i class="fas fa-calendar-day"></i></div>
+                                        <div>
+                                            <div class="gp-kpi-lbl">Programado Anual</div>
+                                            <div class="gp-kpi-val" id="gprev-kpi-prog">—</div>
+                                        </div>
+                                        <div class="gp-kpi-unit">mantenimientos plan</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gp-kpi gp-kpi--exec">
+                                        <div class="gp-kpi-ico"><i class="fas fa-circle-check"></i></div>
+                                        <div>
+                                            <div class="gp-kpi-lbl">Ejecutado YTD</div>
+                                            <div class="gp-kpi-val" id="gprev-kpi-exec">—</div>
+                                        </div>
+                                        <div class="gp-kpi-unit">mantenimientos reales</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gp-kpi gp-kpi--av">
+                                        <div class="gp-kpi-ico"><i class="fas fa-gauge-high"></i></div>
+                                        <div>
+                                            <div class="gp-kpi-lbl">% Avance Anual</div>
+                                            <div class="gp-kpi-val" id="gprev-kpi-av">—</div>
+                                        </div>
+                                        <div class="gp-kpi-unit">ejecutado / programado</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gp-kpi gp-kpi--cu">
+                                        <div class="gp-kpi-ico"><i class="fas fa-percentage"></i></div>
+                                        <div>
+                                            <div class="gp-kpi-lbl">Cumplimiento Promedio</div>
+                                            <div class="gp-kpi-val" id="gprev-kpi-cu">—</div>
+                                        </div>
+                                        <div class="gp-kpi-unit">de los meses con plan</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 col-xl">
+                                    <div class="gp-kpi gp-kpi--eq">
+                                        <div class="gp-kpi-ico"><i class="fas fa-microchip"></i></div>
+                                        <div>
+                                            <div class="gp-kpi-lbl">Equipos con Plan</div>
+                                            <div class="gp-kpi-val" id="gprev-kpi-eq">—</div>
+                                        </div>
+                                        <div class="gp-kpi-unit">tipos atendidos</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Charts -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-xl-8">
+                                    <div class="gp-chart-card" style="border-top:4px solid var(--gp-prog);">
+                                        <div class="gp-chart-head">
+                                            <div>
+                                                <div class="gp-chart-title"><i class="fas fa-chart-column" style="color:var(--gp-prog);"></i>Programado vs Ejecutado</div>
+                                                <div class="gp-chart-sub">Totales mensuales · todos los equipos</div>
+                                            </div>
+                                            <span class="gp-chart-pill">mantenimientos</span>
+                                        </div>
+                                        <div style="position:relative;height:340px;"><canvas id="gprev-chart-mes"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-4">
+                                    <div class="gp-chart-card">
+                                        <div class="gp-chart-head">
+                                            <div>
+                                                <div class="gp-chart-title"><i class="fas fa-gauge-high" style="color:var(--gp-meta);"></i>Avance del Programa Anual</div>
+                                                <div class="gp-chart-sub">Ejecutado vs Programado</div>
+                                            </div>
+                                        </div>
+                                        <div style="position:relative;height:340px;"><canvas id="gprev-chart-avance"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-7">
+                                    <div class="gp-chart-card">
+                                        <div class="gp-chart-head">
+                                            <div>
+                                                <div class="gp-chart-title"><i class="fas fa-microchip" style="color:#ea580c;"></i>Programa por Tipo de Equipo</div>
+                                                <div class="gp-chart-sub">Distribución anual programada</div>
+                                            </div>
+                                            <span class="gp-chart-pill">mantenimientos</span>
+                                        </div>
+                                        <div style="position:relative;height:340px;"><canvas id="gprev-chart-equipo"></canvas></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-5">
+                                    <div class="gp-chart-card">
+                                        <div class="gp-chart-head">
+                                            <div>
+                                                <div class="gp-chart-title"><i class="fas fa-percentage" style="color:var(--gp-cumpl);"></i>Cumplimiento mensual</div>
+                                                <div class="gp-chart-sub">% Ejecutado / Programado del mes</div>
+                                            </div>
+                                            <span class="gp-chart-pill">%</span>
+                                        </div>
+                                        <div style="position:relative;height:340px;"><canvas id="gprev-chart-cumpl"></canvas></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla pivote -->
+                            <div class="gp-pivot-card">
+                                <div class="gp-pivot-title">
+                                    SERVICIO DE MANTENIMIENTO PREVENTIVO (PROGRAMADO)
+                                </div>
+                                <div class="gp-pivot-wrap">
+                                    <table class="gp-tbl">
+                                        <thead id="gprev-thead"></thead>
+                                        <tbody id="gprev-tbody"></tbody>
+                                    </table>
+                                </div>
+                                <div class="gp-avance-final">
+                                    <span class="lbl"><i class="fas fa-trophy me-2"></i>Porcentaje de Avance</span>
+                                    <span class="val" id="gprev-avance-final">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal: Captura / actualización mensual de todos los equipos -->
+                    <div class="modal fade" id="gprevUpsertModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header" style="background:linear-gradient(90deg,#dbeafe,#dcfce7);">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="fas fa-pen-to-square me-2 text-primary"></i>Captura mensual · Preventivos Programados
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small fw-semibold">Año</label>
+                                            <input type="number" id="gprev-up-anio" class="form-control" min="2020" max="2099" step="1">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label class="form-label small fw-semibold">Mes</label>
+                                            <select id="gprev-up-mes" class="form-select">
+                                                <option value="1">ENERO</option><option value="2">FEBRERO</option>
+                                                <option value="3">MARZO</option><option value="4">ABRIL</option>
+                                                <option value="5">MAYO</option><option value="6">JUNIO</option>
+                                                <option value="7">JULIO</option><option value="8">AGOSTO</option>
+                                                <option value="9">SEPTIEMBRE</option><option value="10">OCTUBRE</option>
+                                                <option value="11">NOVIEMBRE</option><option value="12">DICIEMBRE</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-4 d-flex align-items-end">
+                                            <button type="button" id="gprev-up-load" class="btn btn-outline-secondary w-100">
+                                                <i class="fas fa-rotate-left me-1"></i>Cargar valores actuales
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="border rounded-3">
+                                        <div class="gp-cap-hd">
+                                            <span class="lbl">Tipo de equipo</span>
+                                            <span style="color:var(--gp-prog-d, #1e3a8a)">Programado</span>
+                                            <span style="color:var(--gp-exec-d, #14532d)">Ejecutado</span>
+                                        </div>
+                                        <div id="gprev-up-rows" class="bg-white"></div>
+                                    </div>
+                                    <div id="gprev-up-msg" class="small mt-3"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" id="gprev-up-save" class="btn btn-primary fw-semibold">
+                                        <i class="fas fa-save me-1"></i>Guardar mes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>

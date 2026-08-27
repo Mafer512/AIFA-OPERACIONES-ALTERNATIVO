@@ -3,7 +3,10 @@
  * Datos estáticos provenientes del documento institucional
  * "Capacidad de la Terminal de Carga AIFA" (Gerencia de Carga).
  * Renderiza KPIs (HTML estático) + 2 gráficas Chart.js + chips
- * de aerolíneas. Se invoca al mostrar la sección.
+ * de aerolíneas.
+ *
+ * Módulo extraído: el marcado vive en view.html y esto se carga
+ * la primera vez que se abre la sección, no al arrancar la página.
  * ========================================================== */
 (function () {
     'use strict';
@@ -45,6 +48,7 @@
     ];
 
     var charts = {};
+    var _resizes = [];   // reajustes diferidos, cancelables al salir
 
     function destroy(id) {
         if (charts[id]) { try { charts[id].destroy(); } catch (_) {} charts[id] = null; }
@@ -189,10 +193,10 @@
             renderDistrib();
             renderMars();
             [200, 500, 900].forEach(function (ms) {
-                setTimeout(function () {
+                _resizes.push(setTimeout(function () {
                     if (charts.distrib) { try { charts.distrib.resize(); } catch (_) {} }
                     if (charts.mars) { try { charts.mars.resize(); } catch (_) {} }
-                }, ms);
+                }, ms));
             });
         });
     }
@@ -203,9 +207,19 @@
         renderAll();
     };
 
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('[data-section="capacidad-carga"]')) {
-            setTimeout(renderAll, 180);
-        }
-    });
+    // Contrato de ciclo de vida del módulo.
+    //
+    // Las dos instancias de Chart.js se creaban en cada visita y nadie las
+    // soltaba al salir. Aquí se liberan, junto con los reajustes pendientes:
+    // sin cancelarlos, un timer disparado después de cerrar tocaba gráficas
+    // que ya no existen.
+    //
+    // Los chips, recintos y handlers no se retiran: son marcado fijo dentro de
+    // la vista, que se queda cacheada, y dataset.rendered evita repetirlo.
+    window.destroyCapacidadCarga = function () {
+        _resizes.forEach(function (t) { try { clearTimeout(t); } catch (_) {} });
+        _resizes = [];
+        destroy('distrib');
+        destroy('mars');
+    };
 })();

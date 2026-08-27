@@ -19,7 +19,11 @@ const path = require('path');
 
 const raiz = path.resolve(__dirname, '..');
 const script = fs.readFileSync(path.join(raiz, 'script.js'), 'utf8').replace(/\r\n/g, '\n');
-const html = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
+// El marcado de los modulos extraidos vive en su view.html y solo llega al DOM
+// al abrirlos. Se compone la pagina como queda en runtime para que "existe de
+// verdad" siga significando lo mismo que antes de modularizar.
+const { htmlCompleto } = require('../test-utils/modulos.js');
+const html = htmlCompleto();
 
 // DOMParser en vez de require('jsdom'): dentro del entorno de pruebas jsdom,
 // cargar el paquete otra vez falla por TextEncoder.

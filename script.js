@@ -7434,35 +7434,20 @@ function showSection(sectionKey, linkEl, options = {}) {
             }, 80);
         }
 
-        // Hook: Reportes HVAC (Ing. Electromecánica)
-        // 200 ms asegura que el layout del card/canvas ya tiene dimensiones
-        // reales antes de que Chart.js intente dibujar.
-        if (targetKey === 'hvac-reportes') {
-            setTimeout(() => {
-                if (typeof window.initHvac === 'function') window.initHvac();
-            }, 200);
-        }
 
-        // Hook: Gerencia de Generación (SGE)
-        if (targetKey === 'ggen-energia') {
-            setTimeout(() => {
-                if (typeof window.initGgenEnergia === 'function') window.initGgenEnergia();
-            }, 200);
-        }
-
-        // Hook: Gerencia de Transformación (SGE)
-        if (targetKey === 'gtrans-energia') {
-            setTimeout(() => {
-                if (typeof window.initGtransEnergia === 'function') window.initGtransEnergia();
-            }, 200);
-        }
-
-        // Hook: GTRANS · Preventivos Programados
-        if (targetKey === 'gtrans-preventivos') {
-            setTimeout(() => {
-                if (typeof window.initGtransPreventivos === 'function') window.initGtransPreventivos();
-            }, 200);
-        }
+        // Hook: Gestión Energética (SGE) — Generación y Transformación.
+        //
+        // Estos módulos ya no viven en index.html ni se cargan con un
+        // <script> del pie: los trae core/module-loader.js la primera vez que
+        // se abren, y al salir se les llama destroy(). El loader responde true
+        // cuando la clave es suya, así que si algún día se le quitara un
+        // módulo del registro, aquí no habría que tocar nada.
+        //
+        // Desaparece el setTimeout(200) que había antes: era una carrera
+        // contra el layout para que Chart.js encontrara el canvas con medidas.
+        // Ahora la vista se inyecta y SE ESPERA a que esté en el DOM antes de
+        // llamar a init(), que es la garantía que aquel retraso solo aproximaba.
+        if (window.moduleLoader) window.moduleLoader.navegar(targetKey);
 
         // Cerrar sidebar en móvil
         const sidebar = document.getElementById('sidebar');
@@ -7584,20 +7569,6 @@ function handleNavigation(e) {
                 }, 60);
             } catch (_) { }
         }
-        if (section === 'hidraulicas') {
-            try {
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('hidraulicas:visible'));
-                }, 60);
-            } catch (_) { }
-        }
-        if (section === 'combustibles') {
-            try {
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('combustibles:visible'));
-                }, 60);
-            } catch (_) { }
-        }
         if (section === 'ssei-derrames') {
             try {
                 setTimeout(() => {
@@ -7630,20 +7601,6 @@ function handleNavigation(e) {
             try {
                 setTimeout(() => {
                     if (typeof window.initCatalogoVehiculos === 'function') window.initCatalogoVehiculos();
-                }, 200);
-            } catch (_) { }
-        }
-        if (section === 'ingenieria-civil') {
-            try {
-                setTimeout(() => {
-                    if (typeof window.initIngenieriaCivil === 'function') window.initIngenieriaCivil();
-                }, 200);
-            } catch (_) { }
-        }
-        if (section === 'capacidad-carga') {
-            try {
-                setTimeout(() => {
-                    if (typeof window.initCapacidadCarga === 'function') window.initCapacidadCarga();
                 }, 200);
             } catch (_) { }
         }

@@ -10,8 +10,9 @@
  *      diario derivado).
  *    - Editor (solo isAdmin): capturar / editar litros por mes/año.
  *
- *  Se activa con el evento 'combustibles:visible' (disparado por
- *  script.js en showSection).
+ *  Módulo extraído: el marcado y los estilos viven en view.html y
+ *  esto se carga la primera vez que se abre la sección. Lo enciende
+ *  initCombustibles(), llamado por el loader.
  * ============================================================ */
 ;(function () {
     'use strict';
@@ -85,153 +86,16 @@
     }
 
     // ─── Plantilla ─────────────────────────────────────────────
+    // La plantilla ya no se inyecta desde aquí: vive en view.html y el loader
+    // la deja puesta antes de evaluar este archivo. Lo único que queda es
+    // cablear los controles, una sola vez.
     function ensureTemplate() {
         const host = $('combustibles-section');
-        if (!host || host.dataset.ready === '1') return !!host;
-        host.innerHTML = `
-          <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom py-3 px-4">
-              <h2 class="fw-bold mb-1" style="font-size:1.25rem;color:#0e7490;">
-                <i class="fas fa-gas-pump me-2"></i>Combustible de Aviación Suministrado
-              </h2>
-              <p class="text-muted mb-0" style="font-size:0.85rem;">
-                Servicios Conexos · Concentrado de litros suministrados desde inicio de operación
-              </p>
-            </div>
-            <div class="card-body px-3 px-md-4 pt-3">
-              <ul class="nav nav-tabs comb-tabs mb-3" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="comb-tabbtn-dash" data-bs-toggle="tab" data-bs-target="#comb-tab-dashboard" type="button" role="tab">
-                    <i class="fas fa-chart-line me-2"></i>Dashboard
-                  </button>
-                </li>
-                <li class="nav-item comb-admin-only" role="presentation">
-                  <button class="nav-link" id="comb-tabbtn-edit" data-bs-toggle="tab" data-bs-target="#comb-tab-editor" type="button" role="tab">
-                    <i class="fas fa-edit me-2"></i>Capturar / Editar
-                  </button>
-                </li>
-              </ul>
-
-              <div class="tab-content">
-                <!-- DASHBOARD -->
-                <div class="tab-pane fade show active" id="comb-tab-dashboard" role="tabpanel">
-                  <div class="row g-3 mb-4">
-                    <div class="col-12 col-md-3">
-                      <div class="comb-kpi-card comb-kpi--teal">
-                        <div class="comb-kpi-label">Total suministrado</div>
-                        <div class="comb-kpi-value" id="comb-kpi-total">—</div>
-                        <div class="comb-kpi-unit">litros · desde inicio de operación</div>
-                      </div>
-                    </div>
-                    <div class="col-12 col-md-3">
-                      <div class="comb-kpi-card comb-kpi--blue">
-                        <div class="comb-kpi-label">Año en curso</div>
-                        <div class="comb-kpi-value" id="comb-kpi-anio">—</div>
-                        <div class="comb-kpi-unit"><span id="comb-kpi-anio-label">—</span></div>
-                      </div>
-                    </div>
-                    <div class="col-12 col-md-3">
-                      <div class="comb-kpi-card comb-kpi--green">
-                        <div class="comb-kpi-label">Último mes registrado</div>
-                        <div class="comb-kpi-value" id="comb-kpi-mes">—</div>
-                        <div class="comb-kpi-unit"><span id="comb-kpi-mes-label">—</span></div>
-                      </div>
-                    </div>
-                    <div class="col-12 col-md-3">
-                      <div class="comb-kpi-card comb-kpi--violet">
-                        <div class="comb-kpi-label">Promedio diario (últ. mes)</div>
-                        <div class="comb-kpi-value" id="comb-kpi-prom">—</div>
-                        <div class="comb-kpi-unit">litros / día</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="comb-chart-card comb-chart-card--main mb-4">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                      <h5 class="comb-chart-title mb-0">
-                        <i class="fas fa-chart-area me-1" style="color:#0e7490;"></i>
-                        <span id="comb-chart-title-text">Combustible de aviación suministrado</span>
-                      </h5>
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="btn-group" role="group" aria-label="Tipo de gráfica">
-                          <button type="button" class="btn comb-seg-btn active" data-mode="lineas">
-                            <i class="fas fa-chart-line me-1"></i>Líneas por año
-                          </button>
-                          <button type="button" class="btn comb-seg-btn" data-mode="histograma">
-                            <i class="fas fa-chart-column me-1"></i>Histograma continuo
-                          </button>
-                        </div>
-                        <button id="comb-btn-refresh" class="btn btn-outline-secondary btn-sm" type="button" title="Refrescar">
-                          <i class="fas fa-sync"></i>
-                        </button>
-                        <span id="comb-status-badge" class="badge bg-secondary">Sin datos</span>
-                      </div>
-                    </div>
-                    <div class="comb-year-toggles d-flex flex-wrap align-items-center gap-3 mb-2" id="comb-year-toggles"></div>
-                    <div class="comb-chart-host"><canvas id="comb-chart-main"></canvas></div>
-                  </div>
-
-                  <!-- TABLA CONCENTRADO -->
-                  <div class="comb-chart-card">
-                    <h5 class="comb-chart-title mb-3">
-                      <i class="fas fa-table me-1" style="color:#0e7490;"></i>
-                      Concentrado de litros de combustible de aviación suministrado
-                    </h5>
-                    <div class="table-responsive">
-                      <table class="table table-bordered table-sm comb-table mb-3" id="comb-table">
-                        <thead></thead>
-                        <tbody></tbody>
-                        <tfoot></tfoot>
-                      </table>
-                    </div>
-                    <div class="comb-table-total d-inline-block">
-                      <span class="text-uppercase small fw-semibold">Total de litros suministrados desde inicio de operación:</span>
-                      <span class="fw-bold ms-2" id="comb-total-acum">—</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- EDITOR (admin) -->
-                <div class="tab-pane fade comb-admin-only" id="comb-tab-editor" role="tabpanel">
-                  <div class="row g-2 align-items-end mb-3">
-                    <div class="col-auto">
-                      <label class="form-label small mb-1 fw-bold">Año a capturar / editar</label>
-                      <select id="comb-edit-year" class="form-select form-select-sm"></select>
-                    </div>
-                    <div class="col-auto">
-                      <button id="comb-edit-load" class="btn btn-outline-primary btn-sm" type="button">
-                        <i class="fas fa-folder-open me-1"></i>Cargar año
-                      </button>
-                    </div>
-                    <div class="col text-end">
-                      <button id="comb-edit-save" class="btn btn-success btn-sm" type="button">
-                        <i class="fas fa-save me-1"></i>Guardar cambios
-                      </button>
-                    </div>
-                  </div>
-                  <div class="comb-edit-summary mb-3 d-flex flex-wrap gap-4">
-                    <span>Total del año: <strong id="comb-edit-total">0</strong> litros</span>
-                    <span>Meses con dato: <strong id="comb-edit-meses">0</strong> / 12</span>
-                    <span class="text-muted">Promedio diario = litros ÷ días del mes (calculado)</span>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-bordered table-sm comb-edit-table">
-                      <thead>
-                        <tr>
-                          <th style="width:30%">Mes</th>
-                          <th style="width:35%">Litros suministrados</th>
-                          <th style="width:35%" class="text-end">Promedio diario</th>
-                        </tr>
-                      </thead>
-                      <tbody id="comb-edit-tbody"></tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>`;
-        host.dataset.ready = '1';
-        bind();
+        if (!host) return false;
+        if (host.dataset.ready !== '1') {
+            host.dataset.ready = '1';
+            bind();
+        }
         return true;
     }
 
@@ -629,9 +493,24 @@
         renderDashboard();
     }
 
-    window.addEventListener('combustibles:visible', () => {
+    window.initCombustibles = function () {
         init().catch(e => console.error('[combustibles] init error', e));
-    });
+    };
+
+    // Contrato de ciclo de vida del módulo.
+    //
+    // La gráfica se reconstruye en cada render y nadie la soltaba al salir de
+    // la sección. Aquí se libera.
+    //
+    // Los datos ya cargados (state.rows) se conservan a propósito: volver a
+    // entrar no debe reconsultar Supabase. Para forzarlo está loadAll(true),
+    // que es lo que hace el botón de refrescar.
+    //
+    // Los listeners de los controles NO se retiran: bind() corre una sola vez
+    // sobre nodos que viven dentro de la vista, y la vista se queda cacheada.
+    window.destroyCombustibles = function () {
+        destroyChart();
+    };
 
     window.combustiblesModule = { init, loadAll, renderDashboard, state };
 })();

@@ -64,6 +64,10 @@
 
     let _charts = {};
     let _initOnce = false;
+    // Ciclo de vida del modulo. Los listeners se registran con esta senal:
+    // abortarla en destroy() los retira todos de golpe, sin tener que
+    // acordarse de cada removeEventListener uno por uno.
+    let _ac = null;
     let _currentAnio = null;
     let _equipos = []; // catálogo cacheado
 
@@ -73,11 +77,21 @@
         throw new Error('Cliente de Supabase no disponible');
     }
 
+    // Permiso de escritura. La decision vive en el nucleo compartido
+    // (core/permissions.js): un solo sitio para toda la aplicacion, en vez de
+    // una copia de esta misma logica dentro de cada modulo.
+    //
+    // El respaldo de abajo conserva el comportamiento exacto que tenia este
+    // modulo por si el nucleo no estuviera cargado -- abrir el modulo suelto,
+    // una prueba aislada -- para que la extraccion no cambie nada.
+    //
+    // Esto decide que se VE. Lo que se puede ESCRIBIR lo decide la RLS de
+    // Supabase, del lado del servidor, y no depende de esta funcion.
     function canEdit() {
         try {
+            if (window.appPermisos) return window.appPermisos.puedeEditar('gtrans-preventivos');
             const role = sessionStorage.getItem('user_role') || '';
             if (role === 'admin' || role === 'superadmin') return true;
-            // Respeta el override explícito "solo ver" por módulo (section_levels)
             const ovr = (window.dataManager && window.dataManager.sectionLevels || {})['gtrans-preventivos'];
             if (ovr === 'read' || ovr === 'none') return false;
             if (ovr === 'capture' || ovr === 'edit') return true;
@@ -624,28 +638,30 @@
     function wireUi() {
         if (_initOnce) return;
         _initOnce = true;
+        _ac = new AbortController();
+        const _ev = { signal: _ac.signal };
 
         const anioSel = document.getElementById('gprev-anio-select');
-        if (anioSel) anioSel.addEventListener('change', renderAll);
+        if (anioSel) anioSel.addEventListener('change', renderAll, _ev);
 
         const refresh = document.getElementById('gprev-refresh-btn');
-        if (refresh) refresh.addEventListener('click', renderAll);
+        if (refresh) refresh.addEventListener('click', renderAll, _ev);
 
         const btnUp = document.getElementById('gprev-upsert-btn');
         if (btnUp) {
             btnUp.classList.toggle('d-none', !canEdit());
-            btnUp.addEventListener('click', openUpsertAutoLoad);
+            btnUp.addEventListener('click', openUpsertAutoLoad, _ev);
         }
 
         const btnLoad = document.getElementById('gprev-up-load');
-        if (btnLoad) btnLoad.addEventListener('click', loadMonthIntoForm);
+        if (btnLoad) btnLoad.addEventListener('click', loadMonthIntoForm, _ev);
 
         const btnSave = document.getElementById('gprev-up-save');
-        if (btnSave) btnSave.addEventListener('click', saveMonth);
+        if (btnSave) btnSave.addEventListener('click', saveMonth, _ev);
 
         ['gprev-up-anio', 'gprev-up-mes'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('change', loadMonthIntoForm);
+            if (el) el.addEventListener('change', loadMonthIntoForm, _ev);
         });
     }
 
@@ -664,4 +680,15 @@
     };
 
     window.gtransPreventivosReload = renderAll;
+
+    // Contrato de ciclo de vida: liberar todo lo que el modulo abrio.
+    // Sin esto, cada entrada a la seccion dejaba sus Chart vivos en memoria
+    // y sus listeners colgados del DOM hasta cerrar la pestana.
+    window.destroyGtransPreventivos = function () {
+        try { if (_ac) _ac.abort(); } catch (_) {}
+        _ac = null;
+        _initOnce = false;
+        Object.values(_charts).forEach(c => { try { c.destroy(); } catch (_) {} });
+        _charts = {};
+    };
 })();

@@ -1527,6 +1527,10 @@
     // sistema propio: reutiliza window.canCaptureSection('hidraulicas').
     function canCaptureHidra() {
         try {
+            // Primero el nucleo compartido; el respaldo de abajo conserva el
+            // comportamiento exacto que tenia antes de extraer el modulo.
+            if (window.appPermisos) return !!window.appPermisos.puedeCapturar('hidraulicas');
+
             if (typeof window.canCaptureSection === 'function') return window.canCaptureSection('hidraulicas');
             if (typeof window.canCapture === 'function') return window.canCapture();
         } catch (_) {}
@@ -1809,4 +1813,32 @@
     });
 
     window.hidraulicasModule = { init, loadAll, loadAux, renderDashboard, state };
+
+    // Contrato de ciclo de vida del modulo.
+    //
+    // Lo que de verdad se acumulaba visita tras visita eran las instancias de
+    // Chart.js: cada render creaba las suyas y nadie las soltaba al salir de la
+    // seccion. Aqui se liberan.
+    //
+    // Los listeners de los controles NO se retiran a proposito: se registran una
+    // sola vez (guardados por initDone / state.bound) sobre nodos que viven
+    // dentro de la vista, y la vista se queda cacheada en el DOM. No se duplican
+    // al volver a entrar, asi que retirarlos obligaria a volver a cablearlos sin
+    // ganar nada.
+    window.destroyHidraulicas = function () {
+        try {
+            Object.keys(charts || {}).forEach(function (k) {
+                try { if (charts[k]) charts[k].destroy(); } catch (_) {}
+                charts[k] = null;
+            });
+        } catch (_) {}
+    };
+
+    // init() del contrato: el loader lo llama tras inyectar la vista.
+    window.initHidraulicas = function () {
+        // Ambas pestanas (Aprovechamiento y Residuos) se encienden con el mismo
+        // evento que ya usaban antes: se conserva tal cual para no cambiar su
+        // arranque, solo que ahora lo dispara el loader en vez del router.
+        window.dispatchEvent(new Event('hidraulicas:visible'));
+    };
 })();
