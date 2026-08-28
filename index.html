@@ -4545,7 +4545,7 @@ FF
                                             <div class="alert alert-danger border-danger py-2 px-3 mb-2 flex-wrap" role="alert" style="font-size:.85rem">
                                                 <div class="d-flex align-items-center gap-3 flex-wrap">
                                                     <i class="fas fa-exclamation-triangle fa-lg"></i>
-                                                    <span><strong>Zona de Administración</strong> — Los cambios son permanentes e irreversibles. Cada eliminación borra el vuelo de las 3 tablas relacionadas (bitácora cruda de importación, Itinerario de Vuelos y el lado "vuelos" de Conciliación Manifiestos), para que el mismo vuelo pueda reimportarse limpio si lo necesitas.</span>
+                                                    <span><strong>Zona de Administración</strong> — Los cambios son permanentes e irreversibles. Eliminar por día, rango o selección borra la bitácora, el Itinerario y sus vuelos espejo. La opción <strong>Eliminar todo</strong> también borra todos los manifiestos capturados para dejar vacías ambas pestañas.</span>
                                                 </div>
                                                 <!-- Row 1: single day -->
                                                 <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
@@ -4566,6 +4566,13 @@ FF
                                                     <span id="admin-range-preview" class="badge bg-warning text-dark d-none" style="font-size:.78rem"></span>
                                                     <button class="btn btn-sm btn-danger" onclick="window.opsFlightsAdmin.deleteByRange()" aria-label="Eliminar todos los vuelos del rango de fechas seleccionado">
                                                         <i class="fas fa-trash-alt me-1" aria-hidden="true"></i>Eliminar rango
+                                                    </button>
+                                                </div>
+                                                <!-- Row 3: complete purge across Itinerary and Manifests -->
+                                                <div class="d-flex align-items-center justify-content-between gap-3 mt-2 pt-2 flex-wrap border-top border-danger">
+                                                    <span class="fw-semibold"><i class="fas fa-database me-2" aria-hidden="true"></i>Vaciar Itinerario de Vuelos y Manifiestos, incluidos los registros capturados.</span>
+                                                    <button class="btn btn-sm btn-dark" id="btn-delete-admin-all" onclick="window.opsFlightsAdmin.deleteAll()" aria-label="Eliminar todos los vuelos y manifiestos capturados">
+                                                        <i class="fas fa-trash-alt me-1" aria-hidden="true"></i>Eliminar todo
                                                     </button>
                                                 </div>
                                             </div>
@@ -10076,8 +10083,12 @@ FF
                                             <tr>
                                                 <th style="width:13%">Profesión</th>
                                                 <td colspan="3" id="cf-profesion">—</td>
+                                                <th style="width:13%">Sexo</th>
+                                                <td id="cf-sexo">—</td>
+                                            </tr>
+                                            <tr>
                                                 <th style="width:13%">Militar / Civil</th>
-                                                <td id="cf-militar">—</td>
+                                                <td colspan="5" id="cf-militar">—</td>
                                             </tr>
                                             <tr>
                                                 <th>Fecha de Ingreso</th>
@@ -10454,6 +10465,7 @@ FF
                                                 <div class="col-12 col-md-5"><label class="form-label fw-semibold small">Correo Personal <span class="badge bg-primary" style="font-size:.65rem;vertical-align:middle">Cumpleaños</span></label><input type="email" class="form-control form-control-sm" id="ce-correo-personal" data-field="Correo Personal" placeholder="nombre@gmail.com"></div>
                                                 <div class="col-12 col-md-3"><label class="form-label fw-semibold small">Profesión</label><input type="text" class="form-control form-control-sm" id="ce-profesion" data-field="profesion"></div>
                                                 <div class="col-12 col-md-2"><label class="form-label fw-semibold small">Militar / Civil</label><input type="text" class="form-control form-control-sm" id="ce-militar" data-field="militar"></div>
+                                                <div class="col-12 col-md-3"><label class="form-label fw-semibold small">Sexo</label><select class="form-select form-select-sm" id="ce-sexo" data-field="sexo"><option value="">-- Seleccionar --</option><option>Femenino</option><option>Masculino</option></select></div>
                                                 <div class="col-12"><p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i>Para editar amonestaciones y adjuntar PDFs usa la pestaña <strong>Amonest.</strong> &nbsp;·&nbsp; Para comentarios usa <strong>Coment.</strong></p></div>
                                             </div>
                                         </div>
@@ -11029,6 +11041,7 @@ FF
                                                 <div class="col-12 col-md-6"><label class="form-label fw-semibold small">Nombre completo <span class="text-danger">*</span></label><input type="text" class="form-control form-control-sm" id="cn-nombre" placeholder="Apellido Apellido Nombre" required></div>
                                                 <div class="col-12 col-md-3"><label class="form-label fw-semibold small">Profesión</label><input type="text" class="form-control form-control-sm" id="cn-profesion" placeholder="Ing. Industrial…"></div>
                                                 <div class="col-12 col-md-6"><label class="form-label fw-semibold small">Puesto</label><input type="text" class="form-control form-control-sm" id="cn-puesto" placeholder="Analista de Operaciones…"></div>
+                                                <div class="col-6 col-md-3"><label class="form-label fw-semibold small">Sexo</label><select class="form-select form-select-sm" id="cn-sexo"><option value="">-- Seleccionar --</option><option>Femenino</option><option>Masculino</option></select></div>
                                                 <div class="col-6 col-md-3"><label class="form-label fw-semibold small">Militar / Civil</label><input type="text" class="form-control form-control-sm" id="cn-militar" placeholder="Civil"></div>
                                                 <div class="col-6 col-md-3"><label class="form-label fw-semibold small">Turno</label><input type="text" class="form-control form-control-sm" id="cn-turno" placeholder="Matutino"></div>
                                                 <div class="col-12 col-md-4"><label class="form-label fw-semibold small">Fecha de Ingreso</label><input type="text" class="form-control form-control-sm" id="cn-fecha-ingreso" placeholder="DD/MM/YYYY"></div>
@@ -12081,6 +12094,7 @@ FF
                             fillField('cf-correo',        gc(c, 'correo'), { highlight: true });
                             fillField('cf-profesion',     gc(c, 'profesion'));
                             fillField('cf-militar',       gc(c, 'militar'));
+                            fillField('cf-sexo',          gc(c, 'sexo'));
 
                             // Sección 2: Clasificación
                             fillField('cf-nivel',           gc(c, 'nivel'), { highlight: true });
@@ -13246,14 +13260,14 @@ FF
                             rubrica:'Rúbrica', doc_ingreso:'Doc. Ingreso',
                             foto:'Foto de perfil', foto_ine:'INE frente', foto_ine_rev:'INE reverso',
                             foto_cred:'TIA / Credencial AIFA', cv_url:'Currículum Vitae (CV)',
-                            estatus:'Estatus',
+                            estatus:'Estatus', sexo:'Sexo',
                         };
 
                         /* Mapeo: id-del-input ? clave-semántica */
                         const COLAB_EDIT_FIELD_MAP = {
                             'ce-nombre':'nombre','ce-puesto':'puesto','ce-fecha-ingreso':'fecha_ingreso',
                             'ce-onomastico':'onomastico','ce-celular':'celular','ce-extension':'extension',
-                            'ce-correo':'correo','ce-correo-personal':'correo_personal','ce-profesion':'profesion','ce-militar':'militar',
+                            'ce-correo':'correo','ce-correo-personal':'correo_personal','ce-profesion':'profesion','ce-militar':'militar','ce-sexo':'sexo',
                             'ce-amonestaciones':'amonestaciones','ce-comentarios':'comentarios',
                             'ce-nivel':'nivel','ce-plaza':'plaza','ce-turno':'turno','ce-ryr':'ryr',
                             'ce-grado':'grado','ce-matricula':'matricula','ce-grado-academico':'grado_academico',
@@ -14166,6 +14180,22 @@ FF
                                         : String(gc(c, colKey) ?? '').trim();
                             });
 
+                            // El sexo guardado puede venir con una variante ("M", "Hombre"...) que no
+                            // está en el catálogo; se conserva como opción para no borrarla al guardar.
+                            (() => {
+                                const sexEl = document.getElementById('ce-sexo');
+                                const sexVal = String(gc(c, 'sexo') ?? '').trim();
+                                if (!sexEl) return;
+                                [...sexEl.querySelectorAll('option[data-sexo-extra]')].forEach(o => o.remove());
+                                if (sexVal && sexEl.value !== sexVal) {
+                                    const opt = document.createElement('option');
+                                    opt.value = opt.textContent = sexVal;
+                                    opt.dataset.sexoExtra = '1';
+                                    sexEl.appendChild(opt);
+                                    sexEl.value = sexVal;
+                                }
+                            })();
+
                             // Resetear al primer tab
                             const firstTab = document.getElementById('cedit-tab-gen');
                             if (firstTab && typeof bootstrap !== 'undefined') {
@@ -14654,7 +14684,7 @@ FF
                             'cn-c1-nombre':'c1_nombre','cn-c1-parentesco':'c1_parentesco',
                             'cn-c1-tel':'c1_tel','cn-c2-nombre':'c2_nombre',
                             'cn-c2-parentesco':'c2_parentesco','cn-c2-tel':'c2_tel',
-                            'cn-sangre':'sangre','cn-alerg-med':'alerg_med',
+                            'cn-sexo':'sexo','cn-sangre':'sangre','cn-alerg-med':'alerg_med',
                             'cn-alerg-ali':'alerg_ali','cn-nss':'nss',
                         };
 
@@ -14794,7 +14824,7 @@ FF
                         // Orden preferido de columnas
                         const CTBL_COL_ORDER = [
                             'estatus','Estatus','sangre','Tipo de sangre',
-                            'num_empleado','nombre','puesto','plaza','nivel','turno',
+                            'num_empleado','nombre','sexo','Sexo','puesto','plaza','nivel','turno',
                             'direccion','subdireccion','gerencia','coordinacion',
                             'fecha_ingreso','correo','celular','extension','profesion',
                             'grado','matricula','grado_academico','Grado Académico','cedula',
@@ -14810,7 +14840,7 @@ FF
 
                         // Etiquetas legibles
                         const CTBL_COL_LABELS = {
-                            'num_empleado':'No. Empleado','nombre':'Nombre','puesto':'Puesto',
+                            'num_empleado':'No. Empleado','nombre':'Nombre','sexo':'Sexo','Sexo':'Sexo','puesto':'Puesto',
                             'plaza':'Plaza','nivel':'Nivel','turno':'Turno',
                             'direccion':'Dirección','subdireccion':'Subdireccion',
                             'gerencia':'Gerencia','coordinacion':'Coordinacion',
@@ -14847,6 +14877,7 @@ FF
                             if (n === 'estatus') return 'estatus';
                             if (n === 'grado academico' || /^grado acad.mico$/i.test(raw)) return 'grado_academico';
                             if (n === 'sangre' || n === 'tipo de sangre') return 'sangre';
+                            if (n === 'sexo' || n === 'genero' || n === 'sex') return 'sexo';
                             if (n === 'no empleado' || n === 'num empleado' || n === 'numero empleado') return 'num_empleado';
                             if (n === 'nombre') return 'nombre';
                             return n || raw;
@@ -33229,7 +33260,7 @@ FF
     </script>
     <script src="js/frecuencias_upload_test.js" defer></script>
     <script src="js/operations-metrics.js?v=20260724a" defer></script>
-    <script src="script.js?v=20260824-guardado-conciliacion" defer></script>
+    <script src="script.js?v=20260827-delete-all-manifests" defer></script>
     <script src="js/manifiestos_pax.js?v=9999999999993" defer></script>
     <script src="js/puntualidad.js" defer></script>    <script>
         // Modo DEV: bloquear por completo el registro de Service Workers en localhost/127.0.0.1 o con bandera noSW
@@ -34440,7 +34471,7 @@ FF
 </script>
 
 <!-- ====== Conciliación Admin Module — extraído a js/ops-flights-admin.js (v=20260616m) ====== -->
-<script src="js/ops-flights-admin.js?v=20260730-delete-chunked" defer></script>
+<script src="js/ops-flights-admin.js?v=20260827-delete-all-manifests" defer></script>
 <!-- Conciliación Manifiestos table + inline editing -->
 <script src="js/conci-manifiestos-table.js?v=1" defer></script>
 <script src="js/conci-manifiestos-captura.js?v=20260727-v1" defer></script>
