@@ -21,9 +21,18 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto, archivoDeModulo } = require('../test-utils/modulos.js');
 
 const raiz = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
+// Colaboradores reparte hoy su marcado (view.html) y su codigo (index.js) en
+// archivos distintos; hasta la modularizacion los dos vivian dentro de
+// index.html, el segundo como un <script> incrustado de 8566 lineas. Estas
+// pruebas siempre miraron "lo que entrega el modulo", asi que se les sigue
+// dando eso: el documento compuesto mas el codigo del modulo.
+const app = htmlCompleto() + fs.readFileSync(archivoDeModulo('colaboradores'), 'utf8');
 
 /** Trozo de HTML entre un marcador de apertura y el comentario que lo cierra. */
 function trozoHtml(desde, hasta) {
@@ -50,9 +59,13 @@ function codigo(desde, hasta) {
   return app.slice(i, j + hasta.length);
 }
 
-const FIN_FUNCION = '\n' + ' '.repeat(24) + '}';
+// El recorte se apoya en la sangría del cierre. Eran 24 espacios cuando este
+// código vivía dentro de index.html, anidado en el <script> de la sección; al
+// salir al módulo pasó a ser un archivo normal, con sangría de 4.
+const SANGRIA = 4;
+const FIN_FUNCION = '\n' + ' '.repeat(SANGRIA) + '}';
 const FIN_ASIGNACION = FIN_FUNCION + ';';
-const FIN_ARREGLO = '\n' + ' '.repeat(24) + '];';
+const FIN_ARREGLO = '\n' + ' '.repeat(SANGRIA) + '];';
 
 /**
  * Monta el alta y el modal de faltantes reales en jsdom y corre encima las

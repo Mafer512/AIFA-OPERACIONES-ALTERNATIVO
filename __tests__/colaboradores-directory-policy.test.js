@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const policy = require('../js/colaboradores-directory-policy');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto, archivoDeModulo, registroDeModulos } = require('../test-utils/modulos.js');
+const loaderJs = () => fs.readFileSync(require('path').resolve(__dirname, '..', 'core', 'module-loader.js'), 'utf8');
+const policy = require(archivoDeModulo('colaboradores', 'directory-policy.js'));
 
 const TODAY = '2026-08-04';
 const active = overrides => ({
@@ -208,8 +213,13 @@ describe('política del Resumen del Directorio', () => {
     });
 
     test('la integración del dashboard utiliza la política central y conserva el histórico completo', () => {
-        const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-        expect(html).toContain('js/colaboradores-directory-policy.js?v=20260831b');
+        // Colaboradores reparte hoy su marcado (view.html) y su codigo (index.js) en
+        // archivos distintos; hasta la modularizacion los dos vivian dentro de
+        // index.html. Estas pruebas siempre miraron "lo que entrega el modulo".
+        const html = htmlCompleto() + fs.readFileSync(archivoDeModulo('colaboradores'), 'utf8');
+        // Ya no es un <script> del shell: lo trae el loader como extra del modulo
+        // de Colaboradores, y solo cuando alguien abre la seccion.
+        expect(loaderJs()).toContain('directory-policy.js');
         expect(html).toContain('const universe = colabObtenerUniversoDirectorio();');
         expect(html).toContain('const data = universe.included;');
         expect(html).toContain('var masc = universe.summary.men;');

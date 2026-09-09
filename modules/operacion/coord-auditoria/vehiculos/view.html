@@ -1,0 +1,209 @@
+                  <!-- Toast container (posición fija) -->
+                  <div id="veh-toast-container"
+                       class="position-fixed bottom-0 end-0 p-3"
+                       style="z-index:11000;"></div>
+
+                  <!-- ── Hero Header ── -->
+                  <div class="rounded-4 mb-4 p-4 p-md-5 position-relative overflow-hidden"
+                       style="background:linear-gradient(135deg,#0a1f44 0%,#1a3a6e 55%,#2c5282 100%);">
+                    <!-- Ícono decorativo de fondo -->
+                    <div class="position-absolute top-0 end-0 opacity-5"
+                         style="font-size:14rem;line-height:1;color:#fff;transform:translate(15%,-15%);pointer-events:none;">
+                      <i class="fas fa-car-side"></i>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                      <div class="rounded-3 p-2 d-inline-flex"
+                           style="background:rgba(232,119,10,.18);border:1px solid rgba(232,119,10,.4);">
+                        <i class="fas fa-clipboard-check fa-lg" style="color:#E8770A;"></i>
+                      </div>
+                      <span class="badge rounded-pill px-3 py-2 fw-semibold text-uppercase"
+                            style="font-size:.7rem;background:rgba(232,119,10,.15);color:#FFA040;border:1px solid rgba(232,119,10,.35);">
+                        Coordinación de Auditoría
+                      </span>
+                    </div>
+                    <h1 class="fw-black text-white mb-1" style="font-size:clamp(1.3rem,3vw,2rem);">
+                      Catálogo de Vehículos Terrestres
+                    </h1>
+                    <p class="text-white-50 mb-0">
+                      de Cargo en la Dirección de Operación · AIFA
+                    </p>
+                    <!-- Botón recargar -->
+                    <button class="btn btn-sm btn-light rounded-circle shadow position-absolute bottom-0 end-0 m-3"
+                            style="width:38px;height:38px;padding:0;"
+                            onclick="window.vehiculosModule && window.vehiculosModule.reload()"
+                            title="Actualizar catálogo">
+                      <i class="fas fa-sync-alt text-primary"></i>
+                    </button>
+                  </div>
+
+                  <!-- ── KPIs ── -->
+                  <div class="row g-3 mb-4" id="veh-kpi-row">
+                    <div class="col-6 col-md-3">
+                      <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden position-relative">
+                        <div class="position-absolute top-0 start-0 end-0" style="height:3px;background:linear-gradient(90deg,#0a1f44,#0d6efd);"></div>
+                        <div class="card-body p-3 text-center">
+                          <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-2" style="width:44px;height:44px;">
+                            <i class="fas fa-car text-primary"></i>
+                          </div>
+                          <div class="fw-black fs-3 text-primary" id="veh-kpi-total">—</div>
+                          <div class="text-muted small fw-semibold">Total Vehículos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden position-relative">
+                        <div class="position-absolute top-0 start-0 end-0" style="height:3px;background:linear-gradient(90deg,#198754,#20c997);"></div>
+                        <div class="card-body p-3 text-center">
+                          <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-2" style="width:44px;height:44px;">
+                            <i class="fas fa-check-circle text-success"></i>
+                          </div>
+                          <div class="fw-black fs-3 text-success" id="veh-kpi-activos">—</div>
+                          <div class="text-muted small fw-semibold">Activos</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden position-relative">
+                        <div class="position-absolute top-0 start-0 end-0" style="height:3px;background:linear-gradient(90deg,#fd7e14,#ffc107);"></div>
+                        <div class="card-body p-3 text-center">
+                          <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width:44px;height:44px;background:rgba(253,126,20,.1);">
+                            <i class="fas fa-tools" style="color:#fd7e14;"></i>
+                          </div>
+                          <div class="fw-black fs-3" style="color:#fd7e14;" id="veh-kpi-mantenimiento">—</div>
+                          <div class="text-muted small fw-semibold">Mantenimiento</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden position-relative">
+                        <div class="position-absolute top-0 start-0 end-0" style="height:3px;background:linear-gradient(90deg,#dc3545,#e91e63);"></div>
+                        <div class="card-body p-3 text-center">
+                          <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-2" style="width:44px;height:44px;">
+                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                          </div>
+                          <div class="fw-black fs-3 text-danger" id="veh-kpi-vigencia">—</div>
+                          <div class="text-muted small fw-semibold">Póliza por Vencer</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ── Barra de búsqueda y filtros ── -->
+                  <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-3 d-flex flex-wrap align-items-center gap-3">
+                      <!-- Búsqueda -->
+                      <div class="input-group rounded-pill overflow-hidden flex-grow-1 shadow-sm"
+                           style="max-width:320px;border:1px solid #dee2e6;">
+                        <span class="input-group-text bg-white border-0 ps-3">
+                          <i class="fas fa-search text-muted small"></i>
+                        </span>
+                        <input type="text" id="veh-search"
+                               class="form-control border-0 shadow-none"
+                               placeholder="Buscar por nombre, placa, serie…">
+                      </div>
+                      <!-- Filtro tipo -->
+                      <select id="veh-filter-tipo"
+                              class="form-select form-select-sm rounded-pill shadow-sm border"
+                              style="width:auto;border-color:#dee2e6!important;">
+                        <option value="all">Todos los tipos</option>
+                        <option value="Camioneta">Camioneta</option>
+                        <option value="Camioneta Van">Camioneta Van</option>
+                        <option value="Camión">Camión</option>
+                        <option value="Autobús">Autobús</option>
+                        <option value="Ambulancia">Ambulancia</option>
+                        <option value="Montacargas">Montacargas</option>
+                        <option value="Automóvil">Automóvil</option>
+                        <option value="Motocicleta">Motocicleta</option>
+                      </select>
+                      <!-- Filtro estado -->
+                      <select id="veh-filter-estado"
+                              class="form-select form-select-sm rounded-pill shadow-sm border"
+                              style="width:auto;border-color:#dee2e6!important;">
+                        <option value="all">Todos los estados</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                        <option value="Baja">Baja</option>
+                      </select>
+                      <!-- Filtro combustible -->
+                      <select id="veh-filter-combustible"
+                              class="form-select form-select-sm rounded-pill shadow-sm border"
+                              style="width:auto;border-color:#dee2e6!important;">
+                        <option value="all">Todo combustible</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Gasolina">Gasolina</option>
+                        <option value="Híbrido">Híbrido</option>
+                        <option value="Eléctrico">Eléctrico</option>
+                      </select>
+                      <!-- Botones vista + agregar -->
+                      <div class="ms-auto d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                onclick="window.vehiculosModule.openMantAllModal()"
+                                title="Ver todos los mantenimientos registrados">
+                          <i class="fas fa-wrench me-1"></i>Mantenimientos
+                        </button>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Vista">
+                          <button id="veh-view-grid"
+                                  class="btn btn-primary rounded-start-pill px-3"
+                                  onclick="setVehView('grid')" title="Vista tarjetas">
+                            <i class="fas fa-th-large"></i>
+                          </button>
+                          <button id="veh-view-list"
+                                  class="btn btn-outline-secondary rounded-end-pill px-3"
+                                  onclick="setVehView('list')" title="Vista lista">
+                            <i class="fas fa-list"></i>
+                          </button>
+                        </div>
+                        <button class="btn btn-sm rounded-pill px-3 d-none fw-semibold" id="veh-add-btn"
+                                onclick="openVehModal()"
+                                style="background:#E8770A;color:white;border:none;">
+                          <i class="fas fa-plus me-1"></i>Agregar vehículo
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ── Spinner de carga ── -->
+                  <div id="veh-loading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando…</span>
+                    </div>
+                    <p class="text-muted mt-3 small">Cargando catálogo de vehículos…</p>
+                  </div>
+
+                  <!-- ── Estado vacío ── -->
+                  <div id="veh-empty" class="text-center py-5 d-none">
+                    <i class="fas fa-car fa-3x text-muted mb-3 d-block"></i>
+                    <p class="text-muted mb-1 fw-semibold">No se encontraron vehículos</p>
+                    <p class="text-muted small">Intenta ajustar los filtros de búsqueda.</p>
+                  </div>
+
+                  <!-- ── Vista Grid (tarjetas) ── -->
+                  <div id="veh-grid-wrapper">
+                    <div id="veh-grid" class="row g-4"></div>
+                  </div>
+
+                  <!-- ── Vista Lista (tabla) ── -->
+                  <div id="veh-list-wrapper" class="d-none">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                      <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                          <thead class="table-dark" style="background:#0a1f44!important;">
+                            <tr>
+                              <th scope="col" style="width:90px;">Código</th>
+                              <th scope="col">Vehículo</th>
+                              <th scope="col">Año</th>
+                              <th scope="col">Placas</th>
+                              <th scope="col">Combustible</th>
+                              <th scope="col">Estado</th>
+                              <th scope="col">Responsable</th>
+                              <th scope="col">Número de Resguardo</th>
+                              <th scope="col">Póliza</th>
+                              <th scope="col" style="width:60px;"></th>
+                            </tr>
+                          </thead>
+                          <tbody id="veh-table-body"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+

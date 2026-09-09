@@ -1951,43 +1951,39 @@ async function agOpenGoogleCalendar() {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   HOOK EN showSection — auto-carga al navegar a la sección
+   Aquí se envolvía window.showSection para auto-cargar al navegar a la
+   sección, con reintentos cada 300 ms durante 5 s por si el router aún
+   no existía al evaluarse este archivo. Era el cuarto parche de ese tipo
+   en el proyecto. Ahora el loader llama a initAgendaComites() al abrir,
+   que hace lo mismo sin depender del orden de carga.
 ───────────────────────────────────────────────────────────────────*/
-(function _agPatchNav() {
-    function patch() {
-        const orig = window.showSection;
-        if (typeof orig !== 'function') return false;
-        if (orig._agPatched) return true;
 
-        window.showSection = function(sectionKey, linkEl) {
-            orig(sectionKey, linkEl);
-            if (sectionKey === 'agenda') {
-                /* Carga el calendario al entrar a la sección */
-                setTimeout(agLoadCalendario, 50);
-                /* También carga comités para que el tab esté listo */
-                setTimeout(agLoadComites, 80);
-            }
-        };
-        window.showSection._agPatched = true;
-        return true;
+/* ============================================================
+ *  Contrato de ciclo de vida del módulo.
+ *
+ *  El cableado de pestañas colgaba de DOMContentLoaded, evento que ya no
+ *  llega cuando el loader inyecta este archivo. Se hace una sola vez, al
+ *  primer init; la carga de datos, en cada entrada.
+ * ========================================================== */
+var _agCableado = false;
+
+window.initAgendaComites = function () {
+    if (!_agCableado) {
+        _agCableado = true;
+        _agCablearPestanas();
     }
+    // Los permisos y la visibilidad de los botones se resuelven aquí:
+    // agInitSection() vive en el propio módulo, en permisos.js.
+    try { if (typeof window.agInitSection === 'function') window.agInitSection(); } catch (e) { console.error('[agenda] init:', e && e.message); }
+    setTimeout(agLoadCalendario, 50);
+    setTimeout(agLoadComites, 80);
+};
 
-    if (!patch()) {
-        document.addEventListener('DOMContentLoaded', function _agDomReady() {
-            if (!patch()) {
-                /* Reintentar cada 300ms durante 5s */
-                let attempts = 0;
-                const timer = setInterval(() => {
-                    if (patch() || ++attempts > 16) clearInterval(timer);
-                }, 300);
-            }
-            document.removeEventListener('DOMContentLoaded', _agDomReady);
-        });
-    }
-})();
+// No hay gráficas que soltar: el calendario y las tablas se repintan al
+// entrar. Los datos ya traídos se conservan.
+window.destroyAgendaComites = function () {};
 
-/* Bootstrap tab events */
-document.addEventListener('DOMContentLoaded', function() {
+function _agCablearPestanas() {
     const TABS_WITH_FILTER  = new Set(['ag-tab-comites','ag-tab-reuniones','ag-tab-acuerdos']);
 
     document.getElementById('ag-main-tabs')?.addEventListener('shown.bs.tab', function(e) {
@@ -2001,17 +1997,14 @@ document.addEventListener('DOMContentLoaded', function() {
         tabComites.addEventListener('shown.bs.tab', agLoadComites);
     }
 
-    /* Si llegamos con la sección ya activa (recarga directa) */
-    const agSection = document.getElementById('agenda-section');
-    if (agSection && agSection.classList.contains('active')) {
-        agLoadCalendario();
-    }
+    /* El arranque por sección ya activa lo cubre initAgendaComites(): el
+       loader lo llama también cuando se llega por URL directa. */
 
     /* Inicializar estado del botón de notificaciones */
     if (typeof window.agNotificationsInit === 'function') {
         window.agNotificationsInit();
     }
-});
+}
 
 /* ─── Recarga en tiempo real cuando cambia algo en agenda ──────────
    Escucha el evento global 'rt:change' emitido por js/realtime.js

@@ -922,7 +922,16 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  // El loader inyecta este archivo despues de DOMContentLoaded: ese evento ya
+  // no vuelve a llegar. El encendido pasa por window.initFauna(), abajo.
+  window.__faunaPrincipal = {
+    init: init,
+    apagar: function () {
+      try {
+        Object.keys(state.charts || {}).forEach(function (k) { destroyChart(state.charts[k]); state.charts[k] = null; });
+      } catch (_) {}
+    },
+  };
   function exportCSV(){
     if (!state.columns.length) return;
     const sep = ',';
@@ -2040,5 +2049,52 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  // El loader inyecta este archivo despues de DOMContentLoaded: ese evento ya
+  // no vuelve a llegar. El encendido pasa por window.initFauna(), abajo.
+  window.__faunaRescate = {
+    init: init,
+    apagar: function () {
+      try {
+        Object.keys(state.charts || {}).forEach(function (k) { destroyChart(state.charts[k]); state.charts[k] = null; });
+      } catch (_) {}
+    },
+  };
+})();
+
+
+/* ============================================================
+ *  Contrato de ciclo de vida del modulo.
+ *
+ *  Antes esto vivia en index.html + js/fauna.js, y los dos init()
+ *  corrian en DOMContentLoaded aunque nadie abriera la seccion: se
+ *  descargaba fauna.json y se construian diez graficas de ECharts en
+ *  cada carga de la pagina.
+ *
+ *  Se respeta el comportamiento de siempre: los datos se cargan UNA vez
+ *  y en las visitas siguientes solo se repinta, que es justo lo que hacia
+ *  el evento fauna:visible.
+ * ========================================================== */
+(function () {
+    'use strict';
+
+    var _cargado = false;
+
+    window.initFauna = function () {
+        if (!_cargado) {
+            _cargado = true;
+            try { if (window.__faunaPrincipal) window.__faunaPrincipal.init(); } catch (e) { console.error("[fauna] init:", e && e.message); }
+            try { if (window.__faunaRescate) window.__faunaRescate.init(); } catch (e) { console.error("[fauna rescate] init:", e && e.message); }
+            return;
+        }
+        // Ya cargado: basta con repintar, que las graficas de ECharts miden mal
+        // cuando su contenedor estaba oculto.
+        try { window.dispatchEvent(new Event('fauna:visible')); } catch (_) {}
+    };
+
+    // Al salir se sueltan las instancias de ECharts de los dos tableros. Los
+    // datos ya cargados se conservan: volver a entrar no debe reconsultar.
+    window.destroyFauna = function () {
+        try { if (window.__faunaPrincipal) window.__faunaPrincipal.apagar(); } catch (_) {}
+        try { if (window.__faunaRescate) window.__faunaRescate.apagar(); } catch (_) {}
+    };
 })();

@@ -17,10 +17,13 @@ const path = require('path');
 
 const raiz = path.resolve(__dirname, '..');
 const catalogo = require('../js/airline-catalog.js');
-const fauna = fs.readFileSync(path.join(raiz, 'js/fauna.js'), 'utf8');
+// Fauna salio a su modulo. Se pregunta al registro del loader donde vive en
+// vez de fijar la ruta aqui: si el modulo se mueve otra vez, esto le sigue.
+const { registroDeModulos, htmlCompleto } = require('../test-utils/modulos.js');
+const fauna = fs.readFileSync(path.join(raiz, registroDeModulos().get('fauna'), 'index.js'), 'utf8');
 const script = fs.readFileSync(path.join(raiz, 'script.js'), 'utf8');
 const dataMgmt = fs.readFileSync(path.join(raiz, 'js/data-management.js'), 'utf8');
-const app = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
+const app = htmlCompleto();
 
 const CATALOGO = [
     {

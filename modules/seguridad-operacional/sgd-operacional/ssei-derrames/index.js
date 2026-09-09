@@ -941,4 +941,19 @@
     };
 
     window.sseiDerramesReload = renderAll;
+
+    // Contrato de ciclo de vida del modulo.
+    //
+    // Lo que se acumulaba visita tras visita eran las instancias de Chart.js:
+    // cada render creaba las suyas y nadie las soltaba al salir de la seccion.
+    // destroyCharts() ya existia para reconstruirlas; aqui se usa tambien para
+    // apagarlas.
+    //
+    // Los listeners de los controles NO se retiran: wireUi() corre una sola vez
+    // (guardado por _initOnce) sobre nodos que viven dentro de la vista, y la
+    // vista se queda cacheada en el DOM. Retirarlos obligaria a volver a
+    // cablearlos sin ganar nada.
+    window.destroySseiDerrames = function () {
+        try { destroyCharts(); } catch (_) {}
+    };
 })();

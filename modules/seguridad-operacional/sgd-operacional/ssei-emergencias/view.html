@@ -1,0 +1,396 @@
+        <div class="card border-0 shadow-sm">
+
+            <!-- ESTILOS LOCALES EMERGENCIAS -->
+            <style>
+                #em-tbl th { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+                #em-tbl td { font-size: .82rem; vertical-align: middle; }
+                #em-tbl tr:hover td { background: #fef2f2; }
+                .em-badge-header {
+                    display: inline-flex; align-items: center; gap: .4rem;
+                    background: #b91c1c; color: #fff;
+                    border-radius: 8px; padding: .2rem .65rem;
+                    font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+                }
+                .em-clasif { font-size:.68rem; font-weight:800; letter-spacing:.03em; text-transform:uppercase; padding:.18rem .55rem; border-radius:999px; }
+                .em-clasif--acc { background:#fee2e2; color:#b91c1c; }
+                .em-clasif--inc { background:#fef3c7; color:#b45309; }
+                .em-thumbs { display:flex; gap:4px; flex-wrap:wrap; }
+                .em-thumb {
+                    width:46px; height:46px; object-fit:cover; border-radius:8px;
+                    border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.18);
+                    cursor:pointer; transition:transform .15s ease;
+                }
+                .em-thumb:hover { transform:scale(1.12); }
+                .em-thumb-more {
+                    width:46px; height:46px; border-radius:8px; background:#0f172a; color:#fff;
+                    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.78rem;
+                    cursor:pointer;
+                }
+                .em-nofoto { color:#cbd5e1; font-size:1.1rem; }
+                .em-desc-cell { max-width:340px; font-size:.78rem; color:#475569; }
+                #em-lightbox .modal-content { background:#0b1220; }
+                #em-lightbox img { max-height:74vh; width:auto; max-width:100%; border-radius:10px; }
+                .em-upload-preview { display:flex; gap:8px; flex-wrap:wrap; margin-top:.5rem; }
+                .em-upload-preview .pv {
+                    position:relative; width:70px; height:70px; border-radius:8px; overflow:hidden;
+                    border:1px solid #e2e8f0;
+                }
+                .em-upload-preview .pv img { width:100%; height:100%; object-fit:cover; }
+                .em-upload-preview .pv button {
+                    position:absolute; top:1px; right:1px; border:none; background:rgba(15,23,42,.8);
+                    color:#fff; border-radius:50%; width:18px; height:18px; line-height:1; font-size:.65rem; cursor:pointer;
+                }
+                /* Fila clickeable */
+                #em-tbl tbody tr { cursor:pointer; }
+                .em-row-actions { white-space:nowrap; }
+
+                /* Vista de detalle */
+                #em-detail .em-detail-head {
+                    position:relative; padding:1.1rem 1.5rem 1.25rem;
+                    background:linear-gradient(135deg,#b91c1c,#7f1d1d); color:#fff;
+                }
+                #em-detail .em-detail-close { position:absolute; top:1rem; right:1.1rem; }
+                #em-detail .em-detail-sub { font-size:.8rem; opacity:.85; margin-top:.15rem; }
+                #em-detail .em-detail-gallery { background:#0b1220; display:flex; flex-direction:column; }
+                #em-detail .carousel, #em-detail .carousel-inner, #em-detail .carousel-item { height:100%; }
+                #em-detail .carousel-inner { height:100%; min-height:62vh; }
+                #em-detail .carousel-item {
+                    display:none; height:62vh; position:relative; overflow:hidden;
+                }
+                #em-detail .carousel-item.active { display:block; }
+                /* Fondo desenfocado que rellena el recuadro */
+                #em-detail .carousel-item .em-bg {
+                    position:absolute; inset:0;
+                    background-size:cover; background-position:center;
+                    filter:blur(22px) brightness(.55); transform:scale(1.15);
+                }
+                /* Imagen principal nitida y completa */
+                #em-detail .carousel-item img {
+                    position:relative; z-index:1;
+                    width:100%; height:100%; object-fit:contain; object-position:center;
+                    display:block; image-rendering:auto;
+                }
+                #em-detail .em-detail-noimg {
+                    height:62vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+                    color:#475569; gap:.5rem; font-size:.9rem;
+                }
+                #em-detail .em-detail-noimg i { font-size:2.4rem; opacity:.4; }
+                #em-detail .em-detail-thumbs {
+                    display:flex; gap:6px; padding:8px 10px; background:#0f172a; overflow-x:auto; flex-wrap:nowrap;
+                }
+                #em-detail .em-detail-thumbs img {
+                    width:54px; height:54px; object-fit:cover; border-radius:6px; cursor:pointer;
+                    opacity:.55; border:2px solid transparent; transition:opacity .15s, border-color .15s; flex:0 0 auto;
+                }
+                #em-detail .em-detail-thumbs img:hover { opacity:.85; }
+                #em-detail .em-detail-thumbs img.active { opacity:1; border-color:#dc2626; }
+                #em-detail .em-detail-info { padding:1.4rem 1.6rem; }
+                #em-detail .em-detail-grid {
+                    display:grid; grid-template-columns:1fr 1fr; gap:1rem 1.2rem; margin-bottom:1.2rem;
+                }
+                #em-detail .em-detail-item { display:flex; flex-direction:column; gap:.2rem; }
+                #em-detail .em-detail-lbl {
+                    font-size:.66rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:#94a3b8;
+                }
+                #em-detail .em-detail-val { font-size:1.02rem; font-weight:700; color:#0f172a; }
+                #em-detail .em-detail-desc-block {
+                    border-top:1px solid #eef2f7; padding-top:1rem;
+                }
+                #em-detail .em-detail-desc {
+                    font-size:.92rem; line-height:1.6; color:#334155; margin:.4rem 0 0; white-space:pre-line;
+                }
+                #em-detail .em-clasif { font-size:.72rem; }
+            </style>
+
+            <!-- HEADER -->
+            <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between gap-2 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="em-badge-header"><i class="fas fa-plane-circle-exclamation"></i> SSEI</span>
+                    <div>
+                        <h2 class="section-title mb-0" style="font-size:1.1rem;">Emergencias en Pista</h2>
+                        <p class="text-muted mb-0" style="font-size:.75rem;">Registro histórico de accidentes e incidentes · Supabase en tiempo real</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <label class="text-muted me-1 small fw-semibold" for="em-anio-select">Año:</label>
+                    <select id="em-anio-select" class="form-select form-select-sm" style="min-width:130px;">
+                        <option value="all">Todos los años</option>
+                    </select>
+                    <button class="btn btn-outline-secondary btn-sm" id="em-refresh-btn" title="Actualizar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm d-none" id="em-add-btn">
+                        <i class="fas fa-plus me-1"></i>Nuevo Registro
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body px-3 px-md-4 py-4">
+
+                <!-- STATUS -->
+                <div id="em-status" class="alert d-none mb-3" role="status"></div>
+
+                <!-- KPIs -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="ssei-kpi ssei-kpi--blue">
+                            <div class="ssei-kpi-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="empista-kpi-total">—</div>
+                                <div class="ssei-kpi-lbl">Eventos registrados</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="ssei-kpi ssei-kpi--red">
+                            <div class="ssei-kpi-icon"><i class="fas fa-plane-slash"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="empista-kpi-accidentes">—</div>
+                                <div class="ssei-kpi-lbl">Accidentes</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="ssei-kpi ssei-kpi--orange">
+                            <div class="ssei-kpi-icon"><i class="fas fa-circle-exclamation"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="empista-kpi-incidentes">—</div>
+                                <div class="ssei-kpi-lbl">Incidentes</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="ssei-kpi ssei-kpi--green">
+                            <div class="ssei-kpi-icon"><i class="fas fa-building"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="empista-kpi-operadores">—</div>
+                                <div class="ssei-kpi-lbl">Operadores involucrados</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRÁFICAS: fila 1 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-chart-bar me-1 text-danger"></i>Eventos por año
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="em-chart-anual"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-circle-half-stroke me-1 text-warning"></i>Clasificación
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="em-chart-clasif"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRÁFICAS: fila 2 -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-road me-1 text-primary"></i>Eventos por pista
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="em-chart-pista"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-plane me-1 text-info"></i>Eventos por operador
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="em-chart-operador"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLA HISTÓRICA -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white d-flex align-items-center justify-content-between rounded-top-4 py-2 px-3">
+                        <span class="fw-bold text-uppercase" style="font-size:.75rem;letter-spacing:.05em;color:#0f172a;">
+                            <i class="fas fa-table me-1 text-danger"></i>Registros detallados
+                        </span>
+                        <span class="badge bg-light text-muted border" id="em-tbl-count"></span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0 align-middle" id="em-tbl">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">No.</th>
+                                        <th>Fecha</th>
+                                        <th class="text-center">Pista</th>
+                                        <th>Aeronave</th>
+                                        <th>Operador</th>
+                                        <th class="text-center">Clasificación</th>
+                                        <th>Descripción</th>
+                                        <th class="text-center">Evidencia</th>
+                                        <th class="text-center">Detalle</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="em-tbl-body">
+                                    <tr><td colspan="9" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-1"></i>Cargando…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /card-body -->
+        </div><!-- /card -->
+
+        <!-- ── MODAL: Nuevo registro ─────────────────────────────── -->
+        <div class="modal fade" id="em-modal" tabindex="-1" aria-labelledby="em-modal-label" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4 shadow-lg border-0">
+                    <div class="modal-header" style="background:linear-gradient(135deg,#b91c1c,#7f1d1d);color:#fff;border-radius:1rem 1rem 0 0;">
+                        <h5 class="modal-title fw-bold" id="em-modal-label">
+                            <i class="fas fa-plane-circle-exclamation me-2"></i><span id="em-modal-title-txt">Nueva Emergencia — SSEI</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body px-4 py-3">
+                        <div class="row g-3">
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="em-f-fecha">Fecha del evento <span class="text-danger">*</span></label>
+                                <input type="date" id="em-f-fecha" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="em-f-pista">Pista</label>
+                                <input type="text" id="em-f-pista" class="form-control form-control-sm" list="em-pista-list" placeholder="04C / 04L / 04R" />
+                                <datalist id="em-pista-list">
+                                    <option value="04C"></option><option value="04L"></option><option value="04R"></option>
+                                    <option value="22C"></option><option value="22L"></option><option value="22R"></option>
+                                </datalist>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="em-f-clasif">Clasificación <span class="text-danger">*</span></label>
+                                <select id="em-f-clasif" class="form-select form-select-sm">
+                                    <option value="Incidente">Incidente</option>
+                                    <option value="Accidente">Accidente</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold" for="em-f-tipo">Tipo de aeronave</label>
+                                <input type="text" id="em-f-tipo" class="form-control form-control-sm" placeholder="A-319, C-130, B-737-9…" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold" for="em-f-operador">Operador</label>
+                                <input type="text" id="em-f-operador" class="form-control form-control-sm" placeholder="Volaris, FAM, Aeromexico…" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold" for="em-f-desc">Descripción del evento</label>
+                                <textarea id="em-f-desc" class="form-control form-control-sm" rows="4" placeholder="Describe lo ocurrido…"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div id="em-f-existing-wrap" class="d-none">
+                                    <label class="form-label small fw-semibold">
+                                        <i class="fas fa-images me-1"></i>Fotos actuales <span class="text-muted fw-normal">(haz clic en &times; para quitar)</span>
+                                    </label>
+                                    <div class="em-upload-preview" id="em-f-existing"></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold" for="em-f-fotos">
+                                    <i class="fas fa-camera me-1"></i>Agregar evidencia fotográfica (puedes subir varias)
+                                </label>
+                                <input type="file" id="em-f-fotos" class="form-control form-control-sm" accept="image/*" multiple />
+                                <div class="em-upload-preview" id="em-f-preview"></div>
+                            </div>
+                        </div>
+                        <div id="em-modal-msg" class="mt-2"></div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger btn-sm px-4" id="em-modal-save">
+                            <i class="fas fa-save me-1"></i>Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /modal -->
+
+        <!-- ── VISTA DE DETALLE: resumen del incidente ───────────── -->
+        <div class="modal fade" id="em-detail" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+                    <div class="em-detail-head">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="em-badge-header"><i class="fas fa-plane-circle-exclamation"></i> SSEI</span>
+                            <span id="em-detail-clasif"></span>
+                        </div>
+                        <h5 class="fw-bold mb-0 mt-2" id="em-detail-title">Detalle del evento</h5>
+                        <div class="em-detail-sub" id="em-detail-sub"></div>
+                        <button type="button" class="btn-close btn-close-white em-detail-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="row g-0">
+                            <!-- Galería grande -->
+                            <div class="col-lg-7 em-detail-gallery">
+                                <div id="em-detail-carousel" class="carousel slide" data-bs-ride="false">
+                                    <div class="carousel-inner" id="em-detail-inner"></div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#em-detail-carousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#em-detail-carousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon"></span>
+                                    </button>
+                                    <div class="carousel-indicators" id="em-detail-indicators"></div>
+                                </div>
+                                <div class="em-detail-thumbs" id="em-detail-thumbs"></div>
+                            </div>
+                            <!-- Información -->
+                            <div class="col-lg-5 em-detail-info">
+                                <div class="em-detail-grid">
+                                    <div class="em-detail-item">
+                                        <span class="em-detail-lbl"><i class="fas fa-calendar-day me-1"></i>Fecha</span>
+                                        <span class="em-detail-val" id="em-detail-fecha">—</span>
+                                    </div>
+                                    <div class="em-detail-item">
+                                        <span class="em-detail-lbl"><i class="fas fa-road me-1"></i>Pista</span>
+                                        <span class="em-detail-val" id="em-detail-pista">—</span>
+                                    </div>
+                                    <div class="em-detail-item">
+                                        <span class="em-detail-lbl"><i class="fas fa-plane me-1"></i>Aeronave</span>
+                                        <span class="em-detail-val" id="em-detail-tipo">—</span>
+                                    </div>
+                                    <div class="em-detail-item">
+                                        <span class="em-detail-lbl"><i class="fas fa-building me-1"></i>Operador</span>
+                                        <span class="em-detail-val" id="em-detail-operador">—</span>
+                                    </div>
+                                </div>
+                                <div class="em-detail-desc-block">
+                                    <span class="em-detail-lbl"><i class="fas fa-file-lines me-1"></i>Descripción del evento</span>
+                                    <p class="em-detail-desc" id="em-detail-desc">—</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 py-3 bg-light">
+                        <button type="button" class="btn btn-outline-danger btn-sm d-none" id="em-detail-delete">
+                            <i class="fas fa-trash me-1"></i>Eliminar
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm px-3 d-none" id="em-detail-edit">
+                            <i class="fas fa-pen me-1"></i>Editar
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /detalle -->
+
+

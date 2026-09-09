@@ -2,9 +2,13 @@ const fs = require('fs');
 const path = require('path');
 
 const Core = require('../js/estadistico-informe-core');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto } = require('../test-utils/modulos.js');
 
 const uiSource = fs.readFileSync(path.resolve(__dirname, '..', 'js', 'estadistico-informe.js'), 'utf8');
-const indexSource = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
+const indexSource = htmlCompleto();
 
 const resumenRows = [
   { anio: 2024, mes: 12, tipo_aviacion: 'comercial', direccion: 'A', nacional_internacional: 'Nacional', operaciones: 10, pax_total: 1000, carga_kg_total: 0 },

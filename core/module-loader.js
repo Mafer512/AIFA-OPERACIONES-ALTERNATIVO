@@ -89,6 +89,140 @@
             destroy: 'destroyCombustibles',
             nombre: 'Combustible de Aviacion',
         },
+
+        // Seguridad Operacional · GSO.
+        //
+        // Los seis comparten forma: su propio archivo, un wireUi() guardado por
+        // _initOnce y un destroyCharts() que ya existia para reconstruir las
+        // graficas. Fauna es la excepcion: son DOS tableros en un archivo y
+        // arrancaba en DOMContentLoaded, evento que ya no llega cuando el loader
+        // inyecta el script; su initFauna() lo sustituye.
+        'fauna': {
+            base: 'modules/seguridad-operacional/sgd-operacional/fauna',
+            init: 'initFauna',
+            destroy: 'destroyFauna',
+            nombre: 'Fauna',
+        },
+        'ssei-emergencias': {
+            base: 'modules/seguridad-operacional/sgd-operacional/ssei-emergencias',
+            init: 'initSseiEmergencias',
+            destroy: 'destroySseiEmergencias',
+            nombre: 'SSEI - Emergencias en Pista',
+        },
+        'ssei-derrames': {
+            base: 'modules/seguridad-operacional/sgd-operacional/ssei-derrames',
+            init: 'initSseiDerrames',
+            destroy: 'destroySseiDerrames',
+            nombre: 'SSEI - Atencion a Derrames',
+        },
+        'personal-capacitado-prestadores': {
+            base: 'modules/seguridad-operacional/sgd-operacional/personal-capacitado',
+            init: 'initPersonalCapacitadoPrestadores',
+            destroy: 'destroyPersonalCapacitadoPrestadores',
+            nombre: 'Personal Capacitado Prestadores',
+        },
+        'valoraciones-medicas': {
+            base: 'modules/seguridad-operacional/sgd-operacional/valoraciones-medicas',
+            init: 'initValoracionesMedicas',
+            destroy: 'destroyValoracionesMedicas',
+            nombre: 'Valoraciones Medicas del Personal',
+        },
+        'catalogo-vehiculos': {
+            base: 'modules/seguridad-operacional/sgd-operacional/catalogo-vehiculos',
+            init: 'initCatalogoVehiculos',
+            destroy: 'destroyCatalogoVehiculos',
+            nombre: 'Catalogo de Vehiculos',
+        },
+
+        // Seguridad Operacional · GOPA, GOET y GSM.
+        //
+        // Estos siete no venian de un archivo suelto: se encendian solos al
+        // cargar la pagina y adivinaban por su cuenta cuando se abria su
+        // seccion -- con DOMContentLoaded, con un clic sobre document, con un
+        // MutationObserver, o envolviendo window.showSection. BHS - Manejo de
+        // Maletas era ademas un <script> de 1193 lineas dentro de index.html.
+        'analisis-operaciones': {
+            base: 'modules/seguridad-operacional/parte-aeronautica/analisis-operaciones',
+            extras: ['filtros.js'],
+            init: 'initAnalisisOperaciones',
+            destroy: 'destroyAnalisisOperaciones',
+            nombre: 'Analisis de Operaciones',
+        },
+        'portal-digitalizacion': {
+            base: 'modules/seguridad-operacional/parte-aeronautica/portal-digital',
+            init: 'initPortalDigital',
+            destroy: 'destroyPortalDigital',
+            nombre: 'Portal Digital',
+        },
+        'abordadores-mecanicos': {
+            base: 'modules/seguridad-operacional/parte-aeronautica/abordadores-mecanicos',
+            init: 'initAbordadoresMecanicos',
+            destroy: 'destroyAbordadoresMecanicos',
+            nombre: 'Abordadores Mecanicos',
+        },
+        'biblioteca': {
+            base: 'modules/seguridad-operacional/parte-aeronautica/biblioteca',
+            init: 'initBiblioteca',
+            destroy: 'destroyBiblioteca',
+            nombre: 'Biblioteca',
+        },
+        'bhs': {
+            base: 'modules/seguridad-operacional/ed-terminal/bhs-maletas',
+            init: 'initBhsMaletas',
+            destroy: 'destroyBhsMaletas',
+            nombre: 'BHS - Manejo de Maletas',
+        },
+        'bhs-estadisticas-equipaje': {
+            base: 'modules/seguridad-operacional/ed-terminal/bhs-estadisticas',
+            init: 'initBhsBaggageStats',
+            destroy: 'destroyBhsBaggageStats',
+            nombre: 'Estadisticas de Equipaje del BHS',
+        },
+        'medicas': {
+            base: 'modules/seguridad-operacional/servicios-medicos/servicio-medico',
+            init: 'initMedicas',
+            destroy: 'destroyMedicas',
+            nombre: 'Servicio Medico',
+        },
+
+        // Direccion de Operacion.
+        //
+        // Colaboradores era la seccion mas grande de la aplicacion: 964 K y
+        // 13782 lineas dentro de index.html, con un <style> de casi 2900
+        // lineas, cuatro <script src> metidos DENTRO de la seccion y un
+        // <script> incrustado de 8566. Ademas envolvia window.showSection y
+        // hacia una precarga a los 1500 ms que se traia la plantilla entera
+        // aunque nadie fuera a abrirla.
+        //
+        // Agenda es el primer caso en el que se saca codigo de DENTRO de
+        // script.js y no un archivo entero: su gestion de permisos era un
+        // IIFE cerrado al final del monolito, y esta ahora en permisos.js.
+        'colaboradores': {
+            base: 'modules/operacion/coord-auditoria/colaboradores',
+            extras: ['directory-policy.js', 'foto-upload.js', 'documento-upload.js', 'visor-imagenes.js'],
+            init: 'initColaboradores',
+            destroy: 'destroyColaboradores',
+            nombre: 'Colaboradores',
+        },
+        'coord-auditoria': {
+            base: 'modules/operacion/coord-auditoria/vehiculos',
+            init: 'initVehiculos',
+            destroy: 'destroyVehiculos',
+            nombre: 'Vehiculos',
+        },
+        'muebles-bienes': {
+            base: 'modules/operacion/coord-auditoria/muebles-bienes',
+            init: 'initMueblesBienes',
+            destroy: 'destroyMueblesBienes',
+            nombre: 'Muebles y Bienes',
+        },
+        'agenda': {
+            base: 'modules/operacion/gpyc/agenda-comites',
+            extras: ['permisos.js', 'asistente.js'],
+            init: 'initAgendaComites',
+            destroy: 'destroyAgendaComites',
+            nombre: 'Agenda de Comites',
+        },
     };
 
     const VERSION = 'v=1';           // cache-busting, igual que el resto del proyecto

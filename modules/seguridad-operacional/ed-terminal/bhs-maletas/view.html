@@ -1,0 +1,410 @@
+                <style>
+                .bhs-upload-card{border:2px dashed #cbd5e1;border-radius:12px;transition:border-color .2s,background .2s;cursor:pointer;}
+                .bhs-upload-card:hover,.bhs-upload-card.dragover{border-color:#6366f1;background:#f5f3ff;}
+                .bhs-upload-card.ok{border-color:#16a34a;background:#f0fdf4;}
+                .bhs-upload-card.loading{border-color:#f59e0b;background:#fffbeb;}
+                .bhs-stat{font-size:1.6rem;font-weight:700;line-height:1;}
+
+                /* ── Pestañas BHS — diseño moderno ─────────────────────── */
+                .bhs-tabs-bar{background:linear-gradient(180deg,#f8fafc 0%,#f1f5f9 100%);border-bottom:1px solid #e2e8f0;padding:10px 14px !important;gap:8px !important;border-radius:14px 14px 0 0;}
+                .bhs-tab-btn{position:relative;display:inline-flex;align-items:center;gap:8px;padding:8px 18px !important;border-radius:999px !important;border:1px solid transparent !important;background:#fff;color:#475569;font-weight:600;font-size:.82rem;letter-spacing:.01em;box-shadow:0 1px 2px rgba(15,23,42,.04),0 0 0 1px rgba(15,23,42,.05);transition:all .25s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+                .bhs-tab-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,0) 0%,rgba(99,102,241,0) 100%);opacity:0;transition:opacity .25s ease;border-radius:inherit;pointer-events:none;}
+                .bhs-tab-btn i{font-size:.85rem;transition:transform .25s ease;}
+                .bhs-tab-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(15,23,42,.08),0 0 0 1px rgba(15,23,42,.06);color:#1e293b;background:#fff;}
+                .bhs-tab-btn:hover i{transform:scale(1.1);}
+                .bhs-tab-btn:focus{outline:none;box-shadow:0 0 0 3px rgba(99,102,241,.25),0 1px 2px rgba(15,23,42,.04);}
+
+                /* Estado activo: gradiente + sombra de color por tipo */
+                .bhs-tab-btn.active{color:#fff !important;border-color:transparent !important;transform:translateY(-1px);}
+                .bhs-tab-btn.active i{color:#fff;}
+                /* Llegadas (azul) */
+                .bhs-tab-btn[onclick*="'arr'"].active{background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%) !important;box-shadow:0 6px 16px rgba(37,99,235,.35),0 1px 3px rgba(37,99,235,.2);}
+                .bhs-tab-btn[onclick*="'arr'"]:not(.active) i{color:#3b82f6;}
+                /* Salidas (naranja) */
+                .bhs-tab-btn[onclick*="'dep'"].active{background:linear-gradient(135deg,#fb923c 0%,#ea580c 100%) !important;box-shadow:0 6px 16px rgba(234,88,12,.35),0 1px 3px rgba(234,88,12,.2);}
+                .bhs-tab-btn[onclick*="'dep'"]:not(.active) i{color:#ea580c;}
+                /* Sin Vuelo (verde) */
+                .bhs-tab-btn[onclick*="'bwf'"].active{background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%) !important;box-shadow:0 6px 16px rgba(22,163,74,.35),0 1px 3px rgba(22,163,74,.2);}
+                .bhs-tab-btn[onclick*="'bwf'"]:not(.active) i{color:#16a34a;}
+
+                /* Indicador animado debajo del activo */
+                .bhs-tab-btn.active::after{content:"";position:absolute;left:50%;bottom:-12px;width:24px;height:3px;border-radius:2px 2px 0 0;background:currentColor;opacity:.85;transform:translateX(-50%);animation:bhsTabSlide .3s cubic-bezier(.4,0,.2,1);}
+                @keyframes bhsTabSlide{from{width:0;opacity:0;}to{width:24px;opacity:.85;}}
+
+                /* Badge de fecha cargada */
+                #bhs-loaded-date{background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%) !important;color:#4338ca !important;border:1px solid #c7d2fe;padding:6px 12px !important;border-radius:999px;font-weight:600;letter-spacing:.02em;}
+
+                /* ── Capacidades máximas del Sistema BHS ─────────────────── */
+                .bhs-cap-panel{border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 12px 34px rgba(15,23,42,.12),0 2px 6px rgba(15,23,42,.06);border:1px solid #eef2f7;}
+                .bhs-cap-head{display:flex;align-items:center;gap:14px;padding:18px 22px;background:linear-gradient(120deg,#0f2444 0%,#1e3a5f 55%,#2a4a7a 100%);position:relative;overflow:hidden;}
+                .bhs-cap-head::after{content:"";position:absolute;right:-50px;top:-70px;width:220px;height:220px;background:radial-gradient(circle,rgba(99,132,241,.38),transparent 70%);pointer-events:none;}
+                .bhs-cap-head-icon{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;flex-shrink:0;z-index:1;}
+                .bhs-cap-title{color:#fff;font-weight:700;font-size:1.05rem;letter-spacing:.01em;line-height:1.15;z-index:1;}
+                .bhs-cap-sub{color:rgba(255,255,255,.72);font-size:.74rem;margin-top:2px;}
+                .bhs-cap-badge{margin-left:auto;background:rgba(255,255,255,.16);color:#fff;font-size:.7rem;font-weight:600;padding:6px 12px;border-radius:999px;white-space:nowrap;z-index:1;}
+                .bhs-cap-badge i{color:#fbbf24;margin-right:4px;}
+                .bhs-cap-body{padding:18px 22px 22px;display:flex;flex-direction:column;gap:16px;}
+                .bhs-cap-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:16px 18px;border-radius:14px;position:relative;overflow:hidden;background:#f8fafc;border:1px solid #eef2f7;}
+                .bhs-cap-row--dep{background:linear-gradient(120deg,#fff7ed 0%,#ffffff 62%);border-color:#fde3c7;}
+                .bhs-cap-row--arr{background:linear-gradient(120deg,#eff6ff 0%,#ffffff 62%);border-color:#cfe2fd;}
+                .bhs-cap-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;}
+                .bhs-cap-row--dep::before{background:linear-gradient(180deg,#fb923c,#ea580c);}
+                .bhs-cap-row--arr::before{background:linear-gradient(180deg,#3b82f6,#2563eb);}
+                .bhs-cap-rowlabel{display:flex;align-items:center;gap:12px;min-width:210px;flex:0 0 auto;}
+                .bhs-cap-rowicon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.15rem;flex-shrink:0;}
+                .bhs-cap-row--dep .bhs-cap-rowicon{background:linear-gradient(135deg,#fb923c,#ea580c);box-shadow:0 6px 14px rgba(234,88,12,.35);}
+                .bhs-cap-row--arr .bhs-cap-rowicon{background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 6px 14px rgba(37,99,235,.35);}
+                .bhs-cap-rowname{font-weight:700;color:#1e293b;font-size:.95rem;line-height:1.1;}
+                .bhs-cap-rownote{font-size:.72rem;color:#94a3b8;margin-top:2px;}
+                .bhs-cap-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex:1 1 420px;}
+                .bhs-cap-metric{background:#fff;border-radius:12px;padding:12px 10px;text-align:center;border:1px solid #eef2f7;box-shadow:0 1px 3px rgba(15,23,42,.05);transition:transform .2s ease,box-shadow .2s ease;}
+                .bhs-cap-metric:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(15,23,42,.12);}
+                .bhs-cap-num{font-size:1.35rem;font-weight:800;color:#0f2444;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.01em;}
+                .bhs-cap-unit{font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-top:5px;}
+                .bhs-cap-row--dep .bhs-cap-metric--year{background:linear-gradient(135deg,#ea580c,#c2410c);border-color:transparent;}
+                .bhs-cap-row--arr .bhs-cap-metric--year{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-color:transparent;}
+                .bhs-cap-metric--year .bhs-cap-num{color:#fff;}
+                .bhs-cap-metric--year .bhs-cap-unit{color:rgba(255,255,255,.82);}
+                @media (max-width:575px){.bhs-cap-metrics{grid-template-columns:repeat(2,1fr);}.bhs-cap-rowlabel{min-width:100%;}}
+                </style>
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                    <div>
+                        <h2 class="section-heading mb-0"><i class="fas fa-suitcase-rolling me-2"></i>BHS — Manejo de Maletas</h2>
+                        <small class="text-muted">Gerencia de Operaciones · Edificio Terminal</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="bhsToggleDates()" title="Ver fechas con datos"><i class="fas fa-calendar-alt me-1"></i>Fechas con datos</button>
+                        <label for="bhs-date-filter" class="small fw-semibold text-secondary mb-0">Fecha:</label>
+                        <input type="date" id="bhs-date-filter" class="form-control form-control-sm" style="width:160px;">
+                        <button class="btn btn-sm btn-outline-primary" onclick="bhsLoadDate()"><i class="fas fa-sync-alt me-1"></i>Cargar</button>
+                    </div>
+                </div>
+
+                <!-- ══ Capacidades máximas del Sistema BHS (datos clave) ══ -->
+                <div class="bhs-cap-panel mb-4">
+                    <div class="bhs-cap-head">
+                        <div class="bhs-cap-head-icon"><i class="fas fa-gauge-high"></i></div>
+                        <div>
+                            <div class="bhs-cap-title">Capacidades Máximas del Sistema BHS</div>
+                            <div class="bhs-cap-sub">Baggage Handling System · Aeropuerto Internacional Felipe Ángeles</div>
+                        </div>
+                        <span class="bhs-cap-badge"><i class="fas fa-bolt"></i>Datos clave</span>
+                    </div>
+                    <div class="bhs-cap-body">
+                        <!-- SALIDA -->
+                        <div class="bhs-cap-row bhs-cap-row--dep">
+                            <div class="bhs-cap-rowlabel">
+                                <span class="bhs-cap-rowicon"><i class="fas fa-plane-departure"></i></span>
+                                <div>
+                                    <div class="bhs-cap-rowname">Equipajes de Salida</div>
+                                    <div class="bhs-cap-rownote">Manejo máximo · Departures</div>
+                                </div>
+                            </div>
+                            <div class="bhs-cap-metrics">
+                                <div class="bhs-cap-metric"><div class="bhs-cap-num" data-bhs-count="5269">5,269</div><div class="bhs-cap-unit">por hora</div></div>
+                                <div class="bhs-cap-metric"><div class="bhs-cap-num" data-bhs-count="126456">126,456</div><div class="bhs-cap-unit">por día</div></div>
+                                <div class="bhs-cap-metric"><div class="bhs-cap-num" data-bhs-count="3793680">3,793,680</div><div class="bhs-cap-unit">al mes</div></div>
+                                <div class="bhs-cap-metric bhs-cap-metric--year"><div class="bhs-cap-num" data-bhs-count="46156440">46,156,440</div><div class="bhs-cap-unit">por año</div></div>
+                            </div>
+                        </div>
+                        <!-- LLEGADA -->
+                        <div class="bhs-cap-row bhs-cap-row--arr">
+                            <div class="bhs-cap-rowlabel">
+                                <span class="bhs-cap-rowicon"><i class="fas fa-plane-arrival"></i></span>
+                                <div>
+                                    <div class="bhs-cap-rowname">Equipajes de Llegada</div>
+                                    <div class="bhs-cap-rownote">Manejo máximo · Arrivals</div>
+                                </div>
+                            </div>
+                            <div class="bhs-cap-metrics">
+                                <div class="bhs-cap-metric"><div class="bhs-cap-num" data-bhs-count="4389">4,389</div><div class="bhs-cap-unit">por hora</div></div>
+                                <div class="bhs-cap-metric"><div class="bhs-cap-num" data-bhs-count="105336">105,336</div><div class="bhs-cap-unit">por día</div></div>
+                                <div class="bhs-cap-metric"><div class="bhs-cap-num" data-bhs-count="3160080">3,160,080</div><div class="bhs-cap-unit">al mes</div></div>
+                                <div class="bhs-cap-metric bhs-cap-metric--year"><div class="bhs-cap-num" data-bhs-count="38447640">38,447,640</div><div class="bhs-cap-unit">por año</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel fechas disponibles -->
+                <div id="bhs-dates-panel" class="d-none mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-2" style="border-color:#e2e8f0;">
+                            <span class="fw-semibold small"><i class="fas fa-calendar-check me-2 text-primary"></i>Fechas con datos en BHS</span>
+                            <button class="btn btn-xs btn-outline-secondary" onclick="bhsToggleDates()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row g-2" id="bhs-dates-list"><div class="col-12 text-muted small">Cargando…</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnóstico de columnas -->
+                <div id="bhs-col-diag" class="d-none mb-3">
+                    <div class="alert alert-info alert-dismissible py-2 mb-0" role="alert" style="font-size:.8rem;">
+                        <strong><i class="fas fa-info-circle me-1"></i>Columnas detectadas:</strong>
+                        <span id="bhs-col-diag-text"></span>
+                        <button type="button" class="btn-close btn-sm" onclick="document.getElementById('bhs-col-diag').classList.add('d-none')"></button>
+                    </div>
+                </div>
+
+                <!-- Modal: confirmar fecha del archivo -->
+                <div class="modal fade" id="bhs-date-modal" tabindex="-1" aria-labelledby="bhs-date-modal-label" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" style="max-width:380px;">
+                        <div class="modal-content shadow border-0">
+                            <div class="modal-header py-3" style="background:#1e3a5f;">
+                                <h6 class="modal-title text-white mb-0" id="bhs-date-modal-label">
+                                    <i class="fas fa-calendar-day me-2"></i>¿De qué fecha son los datos?
+                                </h6>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <p class="text-muted small mb-3" id="bhs-date-modal-desc">Archivo: <span id="bhs-date-modal-fname" class="fw-semibold text-dark"></span></p>
+                                <label class="form-label fw-semibold" style="font-size:.85rem;">Fecha de los datos</label>
+                                <input type="date" id="bhs-date-modal-input" class="form-control">
+                                <p class="text-muted mt-2 mb-0" style="font-size:.75rem;">Confirma la fecha a la que corresponden los registros de este archivo Excel.</p>
+                            </div>
+                            <div class="modal-footer py-2 gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                <button class="btn btn-primary btn-sm" id="bhs-date-modal-ok"><i class="fas fa-check me-1"></i>Procesar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload cards -->
+                <div class="row g-3 mb-4">
+                    <!-- ARRIVALS -->
+                    <div class="col-12 col-md-4">
+                        <div class="bhs-upload-card p-3 text-center h-100" id="bhs-arr-drop"
+                             onclick="document.getElementById('bhs-arr-input').click()"
+                             ondragover="event.preventDefault();this.classList.add('dragover')"
+                             ondragleave="this.classList.remove('dragover')"
+                             ondrop="bhsHandleDrop(event,'arrivals')">
+                            <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:#eff6ff;">
+                                <i class="fas fa-plane-arrival" style="color:#2196f3;font-size:1.2rem;"></i>
+                            </div>
+                            <div class="fw-semibold mb-1" style="color:#1e3a5f;">Llegadas (Arrivals)</div>
+                            <small class="text-muted d-block mb-2">Arrastra o haz click para cargar .xlsx</small>
+                            <div id="bhs-arr-status" class="small text-muted"></div>
+                            <input type="file" id="bhs-arr-input" accept=".xlsx,.xls" class="d-none" onchange="bhsHandleFile(this,'arrivals')">
+                        </div>
+                    </div>
+                    <!-- DEPARTURES -->
+                    <div class="col-12 col-md-4">
+                        <div class="bhs-upload-card p-3 text-center h-100" id="bhs-dep-drop"
+                             onclick="document.getElementById('bhs-dep-input').click()"
+                             ondragover="event.preventDefault();this.classList.add('dragover')"
+                             ondragleave="this.classList.remove('dragover')"
+                             ondrop="bhsHandleDrop(event,'departures')">
+                            <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:#fff7ed;">
+                                <i class="fas fa-plane-departure" style="color:#ea580c;font-size:1.2rem;"></i>
+                            </div>
+                            <div class="fw-semibold mb-1" style="color:#1e3a5f;">Salidas (Departures)</div>
+                            <small class="text-muted d-block mb-2">Arrastra o haz click para cargar .xlsx</small>
+                            <div id="bhs-dep-status" class="small text-muted"></div>
+                            <input type="file" id="bhs-dep-input" accept=".xlsx,.xls" class="d-none" onchange="bhsHandleFile(this,'departures')">
+                        </div>
+                    </div>
+                    <!-- BAGS WITHOUT FLIGHT -->
+                    <div class="col-12 col-md-4">
+                        <div class="bhs-upload-card p-3 text-center h-100" id="bhs-bwf-drop"
+                             onclick="document.getElementById('bhs-bwf-input').click()"
+                             ondragover="event.preventDefault();this.classList.add('dragover')"
+                             ondragleave="this.classList.remove('dragover')"
+                             ondrop="bhsHandleDrop(event,'bwf')">
+                            <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:#f0fdf4;">
+                                <i class="fas fa-tag" style="color:#16a34a;font-size:1.2rem;"></i>
+                            </div>
+                            <div class="fw-semibold mb-1" style="color:#1e3a5f;">Bags Without Flight</div>
+                            <small class="text-muted d-block mb-2">Arrastra o haz click para cargar .xlsx</small>
+                            <div id="bhs-bwf-status" class="small text-muted"></div>
+                            <input type="file" id="bhs-bwf-input" accept=".xlsx,.xls" class="d-none" onchange="bhsHandleFile(this,'bwf')">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs de resultados -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bhs-tabs-bar bg-white d-flex flex-wrap gap-2 py-2">
+                        <button class="btn btn-sm bhs-tab-btn active" onclick="bhsShowTab('arr',this)"><i class="fas fa-plane-arrival"></i>Llegadas</button>
+                        <button class="btn btn-sm bhs-tab-btn" onclick="bhsShowTab('dep',this)"><i class="fas fa-plane-departure"></i>Salidas</button>
+                        <button class="btn btn-sm bhs-tab-btn" onclick="bhsShowTab('bwf',this)"><i class="fas fa-tag"></i>Sin Vuelo</button>
+                        <span id="bhs-loaded-date" class="badge ms-auto align-self-center" style="font-size:.75rem;"></span>
+                    </div>
+
+                    <!-- TAB ARRIVALS -->
+                    <div id="bhs-tab-arr" class="p-3">
+                        <!-- KPIs -->
+                        <div class="row g-3 mb-3" id="bhs-arr-kpis">
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-primary" id="bhs-arr-total">—</div><small class="text-muted">Total maletas</small></div></div>
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-success" id="bhs-arr-term">—</div><small class="text-muted">Terminación</small></div></div>
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-warning" id="bhs-arr-tras">—</div><small class="text-muted">Tránsito</small></div></div>
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-secondary" id="bhs-arr-vuelos">—</div><small class="text-muted">Vuelos</small></div></div>
+                        </div>
+                        <!-- Airline summary cards with logos -->
+                        <div id="bhs-arr-al-cards" class="mb-4"></div>
+                        <!-- Analytics panel: charts -->
+                        <div id="bhs-arr-analytics" style="display:none;" class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span style="font-size:.75rem;font-weight:700;letter-spacing:.08em;color:#64748b;text-transform:uppercase;white-space:nowrap;"><i class="fas fa-chart-bar me-1 text-primary"></i>Análisis de llegadas</span>
+                                <div class="flex-grow-1" style="height:1px;background:#e2e8f0;"></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-lg-6">
+                                    <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px;height:100%;">
+                                        <div style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;">Maletas por aerolínea</div>
+                                        <div style="font-size:.7rem;color:#94a3b8;margin-bottom:14px;">Terminación y tránsito desagregados por aerolínea</div>
+                                        <canvas id="bhs-arr-chart-al" height="230"></canvas>
+                                        <div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap;">
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Terminación</span>
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Tránsito</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6" id="bhs-arr-peak-wrap" style="display:none;">
+                                    <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px;height:100%;">
+                                        <div style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;"><i class="fas fa-clock me-1"></i>Horas pico</div>
+                                        <div style="font-size:.7rem;color:#94a3b8;margin-bottom:14px;">Distribución de vuelos de llegada por hora del día</div>
+                                        <canvas id="bhs-arr-chart-peak" height="230"></canvas>
+                                        <div id="bhs-arr-peak-badges" style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Table header divider -->
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:#64748b;text-transform:uppercase;">Resumen por aerolínea</span>
+                            <div class="flex-grow-1" style="height:1px;background:#e2e8f0;"></div>
+                        </div>
+                        <!-- Tabla por aerolínea -->
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle text-center mb-0" id="bhs-arr-table">
+                                <thead class="table-light"><tr>
+                                    <th>Aerolínea</th><th>Vuelos</th><th>Total Maletas</th><th>Terminación</th><th>Tránsito</th><th>Posiciones</th>
+                                </tr></thead>
+                                <tbody><tr><td colspan="6" class="text-muted small py-4">Carga un archivo de Arrivals para ver los datos</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB DEPARTURES -->
+                    <div id="bhs-tab-dep" class="p-3 d-none">
+                        <!-- KPI strip -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-primary" id="bhs-dep-vuelos">—</div><small class="text-muted">Vuelos</small></div></div>
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-success" id="bhs-dep-avg-primera">—</div><small class="text-muted">Avg. anticip. 1ª maleta (min)</small></div></div>
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-warning" id="bhs-dep-avg-ultima">—</div><small class="text-muted">Avg. anticip. última (min)</small></div></div>
+                            <div class="col-6 col-md-3"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-danger" id="bhs-dep-tarde">—</div><small class="text-muted">Vuelos con última tardía</small></div></div>
+                        </div>
+
+                        <!-- ── ANALYTICS PANEL ── -->
+                        <div id="bhs-dep-analytics" style="display:none;" class="mb-4">
+                            <!-- Section header -->
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span style="font-size:.75rem;font-weight:700;letter-spacing:.08em;color:#64748b;text-transform:uppercase;white-space:nowrap;"><i class="fas fa-clock me-1 text-primary"></i>Análisis de anticipación al almacenamiento</span>
+                                <div class="flex-grow-1" style="height:1px;background:#e2e8f0;"></div>
+                                <span class="badge" style="background:#eff6ff;color:#1d4ed8;font-size:.68rem;font-weight:600;padding:4px 8px;border-radius:6px;white-space:nowrap;">Norma nacional: 2 h &nbsp;·&nbsp; Internacional: 3 h</span>
+                            </div>
+
+                            <!-- Airline summary cards -->
+                            <div id="bhs-dep-al-cards" class="mb-4"></div>
+
+                            <!-- Two charts -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-lg-6">
+                                    <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px;height:100%;">
+                                        <div style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;">Anticipación promedio por aerolínea</div>
+                                        <div style="font-size:.7rem;color:#94a3b8;margin-bottom:14px;">Minutos antes de la hora programada en que llegó la 1ª maleta</div>
+                                        <div style="position:relative;">
+                                            <canvas id="bhs-dep-chart-avg" height="230"></canvas>
+                                        </div>
+                                        <div id="bhs-dep-avg-legend" style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;">
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:18px;height:3px;background:#3b82f6;vertical-align:middle;margin-right:4px;border-radius:2px;"></span>Norma nac. 2h (120 min)</span>
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:18px;height:3px;background:#f59e0b;vertical-align:middle;margin-right:4px;border-radius:2px;"></span>Norma int. 3h (180 min)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px;height:100%;">
+                                        <div style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;">Distribución de vuelos por categoría</div>
+                                        <div style="font-size:.7rem;color:#94a3b8;margin-bottom:14px;">Cuántos vuelos caen en cada rango de anticipación, por aerolínea</div>
+                                        <canvas id="bhs-dep-chart-dist" height="230"></canvas>
+                                        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Muy temprano (&gt;3h)</span>
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:10px;height:10px;background:#3b82f6;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Normal (2–3h)</span>
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Justo (1–2h)</span>
+                                            <span style="font-size:.68rem;color:#64748b;"><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Tardío (&lt;1h)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- /analytics -->
+
+                        <!-- Detail table header -->
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:#64748b;text-transform:uppercase;">Detalle de vuelos</span>
+                            <div class="flex-grow-1" style="height:1px;background:#e2e8f0;"></div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle text-center mb-0" id="bhs-dep-table">
+                                <thead class="table-light"><tr>
+                                    <th>Vuelo</th><th>Aerolínea</th><th>Hora Prog.</th><th>Destino</th><th>Plat.</th><th>1ª Maleta</th><th>Última Maleta</th><th>ETD</th><th>Anticip. 1ª (min)</th><th>Anticip. Últ. (min)</th>
+                                </tr></thead>
+                                <tbody><tr><td colspan="10" class="text-muted small py-4">Carga un archivo de Departures para ver los datos</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB BWF -->
+                    <div id="bhs-tab-bwf" class="p-3 d-none">
+                        <!-- KPI strip -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-6 col-md-4"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-primary" id="bhs-bwf-total">—</div><small class="text-muted">Maletas procesadas manual</small></div></div>
+                            <div class="col-6 col-md-4"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-secondary" id="bhs-bwf-airlines">—</div><small class="text-muted">Aerolíneas distintas</small></div></div>
+                            <div class="col-6 col-md-4"><div class="card border-0 bg-light text-center p-3"><div class="bhs-stat text-warning" id="bhs-bwf-flights">—</div><small class="text-muted">Vuelos distintos</small></div></div>
+                        </div>
+                        <!-- Airline summary cards -->
+                        <div id="bhs-bwf-summary" class="mb-3"></div>
+                        <!-- Charts -->
+                        <div id="bhs-bwf-charts" class="mb-4" style="display:none;">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:#64748b;text-transform:uppercase;"><i class="fas fa-chart-pie me-1"></i>Distribución gráfica</span>
+                                <div class="flex-grow-1" style="height:1px;background:#e2e8f0;"></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-5">
+                                    <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px;">
+                                        <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;">Proporción por aerolínea</div>
+                                        <div style="position:relative;width:260px;height:260px;margin:0 auto;">
+                                            <canvas id="bhs-chart-donut"></canvas>
+                                            <div id="bhs-donut-center" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;"></div>
+                                        </div>
+                                        <div id="bhs-donut-legend" style="margin-top:12px;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-7">
+                                    <div class="card border-0" style="border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:20px;">
+                                        <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;">Maletas por aerolínea</div>
+                                        <canvas id="bhs-chart-bar" height="220"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Detail table -->
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span style="font-size:.75rem;font-weight:600;letter-spacing:.08em;color:#64748b;text-transform:uppercase;">Detalle de registros</span>
+                            <div class="flex-grow-1" style="height:1px;background:#e2e8f0;"></div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle text-center mb-0" id="bhs-bwf-table">
+                                <thead class="table-light"><tr>
+                                    <th>Tag</th><th>IATA</th><th>Aerolínea</th><th>Vuelo</th><th>Origen</th><th>Destino</th>
+                                </tr></thead>
+                                <tbody><tr><td colspan="6" class="text-muted small py-4">Carga un archivo de Bags Without Flight para ver los datos</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div><!-- /card -->
+

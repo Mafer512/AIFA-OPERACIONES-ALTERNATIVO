@@ -19,9 +19,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const { archivoDeModulo } = require('../test-utils/modulos.js');
 
 const FUENTE = fs.readFileSync(
-  path.resolve(__dirname, '..', 'js', 'colab-visor-imagenes.js'),
+  archivoDeModulo('colaboradores', 'visor-imagenes.js'),
   'utf8',
 );
 

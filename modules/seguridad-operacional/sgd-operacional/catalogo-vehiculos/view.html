@@ -1,0 +1,304 @@
+
+        <style>
+            .cv-kpi { border-radius:1rem; color:#fff; padding:1rem 1.25rem; position:relative; overflow:hidden; }
+            .cv-kpi::before { content:''; position:absolute; right:-14px; top:-14px; width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,.12); }
+            .cv-kpi--indigo { background:linear-gradient(135deg,#4f46e5,#312e81); }
+            .cv-kpi--blue   { background:linear-gradient(135deg,#2563eb,#1e3a8a); }
+            .cv-kpi--teal   { background:linear-gradient(135deg,#0d9488,#134e4a); }
+            .cv-kpi--green  { background:linear-gradient(135deg,#16a34a,#14532d); }
+            .cv-kpi-icon { font-size:1.6rem; opacity:.85; margin-bottom:.3rem; }
+            .cv-kpi-val  { font-size:2rem; font-weight:800; line-height:1; }
+            .cv-kpi-lbl  { font-size:.62rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; opacity:.85; margin-top:.25rem; }
+            .cv-chart-wrap { position:relative; height:220px; }
+            #cv-tbl thead th { font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:#475569; white-space:nowrap; }
+            .opacity-60 { opacity:.6; }
+        </style>
+
+        <div class="card border-0 shadow-sm" style="border-radius:1.2rem;">
+            <div class="card-body p-4">
+
+                <!-- Encabezado -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color:#1e293b;">
+                            <span class="badge me-2" style="background:#4f46e5;font-size:.75rem;vertical-align:middle;">
+                                <i class="fas fa-car"></i>
+                            </span>
+                            Catálogo de Vehículos
+                        </h5>
+                        <p class="text-muted mb-0" style="font-size:.78rem;">
+                            Registro del parque vehicular · Supabase en tiempo real
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button id="cv-refresh-btn" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar
+                        </button>
+                        <button id="cv-csv-btn" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                            <i class="fas fa-file-csv me-1"></i>Exportar CSV
+                        </button>
+                        <button id="cv-add-btn" class="btn btn-sm rounded-pill px-3 d-none"
+                                style="background:#4f46e5;color:#fff;border:none;">
+                            <i class="fas fa-plus me-1"></i>Nuevo Vehículo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div id="cv-status" class="alert d-none mb-3 py-2" role="alert"></div>
+
+                <!-- KPIs -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-sm-3">
+                        <div class="cv-kpi cv-kpi--indigo">
+                            <div class="cv-kpi-icon"><i class="fas fa-car-side"></i></div>
+                            <div class="cv-kpi-val" id="cv-kpi-total">—</div>
+                            <div class="cv-kpi-lbl">Total vehículos</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="cv-kpi cv-kpi--green">
+                            <div class="cv-kpi-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="cv-kpi-val" id="cv-kpi-activos">—</div>
+                            <div class="cv-kpi-lbl">Activos</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="cv-kpi cv-kpi--teal">
+                            <div class="cv-kpi-icon"><i class="fas fa-tags"></i></div>
+                            <div class="cv-kpi-val" id="cv-kpi-tipos">—</div>
+                            <div class="cv-kpi-lbl">Tipos de vehículo</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="cv-kpi cv-kpi--blue">
+                            <div class="cv-kpi-icon"><i class="fas fa-industry"></i></div>
+                            <div class="cv-kpi-val" id="cv-kpi-marcas">—</div>
+                            <div class="cv-kpi-lbl">Marcas distintas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficas fila 1 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-tags me-1" style="color:#4f46e5;"></i>Por tipo de vehículo
+                            </div>
+                            <div class="cv-chart-wrap">
+                                <canvas id="cv-chart-tipo"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-industry me-1 text-primary"></i>Unidades por marca
+                            </div>
+                            <div class="cv-chart-wrap">
+                                <canvas id="cv-chart-marca"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficas fila 2 -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-gas-pump me-1 text-success"></i>Por tipo de combustible
+                            </div>
+                            <div class="cv-chart-wrap">
+                                <canvas id="cv-chart-combustible"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-traffic-light me-1 text-warning"></i>Estado del parque vehicular
+                            </div>
+                            <div class="cv-chart-wrap">
+                                <canvas id="cv-chart-estado"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros + Tabla -->
+                <div class="card border-0 bg-light rounded-4 p-3">
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-12 col-sm-4 col-md-2">
+                            <label class="form-label small fw-semibold mb-1">Marca</label>
+                            <select id="cv-fil-marca" class="form-select form-select-sm">
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-sm-4 col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Tipo</label>
+                            <select id="cv-fil-tipo" class="form-select form-select-sm">
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-sm-4 col-md-2">
+                            <label class="form-label small fw-semibold mb-1">Estado</label>
+                            <select id="cv-fil-estado" class="form-select form-select-sm">
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Buscar</label>
+                            <input id="cv-fil-buscar" type="text" class="form-control form-control-sm"
+                                   placeholder="No. eco, marca, placas, color…" />
+                        </div>
+                        <div class="col-12 col-md-2 d-flex align-items-end justify-content-end">
+                            <span id="cv-tbl-count" class="text-muted small"></span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="cv-tbl" class="table table-hover table-sm mb-2 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th data-sort="numero_economico" data-label="No. Eco">No. Eco</th>
+                                    <th data-sort="marca"            data-label="Marca">Marca</th>
+                                    <th data-sort="tipo_vehiculo"    data-label="Tipo">Tipo</th>
+                                    <th class="text-center">Placas</th>
+                                    <th>Color</th>
+                                    <th>Combustible</th>
+                                    <th>Transmisión</th>
+                                    <th data-sort="estado"           data-label="Estado" class="text-center">Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cv-tbl-body">
+                                <tr><td colspan="9" class="text-center text-muted py-4">
+                                    <i class="fas fa-spinner fa-spin me-1"></i>Cargando…
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div id="cv-pagination" class="d-flex align-items-center gap-2 mt-1"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             Modal: Nuevo / Editar Vehículo
+        ═══════════════════════════════════════════════════════════ -->
+        <div class="modal fade" id="cv-modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg" style="border-radius:1.2rem;">
+
+                    <div class="modal-header text-white border-0 rounded-top-4"
+                         style="background:linear-gradient(135deg,#4f46e5,#312e81);">
+                        <h5 class="modal-title fw-bold" id="cv-modal-title">
+                            <i class="fas fa-car me-2"></i>Nuevo Vehículo
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+
+                            <!-- Código AIFA / No. Económico / Marca / Tipo -->
+                            <div class="col-sm-3">
+                                <label class="form-label small fw-semibold" for="cv-f-codigo">
+                                    Código AIFA <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="cv-f-codigo" class="form-control form-control-sm"
+                                       placeholder="Ej. AIFA-53" style="text-transform:uppercase;" />
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label small fw-semibold" for="cv-f-numeco">
+                                    Número económico <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="cv-f-numeco" class="form-control form-control-sm"
+                                       placeholder="Ej. A-001" />
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label small fw-semibold" for="cv-f-marca">
+                                    Marca <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="cv-f-marca" class="form-control form-control-sm"
+                                       placeholder="Ej. Toyota, Ford…" />
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="form-label small fw-semibold" for="cv-f-tipo">
+                                    Tipo de vehículo <span class="text-danger">*</span>
+                                </label>
+                                <select id="cv-f-tipo" class="form-select form-select-sm">
+                                    <option value="">— Seleccionar —</option>
+                                </select>
+                            </div>
+
+                            <!-- Placas / Color / No. Serie -->
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="cv-f-placas">Placas</label>
+                                <input type="text" id="cv-f-placas" class="form-control form-control-sm"
+                                       placeholder="Ej. ABC-1234" style="text-transform:uppercase;" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="cv-f-color">Color</label>
+                                <input type="text" id="cv-f-color" class="form-control form-control-sm"
+                                       placeholder="Ej. Blanco" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="cv-f-serie">Número de serie</label>
+                                <input type="text" id="cv-f-serie" class="form-control form-control-sm"
+                                       placeholder="VIN o no. de serie" />
+                            </div>
+
+                            <!-- Combustible / Transmisión / Estado -->
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="cv-f-combustible">Combustible</label>
+                                <select id="cv-f-combustible" class="form-select form-select-sm">
+                                    <option value="">— Seleccionar —</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="cv-f-transmision">Transmisión</label>
+                                <select id="cv-f-transmision" class="form-select form-select-sm">
+                                    <option value="">— Seleccionar —</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="cv-f-estado">
+                                    Estado <span class="text-danger">*</span>
+                                </label>
+                                <select id="cv-f-estado" class="form-select form-select-sm">
+                                    <option value="">— Seleccionar —</option>
+                                </select>
+                            </div>
+
+                            <!-- Notas -->
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold" for="cv-f-notas">Notas / Observaciones</label>
+                                <textarea id="cv-f-notas" class="form-control form-control-sm" rows="3"
+                                          placeholder="Información adicional del vehículo…"></textarea>
+                            </div>
+
+                        </div>
+
+                        <div id="cv-modal-msg" class="d-none mt-3" role="alert"></div>
+                    </div>
+
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                                data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" id="cv-modal-save"
+                                class="btn rounded-pill px-4 text-white fw-semibold"
+                                style="background:#4f46e5;border:none;">
+                            <i class="fas fa-save me-1"></i>Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div><!-- /modal -->
+

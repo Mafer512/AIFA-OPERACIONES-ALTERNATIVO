@@ -11,10 +11,14 @@
 
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto } = require('../test-utils/modulos.js');
 
 const raiz = path.resolve(__dirname, '..');
 const portalHtml = fs.readFileSync(path.join(raiz, 'colaborador-registro.html'), 'utf8');
-const app = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
+const app = htmlCompleto();
 
 /** El portal montado en jsdom, sin ejecutar sus scripts. */
 function montarPortal() {

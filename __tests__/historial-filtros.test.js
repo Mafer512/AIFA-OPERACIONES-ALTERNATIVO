@@ -10,9 +10,13 @@
 
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto } = require('../test-utils/modulos.js');
 
 const raiz = path.resolve(__dirname, '..');
-const app = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
+const app = htmlCompleto();
 const script = fs.readFileSync(path.join(raiz, 'script.js'), 'utf8');
 
 function trozo(texto, desde, hasta) {

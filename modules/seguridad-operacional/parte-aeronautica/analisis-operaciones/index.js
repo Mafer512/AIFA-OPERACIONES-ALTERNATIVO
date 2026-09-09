@@ -4518,13 +4518,26 @@ window.addEventListener('analisis-operaciones:visible', () => {
     try { init(); } catch (e) { console.error('[analisis-operaciones] init error', e); }
 });
 
-// Init directo si la sección ya está activa al cargar (deep-link / refresh)
-document.addEventListener('DOMContentLoaded', () => {
-    const sec = document.getElementById('analisis-operaciones-section');
-    if (sec && sec.classList.contains('active')) {
-        try { init(); } catch (e) { console.error('[analisis-operaciones] init error', e); }
-    }
-});
+// El arranque por deep-link colgaba de DOMContentLoaded. Ya no hace falta:
+// el loader trae este archivo la primera vez que se abre la seccion y llama
+// a initAnalisisOperaciones(), tambien cuando se llega por URL directa.
+window.initAnalisisOperaciones = function () {
+    try { if (typeof window.initAnalisisOperacionesFiltros === 'function') window.initAnalisisOperacionesFiltros(); } catch (_) {}
+    // Se sigue disparando el evento en vez de llamar a init() a secas: no es
+    // el unico que escucha -- js/demoras-upload.js tambien se entera por aqui.
+    try { window.dispatchEvent(new Event('analisis-operaciones:visible')); } catch (_) {}
+};
+
+// Al salir se sueltan las graficas de Chart.js, que se acumulaban visita
+// tras visita. Los datos ya cargados se conservan.
+window.destroyAnalisisOperaciones = function () {
+    try {
+        Object.keys(_chartInstances).forEach((id) => {
+            try { _chartInstances[id].destroy(); } catch (_) {}
+            delete _chartInstances[id];
+        });
+    } catch (_) {}
+};
 
 window.AnalisisOperacionesModule = {
     init,

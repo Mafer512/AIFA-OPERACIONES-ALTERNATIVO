@@ -79,7 +79,12 @@ describe('el shell ya no carga estos módulos', () => {
     // Los dos venían pegados en la MISMA línea del pie:
     //   <script src="js/catalogo-vehiculos.js?v=2"></script>    <script src="js/capacidad-carga.js?v=4"></script>
     // Un recorte por líneas se habría llevado los dos sin decir nada.
-    expect(indexHtml).toContain('js/catalogo-vehiculos.js');
+    //
+    // El vecino, catalogo-vehiculos, tambien salio despues -- pero por la
+    // puerta: como modulo registrado, no por un recorte descuidado. Eso es
+    // lo que se comprueba ahora, porque su <script> ya no debe existir.
+    expect(registroDeModulos().has('catalogo-vehiculos')).toBe(true);
+    expect(indexHtml).not.toContain('js/catalogo-vehiculos.js');
   });
 });
 
@@ -249,11 +254,17 @@ describe('seguridad', () => {
 });
 
 // ─── Todo el registro, no sólo esta categoría ───────────────────────────────
-describe('invariantes que valen para los nueve módulos extraídos', () => {
+describe('invariantes que valen para todos los módulos extraídos', () => {
   const registro = [...registroDeModulos()].map(([clave, base]) => ({ clave, base }));
 
-  test('son nueve: tres categorías completas', () => {
-    expect(registro).toHaveLength(9);
+  test('el registro y el shell dicen lo mismo', () => {
+    // Antes esto fijaba un numero, y habia que corregirlo en cada categoria
+    // nueva. Lo que de verdad importa no es cuantos son, sino que el registro
+    // del loader y los contenedores de index.html no se desincronicen: un
+    // modulo registrado sin contenedor no abre, y un contenedor sin entrada en
+    // el registro se queda vacio para siempre.
+    const contenedores = [...indexHtml.matchAll(/data-modulo="([a-z0-9-]+)"/g)].map((m) => m[1]);
+    expect(contenedores.sort()).toEqual(registro.map((r) => r.clave).sort());
   });
 
   test.each(registro)('$clave tiene vista y código donde dice el registro', ({ base }) => {
@@ -262,7 +273,13 @@ describe('invariantes que valen para los nueve módulos extraídos', () => {
   });
 
   test.each(registro)('el shell deja $clave como contenedor vacío', ({ clave }) => {
-    expect(indexHtml).toContain(`<div id="${clave}-section" class="content-section" data-modulo="${clave}"></div>`);
+    // Algunos contenedores llevan clases extra que la sección ya tenía —
+    // Muebles y Bienes es container-fluid, Resumen General era active—, así que
+    // se comprueba la forma, no una cadena literal: mismo id, clase
+    // content-section, data-modulo con su clave, y vacío.
+    expect(indexHtml).toMatch(
+      new RegExp('<div id="' + clave + '-section" class="content-section[^"]*" data-modulo="' + clave + '"></div>')
+    );
   });
 
   test.each(registro)('la vista de $clave no se envuelve a sí misma en la sección', ({ base }) => {

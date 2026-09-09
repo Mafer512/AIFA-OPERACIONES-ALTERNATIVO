@@ -1,0 +1,197 @@
+                    <div class="card border-0">
+                        <div
+                            class="card-header bg-transparent d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                            <div>
+                                <h2 class="section-title mb-1">Servicio Médico</h2>
+                            </div>
+                            <a id="servicio-medico-open" class="btn btn-outline-primary btn-sm d-none" href="#"
+                                target="_blank" rel="noopener">
+                                <i class="fas fa-external-link-alt me-1"></i>Abrir en Google Docs
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs mb-3" id="medicasTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="medicas-comp-tab" data-bs-toggle="tab"
+                                        data-bs-target="#medicas-comp-pane" type="button" role="tab"
+                                        aria-controls="medicas-comp-pane" aria-selected="true"><i
+                                            class="fas fa-chart-area me-2"></i>Atenciones Médicas (Comparación
+                                        Mensual)</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="medicas-directorio-tab" data-bs-toggle="tab"
+                                        data-bs-target="#medicas-directorio-pane" type="button" role="tab"
+                                        aria-controls="medicas-directorio-pane" aria-selected="false"><i
+                                            class="fas fa-address-book me-2"></i>Directorio</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="medicas-tipo-tab" data-bs-toggle="tab"
+                                        data-bs-target="#medicas-tipo-pane" type="button" role="tab"
+                                        aria-controls="medicas-tipo-pane" aria-selected="false"><i
+                                            class="fas fa-user-nurse me-2"></i>Tipo de Atención</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="medicas-atenciones-tab" data-bs-toggle="tab"
+                                        data-bs-target="#medicas-atenciones-pane" type="button" role="tab"
+                                        aria-controls="medicas-atenciones-pane" aria-selected="false"><i
+                                            class="fas fa-chart-column me-2"></i>Atenciones médicas AIFA</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="medicasTabsContent">
+                                <div id="medicas-directorio-pane" class="tab-pane fade" role="tabpanel"
+                                    aria-labelledby="medicas-directorio-tab" tabindex="0">
+                                    <div class="card border-0 shadow-sm medicas-directorio-card">
+                                        <div class="card-body">
+                                            <div
+                                                class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-3">
+                                                <div>
+                                                    <h3 class="h6 mb-1 text-uppercase text-muted">Directorio
+                                                        operativo
+                                                        2025</h3>
+                                                    <p class="mb-0 small text-muted">Haz click en el nombre de cada
+                                                        documento para abrir el PDF correspondiente.</p>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                        id="medicas-directorio-reload">
+                                                        <i class="fas fa-rotate-right me-1"></i>Actualizar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div id="medicas-directorio-alert" class="alert alert-info d-none"
+                                                role="status">
+                                            </div>
+                                            <div id="medicas-directorio-loader" class="text-center py-4" role="status"
+                                                aria-live="polite">
+                                                <div class="spinner-border text-primary" role="status"
+                                                    aria-hidden="true"></div>
+                                                <div class="mt-2 small text-muted">Cargando directorio...</div>
+                                            </div>
+                                            <div id="medicas-directorio-list" class="row g-3"
+                                                data-doc-base="pdfs/directorio">
+                                            </div>
+                                            <div id="medicas-directorio-empty" class="alert alert-warning d-none mb-0"
+                                                role="status">
+                                                No hay registros de directorio disponibles. Verifica el archivo
+                                                <code>data/directorio.json</code> y vuelve a intentarlo.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="medicas-atenciones-pane" class="tab-pane fade" role="tabpanel"
+                                    aria-labelledby="medicas-atenciones-tab" tabindex="0">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-uppercase text-muted small fw-semibold">Vista
+                                                        histórica</span>
+                                                    <span class="fw-semibold" id="medicas-atenciones-resumen">-</span>
+                                                </div>
+                                                <div class="ms-auto d-flex flex-wrap align-items-center gap-2">
+                                                    <label for="medicas-atenciones-year"
+                                                        class="small text-muted fw-semibold mb-0"><i
+                                                            class="fas fa-filter me-1"></i>Año</label>
+                                                    <select id="medicas-atenciones-year"
+                                                        class="form-select form-select-sm" aria-label="Filtrar por año">
+                                                        <option value="all" selected>Todos</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="chart-container chart-height-420">
+                                                <div id="medicasAtencionesChart" class="echart-host w-100 h-100">
+                                                </div>
+                                            </div>
+                                            <p class="small text-muted mt-3 mb-0">Fuente: Servicio Médico AIFA.
+                                                Datos
+                                                2022 a 2025 (cifras preliminares).</p>
+                                            <div class="mt-4">
+                                                <h6 class="text-muted mb-2"><i class="fas fa-table me-1"></i>Detalle
+                                                    de
+                                                    registros</h6>
+                                                <div id="medicas-atenciones-table" class="table-container-tech">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="medicas-tipo-pane" class="tab-pane fade" role="tabpanel"
+                                    aria-labelledby="medicas-tipo-tab" tabindex="0">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-uppercase text-muted small fw-semibold">Tipo
+                                                        de
+                                                        atención</span>
+                                                    <span class="fw-semibold" id="medicas-tipo-resumen">-</span>
+                                                </div>
+                                                <div class="ms-auto d-flex flex-wrap align-items-center gap-2">
+                                                    <label for="medicas-tipo-year"
+                                                        class="small text-muted fw-semibold mb-0"><i
+                                                            class="fas fa-filter me-1"></i>Año</label>
+                                                    <select id="medicas-tipo-year" class="form-select form-select-sm"
+                                                        aria-label="Filtrar por año">
+                                                        <option value="all" selected>Todos</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="chart-container chart-height-420">
+                                                <div id="medicasTipoChart" class="echart-host w-100 h-100"></div>
+                                            </div>
+                                            <p class="small text-muted mt-3 mb-0">Fuente: Servicio Médico AIFA.
+                                                Traslados vs. atenciones ambulatorias.</p>
+                                            <div class="mt-4">
+                                                <h6 class="text-muted mb-2"><i class="fas fa-table me-1"></i>Detalle
+                                                    de
+                                                    registros</h6>
+                                                <div id="medicas-tipo-table" class="table-container-tech"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="medicas-comp-pane" class="tab-pane fade show active" role="tabpanel"
+                                    aria-labelledby="medicas-comp-tab" tabindex="0">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex flex-wrap align-items-start gap-3 mb-3">
+                                                <div class="d-flex flex-column">
+                                                    <span
+                                                        class="text-uppercase text-muted small fw-semibold">Comparación
+                                                        mensual</span>
+                                                    <span class="fw-semibold" id="medicas-comp-resumen">-</span>
+                                                </div>
+                                                <div
+                                                    class="ms-auto d-flex flex-column flex-lg-row align-items-lg-center gap-2 w-100 w-lg-auto">
+                                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                                        <span class="small text-muted fw-semibold"><i
+                                                                class="fas fa-filter me-1"></i>Años</span>
+                                                        <div id="medicas-comp-years" class="d-flex flex-wrap gap-2">
+                                                        </div>
+                                                    </div>
+                                                    <div class="btn-group btn-group-sm mt-2 mt-lg-0" role="group"
+                                                        aria-label="Selección de años">
+                                                        <button type="button" class="btn btn-outline-secondary"
+                                                            id="medicas-comp-select-all">Todos</button>
+                                                        <button type="button" class="btn btn-outline-secondary"
+                                                            id="medicas-comp-select-none">Ninguno</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="chart-container chart-height-420">
+                                                <div id="medicasCompChart" class="echart-host w-100 h-100"></div>
+                                            </div>
+                                            <p class="small text-muted mt-3 mb-0">Fuente: Servicio Médico AIFA.
+                                                Totales
+                                                mensuales comparados por año.</p>
+                                            <div class="mt-4">
+                                                <h6 class="text-muted mb-2"><i class="fas fa-table me-1"></i>Base de
+                                                    datos mensual</h6>
+                                                <div id="medicas-comp-table" class="table-container-tech"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>

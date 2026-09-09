@@ -98,21 +98,11 @@
                 if (el) { el.addEventListener('change', applyFilters); el.addEventListener('input', applyFilters); }
             });
 
-        // Carga cuando el usuario navega a la sección (click en el menú lateral)
-        document.addEventListener('click', e => {
-            const mn = e.target.closest('[data-section="portal-digitalizacion"]');
-            if (mn && !loaded) { setTimeout(loadAll, 120); }
-        });
+        // Aqui habia un listener de clic sobre document que buscaba la entrada
+        // del menu, y mas abajo un MutationObserver espiando la clase "active"
+        // de la seccion. Los dos existian para adivinar cuando se abria el
+        // modulo. Ahora lo dice el loader, llamando a initPortalDigital().
 
-        // También detectar cuando la sección recibe la clase 'active'
-        const section = $('portal-digitalizacion-section');
-        if (section) {
-            new MutationObserver(() => {
-                if (section.classList.contains('active') && !loaded) {
-                    loadAll();
-                }
-            }).observe(section, { attributes: true, attributeFilter: ['class'] });
-        }
     }
 
     /* ================================================================
@@ -577,12 +567,17 @@
     }
 
     /* ================================================================
-       ARRANQUE
+       ARRANQUE  ·  contrato de ciclo de vida del modulo
        ================================================================ */
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+    var _arrancado = false;
+
+    window.initPortalDigital = function () {
+        if (!_arrancado) { _arrancado = true; init(); }
+        if (!loaded) loadAll();
+    };
+
+    // No hay graficas ni temporizadores que soltar; los datos ya traidos se
+    // conservan, y "loaded" evita volver a pedirlos al reentrar.
+    window.destroyPortalDigital = function () {};
 
 })();

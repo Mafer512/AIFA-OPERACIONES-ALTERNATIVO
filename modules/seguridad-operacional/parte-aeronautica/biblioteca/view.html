@@ -1,0 +1,499 @@
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="section-heading mb-0"><i class="fas fa-book me-2"></i>Biblioteca Digital</h2>
+                    </div>
+
+                    <!-- Biblioteca Tabs Navigation -->
+                    <ul class="nav nav-pills mb-4" id="biblioteca-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="bib-docs-tab" data-bs-toggle="pill" data-bs-target="#bib-docs"
+                                type="button" role="tab"><i class="fas fa-folder-open me-2"></i>Documentos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="bib-map-tab" data-bs-toggle="pill" data-bs-target="#bib-map"
+                                type="button" role="tab"><i class="fas fa-satellite me-2"></i>Mapa Satelital</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="bib-guia-tab" data-bs-toggle="pill" data-bs-target="#bib-guia"
+                                type="button" role="tab"><i class="fas fa-rocket me-2"></i>Guía Rápida</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="biblioteca-tabs-content">
+                        <!-- Documentos Tab -->
+                        <div class="tab-pane fade show active" id="bib-docs" role="tabpanel">
+                            <div class="row g-4" id="library-dynamic-container">
+                                <div class="col-12 text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Cargando biblioteca...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mapa Tab -->
+                        <div class="tab-pane fade" id="bib-map" role="tabpanel">
+                            <div class="card shadow-sm border-0 overflow-hidden">
+                                <div
+                                    class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 text-primary"><i class="fas fa-globe-americas me-2"></i>Vista
+                                        Satelital (Google Earth)</h5>
+                                    <a href="https://earth.google.com/web/@19.7431,-99.0125,2247a,5010.5d,35y,0h,0t,0r"
+                                        target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i> Abrir en Google Earth
+                                    </a>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="map-container-wrapper">
+                                        <iframe width="100%" height="650" frameborder="0" style="border:0;"
+                                            title="Vista Satelital Oficial AIFA"
+                                            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d14896.47195325062!2d-99.01248!3d19.7431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1ses-419!2smx!4v1715620000000!5m2!1ses-419!2smx&maptype=satellite"
+                                            allowfullscreen="" loading="lazy">
+                                        </iframe>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light py-2">
+                                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Vista satelital
+                                        oficial del AIFA proporcionada por Google Maps.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Guía Rápida Tab -->
+                        <div class="tab-pane fade" id="bib-guia" role="tabpanel">
+
+                            <!-- Interactive Quick Reference -->
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header py-3" style="background:linear-gradient(135deg,#0891b2 0%,#0e7490 100%); color:white;">
+                                    <h5 class="mb-1"><i class="fas fa-bolt me-2"></i>Referencia Rápida Interactiva</h5>
+                                    <small class="opacity-75">Basada en la Guía de Acceso Rápido — Coordinación de Slots y Demoras AIFA</small>
+                                </div>
+                                <div class="card-body p-3">
+
+                                    <!-- Quick nav cards -->
+                                    <div class="row g-2 mb-4">
+                                        <div class="col-6 col-md-2">
+                                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-2 rounded-3 h-100" style="min-height:90px;background:#f0f9ff;border:2px solid #bae6fd;cursor:pointer;" role="button" tabindex="0" aria-label="Clasificación OACI" onclick="document.getElementById('guia-btn-1').click()" onkeypress="if(event.key==='Enter') document.getElementById('guia-btn-1').click()">
+                                                <i class="fas fa-plane fa-2x mb-1" style="color:#0369a1;"></i>
+                                                <div class="fw-semibold" style="font-size:.72rem;color:#0369a1;">Clasificación<br>OACI</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-2 rounded-3 h-100" style="min-height:90px;background:#f0fdf4;border:2px solid #bbf7d0;cursor:pointer;" role="button" tabindex="0" aria-label="Capacidad AIFA" onclick="document.getElementById('guia-btn-2').click()" onkeypress="if(event.key==='Enter') document.getElementById('guia-btn-2').click()">
+                                                <i class="fas fa-parking fa-2x mb-1" style="color:#166534;"></i>
+                                                <div class="fw-semibold" style="font-size:.72rem;color:#166534;">Capacidad<br>AIFA</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-2 rounded-3 h-100" style="min-height:90px;background:#fff7ed;border:2px solid #fed7aa;cursor:pointer;" role="button" tabindex="0" aria-label="Proceso de Slots" onclick="document.getElementById('guia-btn-3').click()" onkeypress="if(event.key==='Enter') document.getElementById('guia-btn-3').click()">
+                                                <i class="fas fa-clock fa-2x mb-1" style="color:#9a3412;"></i>
+                                                <div class="fw-semibold" style="font-size:.72rem;color:#9a3412;">Proceso<br>de Slots</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-2 rounded-3 h-100" style="min-height:90px;background:#fdf4ff;border:2px solid #e9d5ff;cursor:pointer;" role="button" tabindex="0" aria-label="Organismos y Ley" onclick="document.getElementById('guia-btn-4').click()" onkeypress="if(event.key==='Enter') document.getElementById('guia-btn-4').click()">
+                                                <i class="fas fa-landmark fa-2x mb-1" style="color:#7e22ce;"></i>
+                                                <div class="fw-semibold" style="font-size:.72rem;color:#7e22ce;">Organismos<br>y Ley</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-2 rounded-3 h-100" style="min-height:90px;background:#fffbeb;border:2px solid #fde68a;cursor:pointer;" role="button" tabindex="0" aria-label="Documentos Oficiales" onclick="document.getElementById('guia-btn-5').click()" onkeypress="if(event.key==='Enter') document.getElementById('guia-btn-5').click()">
+                                                <i class="fas fa-file-alt fa-2x mb-1" style="color:#92400e;"></i>
+                                                <div class="fw-semibold" style="font-size:.72rem;color:#92400e;">Documentos<br>Oficiales</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-2">
+                                            <div class="d-flex flex-column align-items-center justify-content-center text-center p-2 rounded-3 h-100" style="min-height:90px;background:#fef2f2;border:2px solid #fecaca;cursor:pointer;" role="button" tabindex="0" aria-label="Penalizaciones y Sanciones" onclick="document.getElementById('guia-btn-6').click()" onkeypress="if(event.key==='Enter') document.getElementById('guia-btn-6').click()">
+                                                <i class="fas fa-exclamation-triangle fa-2x mb-1" style="color:#991b1b;"></i>
+                                                <div class="fw-semibold" style="font-size:.72rem;color:#991b1b;">Penalizaciones<br>y Sanciones</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Accordion -->
+                                    <div class="accordion" id="guiaAccordion">
+
+                                        <!-- 1. Clasificación OACI -->
+                                        <div class="accordion-item border-0 mb-2 rounded-3 overflow-hidden shadow-sm">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-semibold" type="button"
+                                                    id="guia-btn-1"
+                                                    data-bs-toggle="collapse" data-bs-target="#guia-col-1"
+                                                    style="background:#f0f9ff; color:#0369a1;">
+                                                    <i class="fas fa-ruler-horizontal me-2"></i>1. Clasificación OACI por Envergadura
+                                                </button>
+                                            </h2>
+                                            <div id="guia-col-1" class="accordion-collapse collapse" data-bs-parent="#guiaAccordion">
+                                                <div class="accordion-body bg-white">
+                                                    <p class="small text-muted mb-3">Categorías de aeronaves según envergadura de ala (OACI):</p>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered small mb-0">
+                                                            <thead class="table-light">
+                                                                <tr><th>Letra</th><th>Envergadura</th><th>Ejemplos</th></tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr><td><span class="badge bg-secondary">A</span></td><td>&lt; 15 m</td><td>Avionetas, aeronaves pequeñas</td></tr>
+                                                                <tr><td><span class="badge bg-info text-dark">B</span></td><td>15 m – &lt; 24 m</td><td>ATR72, SAAB340, CRJ, ERJ145/170/190</td></tr>
+                                                                <tr><td><span class="badge bg-primary">C</span></td><td>24 m – &lt; 36 m</td><td>B737, A320, A319, A321, MD80/90, B757</td></tr>
+                                                                <tr><td><span class="badge bg-warning text-dark">D</span></td><td>36 m – &lt; 52 m</td><td>B767, A300, A310</td></tr>
+                                                                <tr><td><span class="badge bg-danger">E</span></td><td>52 m – &lt; 65 m</td><td>B777, A330, A340, B787</td></tr>
+                                                                <tr><td><span class="badge bg-dark">F</span></td><td>65 m – &lt; 80 m</td><td>B747, A380, MD11</td></tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="alert alert-info py-2 px-3 small mt-3 mb-0">
+                                                        <i class="fas fa-info-circle me-1"></i>Las aeronaves clase D, E y F ocupan las posiciones <strong>MARS</strong>, bloqueando posiciones C correspondientes.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. Capacidad AIFA -->
+                                        <div class="accordion-item border-0 mb-2 rounded-3 overflow-hidden shadow-sm">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-semibold" type="button"
+                                                    id="guia-btn-2"
+                                                    data-bs-toggle="collapse" data-bs-target="#guia-col-2"
+                                                    style="background:#f0fdf4; color:#166534;">
+                                                    <i class="fas fa-parking me-2"></i>2. Capacidad de Plataforma AIFA
+                                                </button>
+                                            </h2>
+                                            <div id="guia-col-2" class="accordion-collapse collapse" data-bs-parent="#guiaAccordion">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="row g-3 mb-3">
+                                                        <div class="col-sm-4">
+                                                            <div class="text-center p-3 rounded-3 h-100" style="background:#eff6ff; border:1px solid #bfdbfe;">
+                                                                <div class="display-6 fw-bold" style="color:#2563eb;">45</div>
+                                                                <div class="small fw-semibold">Posiciones Pasajeros</div>
+                                                                <div class="text-muted" style="font-size:.75rem;">Categoría C</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="text-center p-3 rounded-3 h-100" style="background:#fff7ed; border:1px solid #fed7aa;">
+                                                                <div class="display-6 fw-bold" style="color:#ea580c;">10</div>
+                                                                <div class="small fw-semibold">Posiciones Carga</div>
+                                                                <div class="text-muted" style="font-size:.75rem;">Categoría D</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="text-center p-3 rounded-3 h-100" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+                                                                <div class="display-6 fw-bold" style="color:#16a34a;">29</div>
+                                                                <div class="small fw-semibold">Aviación General</div>
+                                                                <div class="text-muted" style="font-size:.75rem;">Posiciones 701–712 + MAR</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="mt-3 mb-2">Tiempos de Estancia en Plataforma</h6>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered small mb-0">
+                                                            <thead class="table-light">
+                                                                <tr><th>Tipo</th><th>Estancia Máx.</th><th>Capacidad</th><th>Aeronaves</th></tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr><td><strong>Cabina Ancha</strong></td><td>120 min (90 min si no es intercontinental)</td><td>&gt; 100 pax</td><td>A300, A330, B767, B787, B777, B747, A380, MD11</td></tr>
+                                                                <tr><td><strong>Cabina Mediana</strong></td><td>60 min</td><td>101–220 pax</td><td>A321, A320, A319, B757, B737, B727, MD80/90, DC9</td></tr>
+                                                                <tr><td><strong>Cabina Chica</strong></td><td>45 min</td><td>= 220 pax</td><td>ATR72, ATR42, CRJ, F100, ERJ145/170/190, SAAB340</td></tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="row g-2 mt-2">
+                                                        <div class="col-md-6">
+                                                            <div class="alert alert-warning py-2 px-3 small mb-0">
+                                                                <strong>Estancia Prolongada:</strong> Solicitar ante CSyD o CCO. Se asignan posiciones remotas o se remolca. Sujeto a disponibilidad.
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="alert alert-secondary py-2 px-3 small mb-0">
+                                                                <strong>Pernocta:</strong> Slots entre 18:00–06:00 (local) / 00:00–12:00 (UTC). Anticipar solicitud. Sujeto a disponibilidad.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 3. Proceso de Slots -->
+                                        <div class="accordion-item border-0 mb-2 rounded-3 overflow-hidden shadow-sm">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-semibold" type="button"
+                                                    id="guia-btn-3"
+                                                    data-bs-toggle="collapse" data-bs-target="#guia-col-3"
+                                                    style="background:#fff7ed; color:#9a3412;">
+                                                    <i class="fas fa-clock me-2"></i>3. Proceso de Solicitud y Asignación de Slots (CSD)
+                                                </button>
+                                            </h2>
+                                            <div id="guia-col-3" class="accordion-collapse collapse" data-bs-parent="#guiaAccordion">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <h6 style="color:#ea580c;"><i class="fas fa-list-ol me-1"></i>Prioridades de Asignación</h6>
+                                                            <ol class="small">
+                                                                <li>Vuelos <strong>Regulares de Pasajeros (J)</strong></li>
+                                                                <li>Vuelos de <strong>Fletamento Pasajeros (C)</strong></li>
+                                                                <li>Vuelos <strong>Regulares de Carga (F)</strong></li>
+                                                                <li>Vuelos de <strong>Fletamento de Carga (H)</strong></li>
+                                                            </ol>
+                                                            <p class="small">El transportista que usó un horario en el periodo anterior tiene <strong>prioridad histórica</strong> sobre él.</p>
+                                                            <div class="alert alert-info py-2 px-3 small mb-0">
+                                                                <strong>Regla 80%:</strong> Se requiere =80% de cumplimiento en los últimos 2 meses para conservar el slot. Tolerancia: ±15 min del horario autorizado.
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 style="color:#ea580c;"><i class="fas fa-calendar-alt me-1"></i>Tiempos de Solicitud</h6>
+                                                            <ul class="list-unstyled small">
+                                                                <li class="d-flex gap-2 mb-2">
+                                                                    <span class="badge bg-primary align-self-start mt-1">Temporada</span>
+                                                                    <span><strong>6 meses antes</strong> (166 días). Verano: sep del año previo. Invierno: abril de cada año.</span>
+                                                                </li>
+                                                                <li class="d-flex gap-2 mb-2">
+                                                                    <span class="badge bg-success align-self-start mt-1">Movimientos</span>
+                                                                    <span>Con al menos <strong>72 h</strong> de anticipación tras carga inicial.</span>
+                                                                </li>
+                                                                <li class="d-flex gap-2 mb-2">
+                                                                    <span class="badge bg-warning text-dark align-self-start mt-1">No Programados</span>
+                                                                    <span><strong>24 h</strong> antes. Sujeto a disponibilidad. Sin respuesta en 12 h = rechazado.</span>
+                                                                </li>
+                                                                <li class="d-flex gap-2 mb-2">
+                                                                    <span class="badge bg-info text-dark align-self-start mt-1">Tiempo Real</span>
+                                                                    <span>Demoras/cancelaciones: notificar a CCO de inmediato. Presentar en CSyD en = 48 h.</span>
+                                                                </li>
+                                                                <li class="d-flex gap-2">
+                                                                    <span class="badge bg-danger align-self-start mt-1">Rescate</span>
+                                                                    <span>Tramitar con CCO antes del horario a operar. Presentar a CSyD en = 48 h.</span>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-3">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <h6 style="color:#ea580c;"><i class="fas fa-file-upload me-1"></i>Cómo solicitar un Slot</h6>
+                                                            <ol class="small">
+                                                                <li>Enviar solicitud por correo o de forma física a la <strong>CSyD</strong>.</li>
+                                                                <li>Adjuntar archivo <strong>SSIM de IATA</strong> (Standard Schedule Information Manual).</li>
+                                                                <li>Indicar ruta y tipo de aeronave.</li>
+                                                                <li>Si hay errores, CSyD notifica en = 72 h y no tramita hasta corrección.</li>
+                                                                <li>Solicitudes con <strong>adeudos</strong> son rechazadas de inmediato (Art. 55 Ley).</li>
+                                                            </ol>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 style="color:#ea580c;"><i class="fas fa-exchange-alt me-1"></i>Nomenclatura de Movimientos</h6>
+                                                            <div class="row g-2 small">
+                                                                <div class="col-6"><span class="badge bg-success me-1">N</span>Altas (nuevas operaciones)</div>
+                                                                <div class="col-6"><span class="badge bg-danger me-1">D</span>Bajas (cancelaciones)</div>
+                                                                <div class="col-6"><span class="badge bg-primary me-1">C</span>Cambios</div>
+                                                                <div class="col-6"><span class="badge bg-secondary me-1">R</span>Revisiones</div>
+                                                            </div>
+                                                            <hr class="my-2">
+                                                            <h6 style="color:#ea580c;">Baja de Horario</h6>
+                                                            <ul class="small mb-0">
+                                                                <li>Solicitar con = <strong>72 h</strong> de anticipación a CSyD.</li>
+                                                                <li>Un horario dado de baja por <strong>6 meses o más</strong> pierde su antigüedad.</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 4. Organismos y Marco Legal -->
+                                        <div class="accordion-item border-0 mb-2 rounded-3 overflow-hidden shadow-sm">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-semibold" type="button"
+                                                    id="guia-btn-4"
+                                                    data-bs-toggle="collapse" data-bs-target="#guia-col-4"
+                                                    style="background:#fdf4ff; color:#7e22ce;">
+                                                    <i class="fas fa-landmark me-2"></i>4. Organismos y Marco Legal
+                                                </button>
+                                            </h2>
+                                            <div id="guia-col-4" class="accordion-collapse collapse" data-bs-parent="#guiaAccordion">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <h6 style="color:#7c3aed;"><i class="fas fa-globe me-1"></i>Organismos Internacionales</h6>
+                                                            <ul class="small">
+                                                                <li><strong>IATA</strong> — Asociación Internacional de Transporte Aéreo</li>
+                                                                <li><strong>ACI</strong> — Consejo Internacional de Aeropuertos</li>
+                                                                <li><strong>OACI</strong> — Organización de Aviación Civil Internacional</li>
+                                                                <li><strong>FAA</strong> — Administración Federal de la Aviación (EE.UU.)</li>
+                                                                <li><strong>Convenios de Chicago</strong> — 19 acuerdos fundamentales</li>
+                                                            </ul>
+                                                            <h6 style="color:#7c3aed;" class="mt-3"><i class="fas fa-flag me-1"></i>Organismos Nacionales</h6>
+                                                            <ul class="small">
+                                                                <li><strong>AFAC</strong> — Agencia Federal de Aviación Civil</li>
+                                                                <li><strong>ASA</strong> — Aeropuertos y Servicios Auxiliares</li>
+                                                                <li><strong>SENEAM</strong> — Servicio de Navegación en el Espacio Aéreo Mexicano</li>
+                                                                <li><strong>CANAERO</strong> – Cámara Nacional del Autotransporte</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 style="color:#7c3aed;"><i class="fas fa-balance-scale me-1"></i>Libertades del Aire</h6>
+                                                            <ol class="small">
+                                                                <li>Sobrevolar otro país sin aterrizar.</li>
+                                                                <li>Aterrizar en territorio extranjero por motivos técnicos.</li>
+                                                                <li>Volar desde el país de origen a un país extranjero.</li>
+                                                                <li>Volar desde un país extranjero al país de origen.</li>
+                                                                <li>Volar entre dos países extranjeros con escala en país de origen.</li>
+                                                                <li class="text-muted">6--9: Aplican principalmente en países europeos.</li>
+                                                            </ol>
+                                                            <h6 style="color:#7c3aed;" class="mt-3"><i class="fas fa-gavel me-1"></i>Legislación Aplicable</h6>
+                                                            <ul class="small mb-0">
+                                                                <li>Ley de Aeropuertos (Arts. 23, 35–38, 52–66, 94–132)</li>
+                                                                <li>Ley de Aviación Civil (Arts. 18, 23, 55, 87)</li>
+                                                                <li>Reglamento de la Ley de Aeropuertos</li>
+                                                                <li>Bases AFAC para aeropuertos saturados</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-3">
+                                                    <h6 style="color:#7c3aed;"><i class="fas fa-users-cog me-1"></i>Comité de Operación y Horarios (COyH)</h6>
+                                                    <div class="row g-2 small">
+                                                        <div class="col-md-6">
+                                                            <p class="mb-1">Integrado por:</p>
+                                                            <ul class="mb-0">
+                                                                <li>Administrador del aeropuerto</li>
+                                                                <li>Comandante del aeropuerto</li>
+                                                                <li>Autoridades civiles y militares</li>
+                                                                <li>Representantes de transportistas aéreos</li>
+                                                                <li>Prestadores de servicios aeroportuarios</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p class="mb-1">Funciones:</p>
+                                                            <ul class="mb-0">
+                                                                <li>Sesiona <strong>al menos 1 vez al mes</strong></li>
+                                                                <li>Subcomité de Demoras (presidido por el Comandante)</li>
+                                                                <li>Determina responsables de demoras y cancelaciones</li>
+                                                                <li>Propone acciones para reducir demoras</li>
+                                                                <li>Aprueba reglamento interno en 90 días hábiles</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 5. Documentos Oficiales -->
+                                        <div class="accordion-item border-0 mb-2 rounded-3 overflow-hidden shadow-sm">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-semibold" type="button"
+                                                    id="guia-btn-5"
+                                                    data-bs-toggle="collapse" data-bs-target="#guia-col-5"
+                                                    style="background:#fffbeb; color:#92400e;">
+                                                    <i class="fas fa-file-alt me-2"></i>5. Documentos y Comunicaciones Oficiales
+                                                </button>
+                                            </h2>
+                                            <div id="guia-col-5" class="accordion-collapse collapse" data-bs-parent="#guiaAccordion">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6 col-lg-3">
+                                                            <div class="p-3 rounded-3 h-100" style="background:#fffbeb; border:1px solid #fde68a;">
+                                                                <h6 style="color:#b45309;"><i class="fas fa-envelope me-1"></i>Oficio</h6>
+                                                                <p class="small mb-1">Documento formal institucional para comunicar decisiones, instrucciones o reportes.</p>
+                                                                <p class="small mb-0"><strong>Incluye:</strong> membrete, número, asunto, fecha, cuerpo, firma y C.C.P.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6 col-lg-3">
+                                                            <div class="p-3 rounded-3 h-100" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+                                                                <h6 style="color:#166534;"><i class="fas fa-sticky-note me-1"></i>Memorándum</h6>
+                                                                <p class="small mb-1">Documento breve interno. Campo: <em>De / Para / Asunto / Contenido</em>.</p>
+                                                                <p class="small mb-0"><strong>Uso:</strong> recordatorios, avisos, notificaciones a superiores.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6 col-lg-3">
+                                                            <div class="p-3 rounded-3 h-100" style="background:#eff6ff; border:1px solid #bfdbfe;">
+                                                                <h6 style="color:#1d4ed8;"><i class="fas fa-image me-1"></i>Mensaje CEI</h6>
+                                                                <p class="small mb-1">Correo Electrónico de Imágenes. Transmisión formal con diagramas, mapas o información sensible.</p>
+                                                                <p class="small mb-0"><strong>Incluye:</strong> encabezado, clasificación de seguridad, fecha-hora, remitente.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6 col-lg-3">
+                                                            <div class="p-3 rounded-3 h-100" style="background:#fdf4ff; border:1px solid #e9d5ff;">
+                                                                <h6 style="color:#7c3aed;"><i class="fas fa-lock me-1"></i>FCA / SWEAR</h6>
+                                                                <p class="small mb-1">Mensaje encriptado para información sensible con impacto operativo.</p>
+                                                                <p class="small mb-0"><strong>Clasificación:</strong> Ordinario / Urgente / Extraurgente. 2 hojas: cubierta neutra + mensaje real.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-3">
+                                                    <h6 style="color:#b45309;"><i class="fas fa-comment me-1"></i>Frases de Cortesía Oficial</h6>
+                                                    <div class="row g-2 small">
+                                                        <div class="col-md-6">
+                                                            <p class="fw-semibold mb-1">Superior &#x2192; Subordinado:</p>
+                                                            <ul class="mb-0">
+                                                                <li>"Para su conocimiento…" / "En relación con…"</li>
+                                                                <li>"Agradeceré a usted…" / "Sírvase…"</li>
+                                                                <li>"Atentamente"</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <p class="fw-semibold mb-1">Subordinado &#x2192; Superior:</p>
+                                                            <ul class="mb-0">
+                                                                <li>"Me permito informar a usted…"</li>
+                                                                <li>"Me permito solicitar…"</li>
+                                                                <li>"Respetuosamente" / "Muy respetuosamente" (Presidente)</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 6. Penalizaciones -->
+                                        <div class="accordion-item border-0 rounded-3 overflow-hidden shadow-sm">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed fw-semibold" type="button"
+                                                    id="guia-btn-6"
+                                                    data-bs-toggle="collapse" data-bs-target="#guia-col-6"
+                                                    style="background:#fef2f2; color:#991b1b;">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>6. Penalizaciones, Sanciones y Uso Indebido
+                                                </button>
+                                            </h2>
+                                            <div id="guia-col-6" class="accordion-collapse collapse" data-bs-parent="#guiaAccordion">
+                                                <div class="accordion-body bg-white">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-danger"><i class="fas fa-ban me-1"></i>Causas de Penalización</h6>
+                                                            <ul class="small">
+                                                                <li>Cumplimiento <strong>&lt; 80%</strong> en los últimos 2 meses &#x2192; slot a disponibilidad.</li>
+                                                                <li>Adeudos vencidos &#x2192; retiro de todos los slots autorizados de la temporada.</li>
+                                                                <li>Reincidencia &#x2192; <strong>suspensión temporal</strong>.</li>
+                                                                <li>Cesión o mal uso del slot &#x2192; <strong>cancelación inmediata</strong>.</li>
+                                                                <li>CSD notifica por escrito y registra en expediente histórico.</li>
+                                                            </ul>
+                                                            <h6 class="text-danger mt-3"><i class="fas fa-gavel me-1"></i>Sanciones Legales</h6>
+                                                            <p class="small mb-0">Operación sin trámite o incumplimiento de horarios causa sanciones por parte de la SICyT conforme a la <strong>Ley de Aviación Civil Art. 87, fracción XII</strong>.</p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 class="text-danger"><i class="fas fa-times-circle me-1"></i>¿Qué se considera uso indebido?</h6>
+                                                            <ul class="small">
+                                                                <li>Conservar horarios sin intención de operar.</li>
+                                                                <li>Guardar horarios para negar capacidad a otros.</li>
+                                                                <li>Solicitar horarios sin intención de operarlos.</li>
+                                                                <li>Operar sin horario asignado.</li>
+                                                                <li>Operar en horario muy distinto sin justificación.</li>
+                                                                <li>Solicitar horarios para otra operación buscando mejor prioridad histórica.</li>
+                                                            </ul>
+                                                            <div class="alert alert-success py-2 px-3 small mb-0">
+                                                                <i class="fas fa-check-circle me-1"></i><strong>No es uso indebido:</strong> cambio de ruta o aeronave si se notifica a la administración aeroportuaria.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-3">
+                                                    <h6 class="text-danger"><i class="fas fa-shield-alt me-1"></i>Prohibiciones en el Aeródromo (Art. 118)</h6>
+                                                    <div class="row g-2 small">
+                                                        <div class="col-sm-6"><i class="fas fa-times text-danger me-1"></i>Ingresar a zonas restringidas sin autorización</div>
+                                                        <div class="col-sm-6"><i class="fas fa-times text-danger me-1"></i>Fumar o encender fuego cerca de aeronaves</div>
+                                                        <div class="col-sm-6"><i class="fas fa-times text-danger me-1"></i>Introducir artículos peligrosos (explosivos, armas, drogas)</div>
+                                                        <div class="col-sm-6"><i class="fas fa-times text-danger me-1"></i>Dañar instalaciones o equipos del aeródromo</div>
+                                                        <div class="col-sm-6"><i class="fas fa-times text-danger me-1"></i>Alterar el orden público o causar pánico</div>
+                                                        <div class="col-sm-6"><i class="fas fa-times text-danger me-1"></i>Encender motores en hangar, durante reabastecimiento o embarque</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div><!-- end accordion -->
+                                </div><!-- end card-body -->
+                            </div><!-- end interactive card -->
+                        </div><!-- end #bib-guia -->
+                    </div> <!-- End of tab-content -->

@@ -1505,6 +1505,21 @@
         handlePhotoChange
     };
 
+    /* ============================================================
+     *  Contrato de ciclo de vida del módulo.
+     *
+     *  El router llamaba a window.vehiculosModule.init() tras 80 ms, una
+     *  carrera contra el layout. El loader llama a init() cuando la vista
+     *  ya está en el DOM, que es la garantía que aquel retraso aproximaba.
+     * ========================================================== */
+    window.initVehiculos = function () {
+        init();
+    };
+
+    // No hay gráficas ni temporizadores que soltar: la vista es una tabla
+    // con sus modales, y vive dentro del contenedor cacheado.
+    window.destroyVehiculos = function () {};
+
     // Funciones globales para onclick en HTML
     window.setVehView         = mode => window.vehiculosModule.setView(mode);
     window.openVehModal       = ()   => window.vehiculosModule.openFormModal(null);

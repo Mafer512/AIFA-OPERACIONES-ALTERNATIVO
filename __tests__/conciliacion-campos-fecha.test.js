@@ -15,12 +15,16 @@
 
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto } = require('../test-utils/modulos.js');
 
 const source = fs
   .readFileSync(path.resolve(__dirname, '..', 'script.js'), 'utf8')
   .replace(/\r\n/g, '\n');
 
-const html = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
+const html = htmlCompleto();
 
 function extraer(nombre) {
   const marca = `function ${nombre}(`;

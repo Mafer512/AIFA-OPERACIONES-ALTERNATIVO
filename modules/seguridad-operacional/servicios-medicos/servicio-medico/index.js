@@ -1115,15 +1115,9 @@
       });
     }
 
-    document.addEventListener('click', (event) => {
-      if (event.target.closest('[data-section="medicas"]')){
-        setTimeout(() => {
-          if (pendingAtenciones) renderAtenciones();
-          if (pendingTipo) renderTipo();
-          if (pendingComp) renderComp();
-        }, 120);
-      }
-    });
+    // Antes habia aqui un listener de clic sobre document que buscaba la
+    // entrada del menu: existia porque nadie garantizaba que se avisara al
+    // modulo cuando la seccion se mostraba. Ahora lo hace initMedicas().
 
     window.addEventListener('resize', () => {
       const newMode = getViewportMode();
@@ -1221,10 +1215,36 @@
     }
   }
 
-  // Hook initialization
-  if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => init());
-  } else {
-      setTimeout(() => init(), 250); // Small delay to let dataManager init
-  }
+  /* ============================================================
+   *  Contrato de ciclo de vida del modulo.
+   *
+   *  Antes se encendia solo al cargar la pagina: DOMContentLoaded si
+   *  llegaba a tiempo, y si no un setTimeout de 250 ms "para dar tiempo a
+   *  dataManager". Las dos vias sobran: el modulo se abre por accion del
+   *  usuario, mucho despues de que dataManager este listo.
+   * ========================================================== */
+  window.initMedicas = function () {
+    init().catch((e) => console.error('[medicas] init:', e && e.message));
+    // Las graficas de ECharts miden mal cuando su contenedor estaba oculto,
+    // asi que en cada entrada se repinta lo que quedara pendiente.
+    setTimeout(() => {
+      try {
+        if (pendingAtenciones) renderAtenciones();
+        if (pendingTipo) renderTipo();
+        if (pendingComp) renderComp();
+      } catch (_) {}
+    }, 120);
+  };
+
+  // Al salir se sueltan las tres instancias de ECharts. Ponerlas a null
+  // ademas deja el listener de resize en un no-op mientras la seccion esta
+  // cerrada, porque todas sus ramas empiezan por "if (xChart)".
+  window.destroyMedicas = function () {
+    [atencionesChart, compChart, tipoChart].forEach((c) => {
+      try { if (c && typeof c.dispose === 'function') c.dispose(); } catch (_) {}
+    });
+    atencionesChart = null;
+    compChart = null;
+    tipoChart = null;
+  };
 })();

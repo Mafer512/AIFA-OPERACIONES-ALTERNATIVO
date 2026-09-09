@@ -4,9 +4,13 @@
 
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto } = require('../test-utils/modulos.js');
 
 const root = path.resolve(__dirname, '..');
-const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const indexSource = htmlCompleto();
 const scriptSource = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const modulePath = path.join(root, 'js', 'miscelanea.js');
 

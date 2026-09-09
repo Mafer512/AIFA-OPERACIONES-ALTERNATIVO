@@ -175,7 +175,10 @@ beforeAll(async () => {
   win.console.warn = (...a) => avisos.push(a.map(String).join(' '));
   win.console.log = noop;
 
-  // Los archivos, en el mismo orden en que los pide el HTML.
+  // Los archivos del ARRANQUE, en el mismo orden en que los pide el shell.
+  // Aqui se lee index.html crudo a proposito, no el documento compuesto: lo que
+  // se quiere enumerar es lo que el navegador descarga al abrir la pagina. El
+  // codigo de los modulos se evalua aparte, unas lineas mas abajo.
   const html = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
   const archivos = ['script.js'];
   for (const m of html.matchAll(/<script[^>]+src="([^"]+)"/g)) {

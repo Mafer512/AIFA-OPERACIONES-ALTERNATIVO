@@ -1,0 +1,395 @@
+                    <div class="card border-0">
+                        <div class="card-body px-0">
+                            <div class="gso-media-wrapper mb-4 px-3 px-md-0">
+                                <div class="ratio ratio-16x9 gso-hero">
+                                    <video class="gso-hero-media" src="videos/Aterrizaje%20Cargo.mp4" data-autoplay-on-visible muted
+                                        loop playsinline preload="none"
+                                        aria-label="Gerencia de Seguridad Operacional"></video>
+                                    <div class="gso-hero-overlay">
+                                        <div class="gso-hero-inner">
+                                            <div class="gso-hero-copy text-center">
+                                                <h3 class="gso-hero-title mb-0">Gerencia de Seguridad Operacional
+                                                    (GSO)
+                                                </h3>
+                                                <p class="gso-hero-caption mb-0"><i
+                                                        class="fas fa-plane-departure me-2"></i>Selecciona la opción
+                                                    en
+                                                    la que deseas navegar</p>
+                                            </div>
+                                            <div class="gso-hero-actions">
+                                                <div class="gso-tab-buttons">
+                                                    <button type="button" class="gso-nav-btn"
+                                                        data-nav-button="gso-impactos-tab">
+                                                        <span class="gso-nav-icon"><i class="fas fa-dove"
+                                                                aria-hidden="true"></i></span>
+                                                        <span class="gso-nav-label">Impactos de Ave</span>
+                                                    </button>
+                                                    <button type="button" class="gso-nav-btn"
+                                                        data-nav-button="gso-rescate-tab">
+                                                        <span class="gso-nav-icon"><i class="fas fa-paw"
+                                                                aria-hidden="true"></i></span>
+                                                        <span class="gso-nav-label">Fauna Rescatada</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="nav nav-tabs d-none" id="gsoTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="gso-impactos-tab" data-bs-toggle="tab"
+                                        data-bs-target="#gso-impactos-pane" type="button" role="tab"
+                                        aria-controls="gso-impactos-pane" aria-selected="false" tabindex="-1"><i
+                                            class="fas fa-dove me-2"></i>Registro de Impactos de Ave</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="gso-rescate-tab" data-bs-toggle="tab"
+                                        data-bs-target="#gso-fauna-rescate-pane" type="button" role="tab"
+                                        aria-controls="gso-fauna-rescate-pane" aria-selected="false" tabindex="-1"><i
+                                            class="fas fa-paw me-2"></i>Fauna Rescatada</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content pt-3 d-none" id="gsoTabContent">
+                                <div class="tab-pane fade" id="gso-impactos-pane" role="tabpanel"
+                                    aria-labelledby="gso-impactos-tab" tabindex="0">
+                                    <div class="gso-return mb-3">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm gso-return-btn"><i
+                                                class="fas fa-arrow-left me-2"></i>Regresar al menú GSO</button>
+                                    </div>
+                                    <div class="text-center mb-3">
+                                        <h3 class="fw-bold mb-0"><i class="fas fa-dove me-2"></i>Impactos de Ave</h3>
+                                    </div>
+                                    <div class="card">
+                                        <div
+                                            class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                                            <div
+                                                class="d-flex flex-wrap align-items-center gap-2 fauna-filters filters-bar">
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-date-from"><i
+                                                            class="fas fa-calendar-alt me-1"></i>Fecha</label>
+                                                    <input type="date" id="fauna-date-from"
+                                                        class="form-control form-control-sm"
+                                                        aria-label="Fecha inicio" />
+                                                    <span class="mx-1">a</span>
+                                                    <input type="date" id="fauna-date-to"
+                                                        class="form-control form-control-sm" aria-label="Fecha fin" />
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-year"><i
+                                                            class="fas fa-calendar-alt me-1"></i>Año</label>
+                                                    <select id="fauna-year" class="form-select form-select-sm"
+                                                        aria-label="Filtrar fauna por año">
+                                                        <option value="all" selected>Todos</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-month"><i
+                                                            class="fas fa-calendar me-1"></i>Mes</label>
+                                                    <select id="fauna-month" class="form-select form-select-sm"
+                                                        aria-label="Filtrar fauna por mes">
+                                                        <option value="all" selected>Todos</option>
+                                                        <option value="01">Enero</option>
+                                                        <option value="02">Febrero</option>
+                                                        <option value="03">Marzo</option>
+                                                        <option value="04">Abril</option>
+                                                        <option value="05">Mayo</option>
+                                                        <option value="06">Junio</option>
+                                                        <option value="07">Julio</option>
+                                                        <option value="08">Agosto</option>
+                                                        <option value="09">Septiembre</option>
+                                                        <option value="10">Octubre</option>
+                                                        <option value="11">Noviembre</option>
+                                                        <option value="12">Diciembre</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-species"><i
+                                                            class="fas fa-paw me-1"></i>Especie</label>
+                                                    <select id="fauna-species" class="form-select form-select-sm"
+                                                        aria-label="Filtrar fauna por especie">
+                                                        <option value="all" selected>Todas</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-size"><i
+                                                            class="fas fa-arrows-to-dot me-1"></i>Tamaño</label>
+                                                    <select id="fauna-size" class="form-select form-select-sm"
+                                                        aria-label="Filtrar fauna por tamaño">
+                                                        <option value="all" selected>Todos</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-phase"><i
+                                                            class="fas fa-plane-departure me-1"></i>Fase</label>
+                                                    <select id="fauna-phase" class="form-select form-select-sm"
+                                                        aria-label="Filtrar fauna por fase">
+                                                        <option value="all" selected>Todas</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-airline"><i
+                                                            class="fas fa-plane me-1"></i>Aerolínea</label>
+                                                    <select id="fauna-airline" class="form-select form-select-sm"
+                                                        aria-label="Filtrar fauna por aerolinea">
+                                                        <option value="all" selected>Todas</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip chip-actions">
+                                                    <label class="me-1"><i
+                                                            class="fas fa-broom me-1"></i>Acciones</label>
+                                                    <button id="fauna-clear"
+                                                        class="btn btn-outline-secondary btn-sm">Restablecer</button>
+                                                    <button id="fauna-export-csv"
+                                                        class="btn btn-outline-primary btn-sm"><i
+                                                            class="fas fa-file-csv me-1"></i>CSV</button>
+                                                </div>
+                                                <div class="chip chip-actions ms-auto">
+                                                    <button class="btn btn-primary btn-sm admin-edit-btn" style="display:none;" onclick="dataManagement.addItem('wildlife_strikes')" aria-label="Agregar un nuevo registro de fauna">
+                                                        <i class="fas fa-plus me-1" aria-hidden="true"></i>Agregar Registro
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
+                                                <span class="badge bg-primary" id="fauna-total-badge">Total:
+                                                    0</span>
+                                                <span class="badge bg-info text-dark" id="fauna-period-badge">Periodo:
+                                                    Todos</span>
+                                                <button class="btn btn-outline-primary btn-sm active"
+                                                    id="fauna-summary-toggle" data-bs-toggle="collapse"
+                                                    data-bs-target="#fauna-summary-collapse" aria-expanded="true"
+                                                    aria-controls="fauna-summary-collapse">
+                                                    <i class="fas fa-list-ul me-1"></i>Resumen por Aerolínea
+                                                </button>
+                                            </div>
+                                            <div class="collapse show" id="fauna-summary-collapse">
+                                                <h6 class="mb-2"><i class="fas fa-plane me-2"></i>Resumen por
+                                                    Aerolínea
+                                                </h6>
+                                                <div id="fauna-summary-container" class="table-container-tech">
+                                                </div>
+                                            </div>
+                                            <!-- Top horas críticas arriba -->
+                                            <div class="mb-3">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="fas fa-bolt text-warning"></i>
+                                                    <strong>Top horas críticas</strong>
+                                                    <span class="small text-muted">(con filtros aplicados)</span>
+                                                </div>
+                                                <div id="fauna-top-hours" class="mt-2 d-flex flex-wrap gap-2"></div>
+                                            </div>
+                                            <!-- Resumen despegues vs aterrizajes -->
+                                            <div class="mb-3">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="fas fa-plane me-1 text-primary"></i>
+                                                    <strong>Resumen por fase de operación</strong>
+                                                </div>
+                                                <div id="fauna-phase-summary" class="mt-2 d-flex flex-wrap gap-2">
+                                                </div>
+                                            </div>
+                                            <!-- Resumen visual: gráficas -->
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-lg-6">
+                                                    <h6 class="text-muted mb-2"><i
+                                                            class="fas fa-chart-column me-1"></i>Eventos
+                                                        por
+                                                        mes</h6>
+                                                    <div class="chart-container chart-height-360"><canvas
+                                                            id="fauna-by-month"></canvas></div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <h6 class="text-muted mb-2"><i class="fas fa-paw me-1"></i>Eventos
+                                                        por nombre común</h6>
+                                                    <div class="chart-container chart-height-360"><canvas
+                                                            id="fauna-by-species"></canvas></div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h6 class="text-muted mb-2"><i
+                                                            class="fas fa-grip-vertical me-1"></i>Matriz
+                                                        Mes
+                                                        
+                                                        Condiciones (Heatmap)</h6>
+                                                    <div class="chart-container heatmap-container chart-height-420">
+                                                        <div id="fauna-heatmap" class="w-100 h-100"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h6 class="text-muted mb-2"><i
+                                                            class="fas fa-clock me-1"></i>Distribución
+                                                        por
+                                                        hora del día
+                                                    </h6>
+                                                    <div class="chart-container chart-height-360"><canvas
+                                                            id="fauna-by-hour"></canvas></div>
+                                                </div>
+                                            </div>
+                                            <!-- Tabla completa sin paginación -->
+                                            <div class="table-responsive" id="fauna-table-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="gso-fauna-rescate-pane" role="tabpanel"
+                                    aria-labelledby="gso-rescate-tab" tabindex="0">
+                                    <div class="gso-return mb-3">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm gso-return-btn"><i
+                                                class="fas fa-arrow-left me-2"></i>Regresar al menú GSO</button>
+                                    </div>
+                                    <div class="text-center mb-3">
+                                        <h3 class="fw-bold mb-1"><i class="fas fa-paw me-2"></i>Fauna Rescatada
+                                            <span id="fauna-rescate-year-label"></span>
+                                        </h3>
+                                        <div class="btn-group btn-group-sm fauna-rescate-year-switch"
+                                            id="fauna-rescate-year-switch" role="group" aria-label="Selecciona año">
+                                            <!-- botones dinámicos -->
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div
+                                            class="card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+                                            <div
+                                                class="d-grid d-md-flex flex-wrap align-items-center gap-2 fauna-rescate-filters filters-bar">
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-rescate-date-from"><i
+                                                            class="fas fa-calendar-day me-1"></i>Desde</label>
+                                                    <input type="date" id="fauna-rescate-date-from"
+                                                        class="form-control form-control-sm" />
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-rescate-date-to"><i
+                                                            class="fas fa-calendar-day me-1"></i>Hasta</label>
+                                                    <input type="date" id="fauna-rescate-date-to"
+                                                        class="form-control form-control-sm" />
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-rescate-month"><i
+                                                            class="fas fa-calendar-alt me-1"></i>Mes</label>
+                                                    <select id="fauna-rescate-month" class="form-select form-select-sm"
+                                                        aria-label="Filtrar rescates por mes">
+                                                        <option value="all" selected>Todos</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-rescate-class"><i
+                                                            class="fas fa-paw me-1"></i>Clase</label>
+                                                    <select id="fauna-rescate-class" class="form-select form-select-sm"
+                                                        aria-label="Filtrar rescates por clase">
+                                                        <option value="all" selected>Todas</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-rescate-method"><i
+                                                            class="fas fa-tools me-1"></i>Método</label>
+                                                    <select id="fauna-rescate-method" class="form-select form-select-sm"
+                                                        aria-label="Filtrar rescates por método">
+                                                        <option value="all" selected>Todos</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-rescate-quadrant"><i
+                                                            class="fas fa-route me-1"></i>Cuadrante</label>
+                                                    <select id="fauna-rescate-quadrant"
+                                                        class="form-select form-select-sm"
+                                                        aria-label="Filtrar rescates por cuadrante">
+                                                        <option value="all" selected>Todos</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip">
+                                                    <label class="me-1" for="fauna-rescate-disposal"><i
+                                                            class="fas fa-warehouse me-1"></i>Disposición</label>
+                                                    <select id="fauna-rescate-disposal"
+                                                        class="form-select form-select-sm"
+                                                        aria-label="Filtrar rescates por disposición">
+                                                        <option value="all" selected>Todas</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chip chip-actions">
+                                                    <label class="me-1"><i
+                                                            class="fas fa-broom me-1"></i>Acciones</label>
+                                                    <button id="fauna-rescate-clear"
+                                                        class="btn btn-outline-secondary btn-sm">Restablecer</button>
+                                                </div>
+                                                <div class="chip chip-actions ms-auto">
+                                                    <button class="btn btn-primary btn-sm admin-edit-btn" style="display:none;" onclick="dataManagement.addItem('rescued_wildlife')" aria-label="Agregar un nuevo registro de fauna rescatada">
+                                                        <i class="fas fa-plus me-1" aria-hidden="true"></i>Agregar Rescate
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div
+                                                class="fauna-rescate-badges d-flex flex-wrap align-items-center gap-3 mb-4">
+                                                <span class="fauna-rescate-metric metric-individuals"
+                                                    id="fauna-rescate-individuals-badge" role="status"
+                                                    aria-live="polite">
+                                                    <span class="fauna-rescate-label">Total de rescates</span>
+                                                    <span class="fauna-rescate-value">0</span>
+                                                </span>
+                                                <span class="badge bg-info-subtle text-info fw-semibold d-none"
+                                                    id="fauna-rescate-active-filter"></span>
+                                            </div>
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-lg-6">
+                                                    <h6 class="text-muted mb-2"><i
+                                                            class="fas fa-calendar-alt me-1"></i>Capturas
+                                                        por
+                                                        mes</h6>
+                                                    <div class="chart-container chart-height-320">
+                                                        <div id="fauna-rescate-by-month" class="echart-host"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <h6 class="text-muted mb-2"><i class="fas fa-paw me-1"></i>Eventos
+                                                        por clase</h6>
+                                                    <div class="chart-container chart-height-320">
+                                                        <div id="fauna-rescate-by-class" class="echart-host"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <h6 class="text-muted mb-2"><i
+                                                            class="fas fa-map-location-dot me-1"></i>Sitios
+                                                        de
+                                                        reubicación</h6>
+                                                    <div class="chart-container chart-height-320">
+                                                        <div id="fauna-rescate-by-relocation"
+                                                            class="echart-host fauna-relocation-chart"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <h6 class="text-muted mb-2"><i class="fas fa-tools me-1"></i>Método
+                                                        de rescate</h6>
+                                                    <div class="chart-container chart-height-320">
+                                                        <div id="fauna-rescate-by-method" class="echart-host"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <h6 class="text-muted mb-2"><i
+                                                            class="fas fa-clock me-1"></i>Distribución
+                                                        por
+                                                        hora del día
+                                                    </h6>
+                                                    <div class="chart-container chart-height-320">
+                                                        <div id="fauna-rescate-by-hour" class="echart-host"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="fauna-rescate-top-chipset mb-4">
+                                                <h6 class="text-muted mb-2"><i class="fas fa-leaf me-1"></i>Especies
+                                                    más
+                                                    frecuentes</h6>
+                                                <div id="fauna-rescate-top-species" class="d-flex flex-wrap gap-2">
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-end mb-3">
+                                                <button class="btn btn-outline-primary btn-sm"
+                                                    id="fauna-rescate-export"><i
+                                                        class="fas fa-file-csv me-1"></i>Exportar CSV</button>
+                                            </div>
+                                            <div id="fauna-rescate-table" class="table-responsive"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>

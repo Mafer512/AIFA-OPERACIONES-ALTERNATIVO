@@ -1962,29 +1962,16 @@
         state.activated = true;
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        init();
-        if (isSectionVisible()) {
-            activateModule();
-        }
-    });
-
-    (function patchShowSection() {
-        var previousShowSection = window.showSection;
-        if (typeof previousShowSection !== 'function') {
-            document.addEventListener('DOMContentLoaded', patchShowSection, { once: true });
-            return;
-        }
-        if (previousShowSection.__bhsStatsPatched) return;
-        window.showSection = function (id) {
-            var result = previousShowSection.apply(this, arguments);
-            if (id === SECTION_KEY) {
-                activateModule();
-            }
-            return result;
-        };
-        window.showSection.__bhsStatsPatched = true;
-    })();
-
+    // Antes esto arrancaba en DOMContentLoaded y, para enterarse de que
+    // alguien entraba a la seccion, envolvia window.showSection con un parche
+    // propio. Las dos vias desaparecen: el loader trae el codigo al abrir el
+    // modulo y llama a init(). activateModule() ya llama al init interno.
     window.initBhsBaggageStats = activateModule;
+
+    // Al salir se sueltan las graficas; los datos ya cargados se conservan,
+    // que para recargarlos esta el boton de refrescar de la propia vista.
+    window.destroyBhsBaggageStats = function () {
+        try { destroyCharts(); } catch (_) {}
+        state.activated = false;   // volver a entrar vuelve a pintar
+    };
 })();

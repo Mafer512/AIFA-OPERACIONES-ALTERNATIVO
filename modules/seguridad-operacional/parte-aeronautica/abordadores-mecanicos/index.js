@@ -1424,10 +1424,20 @@ window.onload = async function() {
         bindTabListeners();
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
+    // Antes se encendia solo al cargar la pagina, aunque nadie abriera la
+    // seccion: montaba los pads de firma y cableaba las dos pestanas. Ahora
+    // lo enciende el loader al abrir el modulo.
+    var _arrancado = false;
+
+    window.initAbordadoresMecanicos = function () {
+        if (_arrancado) return;
+        _arrancado = true;
         init();
-    }
+    };
+
+    // No hay graficas que soltar. Los pads de firma y los listeners viven
+    // dentro de la vista, que se queda cacheada, y _arrancado impide
+    // duplicarlos al volver a entrar.
+    window.destroyAbordadoresMecanicos = function () {};
 
 })();

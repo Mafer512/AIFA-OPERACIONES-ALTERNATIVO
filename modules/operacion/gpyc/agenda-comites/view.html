@@ -1,0 +1,195 @@
+                    <style>
+                        #agenda-section { --ag-purple:#7c3aed; --ag-purple-lt:#ede9fe;
+                            --ag-blue:#1565c0; --ag-blue-lt:#eff6ff;
+                            --ag-green:#166534; --ag-green-lt:#f0fdf4;
+                            --ag-orange:#b45309; --ag-orange-lt:#fffbeb;
+                            --ag-red:#991b1b; --ag-red-lt:#fef2f2;
+                            --ag-teal:#0f766e; --ag-teal-lt:#f0fdfa;
+                            --ag-gray:#4b5563; --ag-surface:#fff;
+                            --ag-border:#e5e7eb; --ag-shadow:0 2px 10px rgba(0,0,0,.08); }
+                        .ag-area-badge { display:inline-flex; align-items:center; gap:4px;
+                            font-size:.72rem; font-weight:600; letter-spacing:.03em;
+                            padding:2px 10px; border-radius:999px; }
+                        .ag-status-badge { display:inline-block; font-size:.7rem; font-weight:600;
+                            padding:2px 9px; border-radius:999px; }
+                        .ag-status-Programada   { background:#dbeafe; color:#1e40af; }
+                        .ag-status-Celebrada    { background:#dcfce7; color:#166534; }
+                        .ag-status-Cancelada    { background:#fee2e2; color:#991b1b; }
+                        .ag-status-Pospuesta    { background:#fef3c7; color:#92400e; }
+                        .ag-status-Pendiente    { background:#fef3c7; color:#92400e; }
+                        .ag-status-Concluido    { background:#dcfce7; color:#166534; }
+                        .ag-status-Diferido     { background:#e5e7eb; color:#4b5563; }
+                        .ag-status-Cumplido     { background:#dcfce7; color:#166534; }
+                        .ag-status-Cancelado    { background:#fee2e2; color:#991b1b; }
+                        .ag-card-comite { border:1px solid var(--ag-border); border-radius:12px;
+                            background:var(--ag-surface); box-shadow:var(--ag-shadow);
+                            transition:box-shadow .2s; cursor:pointer; }
+                        .ag-card-comite:hover { box-shadow:0 6px 20px rgba(0,0,0,.13); }
+                        .ag-section-header { background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);
+                            color:#fff; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; }
+                        /* Calendario */
+                        .ag-cal-table td, .ag-cal-table th { vertical-align:middle; font-size:.75rem; }
+                        .ag-cal-chip { display:inline-block; border-radius:6px; padding:1px 5px;
+                            font-size:.72rem; line-height:1.4; margin:1px; white-space:nowrap; cursor:default; }
+                    </style>
+
+                    <!-- Encabezado -->
+                    <div class="ag-section-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h2 class="mb-1 fs-4 fw-bold"><i class="fas fa-calendar-check me-2"></i>Agenda de Comités</h2>
+                            <p class="mb-0 opacity-75 small">Gestión de reuniones, temas y acuerdos por área</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Botón Google Calendar -->
+                            <button class="btn btn-outline-light btn-sm" id="ag-gcal-btn"
+                                title="Agregar sesiones a Google Calendar"
+                                onclick="agOpenGoogleCalendar()"
+                                style="font-size:.8rem;padding:5px 11px;border-color:rgba(255,255,255,.4);white-space:nowrap">
+                                <i class="fab fa-google me-1"></i>
+                                <span>Google Calendar</span>
+                            </button>
+                            <button class="btn btn-light btn-sm fw-semibold" id="ag-btn-nueva-reunion" style="display:none"
+                                onclick="agOpenNuevaReunion()">
+                                <i class="fas fa-plus me-1"></i>Nueva Reunión
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtro de Área (solo visible en Comités, Reuniones y Acuerdos) -->
+                    <div id="ag-area-filters" style="display:none" class="mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted fw-semibold" style="font-size:.8rem;white-space:nowrap">
+                                <i class="fas fa-filter me-1"></i>Filtrar por área:
+                            </span>
+                            <select class="form-select form-select-sm" id="ag-area-select"
+                                style="max-width:210px;font-size:.82rem"
+                                onchange="agFilterArea(this.value, null)">
+                                <option value="all">Todas las áreas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Vista: Tabs principales -->
+                    <ul class="nav nav-tabs mb-3" id="ag-main-tabs">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="ag-tab-calendario" data-bs-toggle="tab"
+                                data-bs-target="#ag-pane-calendario" type="button"
+                                onclick="agLoadCalendario()">
+                                <i class="fas fa-calendar me-1"></i>Calendario General
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="ag-tab-anual" data-bs-toggle="tab"
+                                data-bs-target="#ag-pane-anual" type="button"
+                                onclick="agLoadAnual()">
+                                <i class="fas fa-calendar-alt me-1"></i>Vista Anual 2026
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="ag-tab-comites" data-bs-toggle="tab"
+                                data-bs-target="#ag-pane-comites" type="button">
+                                <i class="fas fa-users-cog me-1"></i>Comités
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="ag-tab-reuniones" data-bs-toggle="tab"
+                                data-bs-target="#ag-pane-reuniones" type="button"
+                                onclick="agLoadReuniones()">
+                                <i class="fas fa-list me-1"></i>Reuniones
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="ag-tab-acuerdos" data-bs-toggle="tab"
+                                data-bs-target="#ag-pane-acuerdos" type="button"
+                                onclick="agLoadAcuerdos()">
+                                <i class="fas fa-tasks me-1"></i>Acuerdos
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+
+                        <!-- -- PESTAÑA: CALENDARIO GENERAL -- -->
+                        <div class="tab-pane fade show active" id="ag-pane-calendario">
+                            <!-- Contenido generado por agLoadCalendario() -->
+                        </div>
+
+                        <!-- -- PESTAÑA: VISTA ANUAL -- -->
+                        <div class="tab-pane fade" id="ag-pane-anual">
+                            <!-- Contenido generado por agLoadAnual() -->
+                        </div>
+
+                        <!-- -- PESTAÑA: COMITÉS -- -->
+                        <div class="tab-pane fade" id="ag-pane-comites">
+                            <div class="d-flex justify-content-end mb-2" id="ag-comites-actions" style="display:none!important">
+                                <button class="btn btn-sm btn-outline-primary" id="ag-btn-nuevo-comite"
+                                    onclick="agOpenNuevoComite()" style="display:none">
+                                    <i class="fas fa-plus me-1"></i>Nuevo Comité
+                                </button>
+                            </div>
+                            <!-- Spinner -->
+                            <div class="text-center py-5" id="ag-comites-loading">
+                                <div class="spinner-border text-primary" role="status" style="width:2.5rem;height:2.5rem"></div>
+                                <p class="text-muted mt-2 small">Cargando comités</p>
+                            </div>
+                            <!-- Grid de tarjetas -->
+                            <div class="row g-3" id="ag-comites-grid" style="display:none"></div>
+                            <!-- Sin resultados -->
+                            <div class="text-center py-5 text-muted d-none" id="ag-comites-empty">
+                                <i class="fas fa-inbox fa-2x mb-2"></i><br>No hay comités registrados para esta área.
+                            </div>
+                        </div>
+
+                        <!-- -- PESTAÑA: REUNIONES -- -->
+                        <div class="tab-pane fade" id="ag-pane-reuniones">
+                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <select class="form-select form-select-sm" id="ag-reuniones-filtro-estatus"
+                                        onchange="agLoadReuniones()" style="width:auto">
+                                        <option value="">Todos los estatus</option>
+                                        <option value="Programada">Programada</option>
+                                        <option value="Celebrada">Celebrada</option>
+                                        <option value="Cancelada">Cancelada</option>
+                                        <option value="Pospuesta">Pospuesta</option>
+                                    </select>
+                                    <input type="month" class="form-control form-control-sm" id="ag-reuniones-filtro-mes"
+                                        onchange="agLoadReuniones()" style="width:auto">
+                                </div>
+                                <button class="btn btn-sm btn-primary" id="ag-btn-nueva-reunion-tab"
+                                    onclick="agOpenNuevaReunion()" style="display:none">
+                                    <i class="fas fa-plus me-1"></i>Nueva Reunión
+                                </button>
+                            </div>
+                            <div class="text-center py-5" id="ag-reuniones-loading">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="text-muted mt-2 small">Cargando…</p>
+                            </div>
+                            <div id="ag-reuniones-list" style="display:none"></div>
+                            <div class="text-center py-5 text-muted d-none" id="ag-reuniones-empty">
+                                <i class="fas fa-calendar-times fa-2x mb-2"></i><br>No hay reuniones registradas.
+                            </div>
+                        </div>
+
+                        <!-- -- PESTAÑA: ACUERDOS -- -->
+                        <div class="tab-pane fade" id="ag-pane-acuerdos">
+                            <div class="d-flex gap-2 mb-2 flex-wrap">
+                                <select class="form-select form-select-sm" id="ag-acuerdos-filtro-estatus"
+                                    onchange="agLoadAcuerdos()" style="width:auto">
+                                    <option value="">Todos los estatus</option>
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="En proceso">En proceso</option>
+                                    <option value="Cumplido">Cumplido</option>
+                                    <option value="Cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div class="text-center py-5" id="ag-acuerdos-loading">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="text-muted mt-2 small">Cargando…</p>
+                            </div>
+                            <div id="ag-acuerdos-list" style="display:none"></div>
+                            <div class="text-center py-5 text-muted d-none" id="ag-acuerdos-empty">
+                                <i class="fas fa-inbox fa-2x mb-2"></i><br>No hay acuerdos registrados.
+                            </div>
+                        </div>
+
+                    </div><!-- /tab-content -->

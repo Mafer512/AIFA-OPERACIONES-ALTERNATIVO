@@ -1,0 +1,335 @@
+        <div class="card border-0 shadow-sm">
+
+            <!-- ESTILOS LOCALES SSEI -->
+            <style>
+                /* KPI cards */
+                .ssei-kpi {
+                    border-radius: 18px;
+                    padding: 1.35rem 1.5rem 1.2rem;
+                    position: relative;
+                    overflow: hidden;
+                    color: #fff;
+                    box-shadow: 0 8px 26px -6px rgba(0,0,0,.22);
+                    transition: transform .2s ease, box-shadow .2s ease;
+                    min-height: 130px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                }
+                .ssei-kpi:hover { transform: translateY(-3px); box-shadow: 0 16px 36px -8px rgba(0,0,0,.30); }
+                .ssei-kpi::before {
+                    content: '';
+                    position: absolute; top: -40px; right: -40px;
+                    width: 130px; height: 130px; border-radius: 50%;
+                    background: rgba(255,255,255,.12);
+                }
+                .ssei-kpi-icon { font-size: 1.6rem; opacity: .85; margin-bottom: .4rem; position: relative; z-index:2; }
+                .ssei-kpi-val  { font-size: 1.9rem; font-weight: 800; line-height: 1; position: relative; z-index:2; }
+                .ssei-kpi-lbl  { font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; opacity: .8; margin-top: .25rem; position: relative; z-index:2; }
+                .ssei-kpi--red    { background: linear-gradient(135deg, #dc2626, #991b1b); }
+                .ssei-kpi--orange { background: linear-gradient(135deg, #f97316, #c2410c); }
+                .ssei-kpi--blue   { background: linear-gradient(135deg, #2563eb, #1e40af); }
+                .ssei-kpi--green  { background: linear-gradient(135deg, #16a34a, #14532d); }
+                .ssei-kpi--teal   { background: linear-gradient(135deg, #0d9488, #134e4a); }
+                .ssei-kpi--red-dark { background: linear-gradient(135deg, #991b1b, #7f1d1d); }
+
+                /* Tabla */
+                #ssei-tbl th { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+                #ssei-tbl td { font-size: .82rem; vertical-align: middle; }
+                #ssei-tbl tr:hover td { background: #fef2f2; }
+
+                /* Gráficas */
+                .ssei-chart-wrap { position: relative; height: 260px; }
+
+                /* Header badge */
+                .ssei-badge-header {
+                    display: inline-flex; align-items: center; gap: .4rem;
+                    background: #dc2626; color: #fff;
+                    border-radius: 8px; padding: .2rem .65rem;
+                    font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+                }
+            </style>
+
+            <!-- HEADER -->
+            <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between gap-2 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="ssei-badge-header"><i class="fas fa-fire-extinguisher"></i> SSEI</span>
+                    <div>
+                        <h2 class="section-title mb-0" style="font-size:1.1rem;">Atención a Derrames en Plataforma</h2>
+                        <p class="text-muted mb-0" style="font-size:.75rem;">Registro histórico · Supabase en tiempo real</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <label class="text-muted me-1 small fw-semibold" for="ssei-anio-select">Año:</label>
+                    <select id="ssei-anio-select" class="form-select form-select-sm" style="min-width:130px;">
+                        <option value="all">Todos los años</option>
+                    </select>
+                    <button class="btn btn-outline-secondary btn-sm" id="ssei-refresh-btn" title="Actualizar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm d-none" id="ssei-add-btn">
+                        <i class="fas fa-plus me-1"></i>Nuevo Registro
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body px-3 px-md-4 py-4">
+
+                <!-- STATUS -->
+                <div id="ssei-status" class="alert d-none mb-3" role="status"></div>
+
+                <!-- KPIs -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-sm-4 col-lg-2">
+                        <div class="ssei-kpi ssei-kpi--red">
+                            <div class="ssei-kpi-icon"><i class="fas fa-biohazard"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="ssei-kpi-total">—</div>
+                                <div class="ssei-kpi-lbl">Derrames atendidos</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4 col-lg-2">
+                        <div class="ssei-kpi ssei-kpi--orange">
+                            <div class="ssei-kpi-icon"><i class="fas fa-stopwatch"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="ssei-kpi-tiempo">—</div>
+                                <div class="ssei-kpi-lbl">Tiempo prom. de respuesta</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4 col-lg-2">
+                        <div class="ssei-kpi ssei-kpi--blue">
+                            <div class="ssei-kpi-icon"><i class="fas fa-expand-arrows-alt"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="ssei-kpi-m2">—</div>
+                                <div class="ssei-kpi-lbl">Superficie total tratada</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4 col-lg-2">
+                        <div class="ssei-kpi ssei-kpi--green">
+                            <div class="ssei-kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="ssei-kpi-cobro">—</div>
+                                <div class="ssei-kpi-lbl">Importe</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4 col-lg-2">
+                        <div class="ssei-kpi ssei-kpi--orange">
+                            <div class="ssei-kpi-icon"><i class="fas fa-tools"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="ssei-kpi-costo">—</div>
+                                <div class="ssei-kpi-lbl">Costo de operación</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4 col-lg-2">
+                        <div class="ssei-kpi ssei-kpi--teal" id="ssei-kpi-ganancia-card">
+                            <div class="ssei-kpi-icon"><i class="fas fa-chart-line"></i></div>
+                            <div>
+                                <div class="ssei-kpi-val" id="ssei-kpi-ganancia">—</div>
+                                <div class="ssei-kpi-lbl">Margen operativo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRÁFICAS: fila 1 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-chart-bar me-1 text-danger"></i>Derrames por año (histórico)
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="ssei-chart-anual"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRÁFICAS: fila 2 -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-building me-1 text-primary"></i>M² afectados por empresa
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="ssei-chart-empresa"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-clock me-1 text-info"></i>Tiempo de respuesta por evento (min)
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="ssei-chart-tiempo"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRÁFICAS: fila 3 — análisis financiero -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-balance-scale me-1 text-success"></i>Importe vs Costo de operación por empresa
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="ssei-chart-finanzas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-chart-line me-1" style="color:#0d9488;"></i>Margen operativo por empresa
+                            </div>
+                            <div class="ssei-chart-wrap">
+                                <canvas id="ssei-chart-ganancia"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLA HISTÓRICA -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white d-flex align-items-center justify-content-between rounded-top-4 py-2 px-3">
+                        <span class="fw-bold text-uppercase" style="font-size:.75rem;letter-spacing:.05em;color:#0f172a;">
+                            <i class="fas fa-table me-1 text-danger"></i>Registros detallados
+                        </span>
+                        <span class="badge bg-light text-muted border" id="ssei-tbl-count"></span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm mb-0 align-middle" id="ssei-tbl">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Mes</th>
+                                        <th>Empresa</th>
+                                        <th>Sitio</th>
+                                        <th>Activado por</th>
+                                        <th class="text-end">Hora activ.</th>
+                                        <th class="text-end">Hora llegada</th>
+                                        <th class="text-end">Tiempo resp.</th>
+                                        <th class="text-end">M²</th>
+                                        <th class="text-end">Importe</th>
+                                        <th class="text-end">Costo de operación</th>
+                                        <th class="text-end">Margen operativo</th>
+                                        <th class="text-center ssei-edit-col d-none">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ssei-tbl-body">
+                                    <tr><td colspan="13" class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin me-1"></i>Cargando…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /card-body -->
+        </div><!-- /card -->
+
+        <!-- ── MODAL: Nuevo registro ─────────────────────────────── -->
+        <div class="modal fade" id="ssei-modal" tabindex="-1" aria-labelledby="ssei-modal-label" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4 shadow-lg border-0">
+                    <div class="modal-header" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border-radius:1rem 1rem 0 0;">
+                        <h5 class="modal-title fw-bold" id="ssei-modal-label">
+                            <i class="fas fa-fire-extinguisher me-2"></i>Nuevo Derrame — SSEI
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body px-4 py-3">
+                        <div class="row g-3">
+                            <!-- Fecha / Mes -->
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-fecha">Fecha <span class="text-danger">*</span></label>
+                                <input type="date" id="ssei-f-fecha" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-mes">Mes (auto) <span class="text-danger">*</span></label>
+                                <input type="text" id="ssei-f-mes" class="form-control form-control-sm" placeholder="ENERO" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-quien">Activado por (CCO/AFAC…)</label>
+                                <input type="text" id="ssei-f-quien" class="form-control form-control-sm" placeholder="CCO" />
+                            </div>
+                            <!-- Empresa / Sitio -->
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold" for="ssei-f-empresa">Empresa <span class="text-danger">*</span></label>
+                                <input type="text" id="ssei-f-empresa" class="form-control form-control-sm" placeholder="VIVA, ASA, UPS…" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold" for="ssei-f-sitio">Sitio / Ubicación</label>
+                                <input type="text" id="ssei-f-sitio" class="form-control form-control-sm" placeholder="Pos 107B combustible" />
+                            </div>
+                            <!-- Horas (formato 24 h — HH:MM) -->
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-hora-act">
+                                    Hora activación <span class="text-muted fw-normal">(HH:MM)</span>
+                                </label>
+                                <input type="text" id="ssei-f-hora-act"
+                                       class="form-control form-control-sm"
+                                       placeholder="17:23"
+                                       maxlength="5"
+                                       inputmode="numeric"
+                                       autocomplete="off" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-hora-lleg">
+                                    Hora llegada <span class="text-muted fw-normal">(HH:MM)</span>
+                                </label>
+                                <input type="text" id="ssei-f-hora-lleg"
+                                       class="form-control form-control-sm"
+                                       placeholder="17:35"
+                                       maxlength="5"
+                                       inputmode="numeric"
+                                       autocomplete="off" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-tiempo">Tiempo respuesta (min)</label>
+                                <input type="number" id="ssei-f-tiempo" class="form-control form-control-sm" min="0" step="0.1" placeholder="Auto si llenas horas" />
+                            </div>
+                            <!-- M² / Importe / Costo / Margen -->
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-m2">Superficie afectada (m²)</label>
+                                <input type="number" id="ssei-f-m2" class="form-control form-control-sm" min="0" step="0.01" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-cobro">Importe ($)</label>
+                                <input type="number" id="ssei-f-cobro" class="form-control form-control-sm" min="0" step="1" placeholder="0" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="ssei-f-costo">Costo de operación ($)</label>
+                                <input type="number" id="ssei-f-costo" class="form-control form-control-sm" min="0" step="0.01" placeholder="0" />
+                            </div>
+                            <!-- Preview de margen (solo lectura, calculado automáticamente) -->
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-2 px-2 py-2 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                                    <i class="fas fa-chart-line text-muted" style="font-size:.85rem;"></i>
+                                    <span class="small text-muted fw-semibold text-uppercase" style="letter-spacing:.04em;font-size:.7rem;">Margen operativo (auto)</span>
+                                    <span id="ssei-f-ganancia-preview" class="fw-bold ms-auto">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Mensaje de estado -->
+                        <div id="ssei-modal-msg" class="mt-2"></div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger btn-sm px-4" id="ssei-modal-save">
+                            <i class="fas fa-save me-1"></i>Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /modal -->
+

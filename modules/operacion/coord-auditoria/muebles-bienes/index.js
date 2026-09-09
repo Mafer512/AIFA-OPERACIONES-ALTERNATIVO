@@ -60,40 +60,22 @@
         return match ? { icon: match[1], color: match[2] } : OTHER_STYLE;
     }
 
+    var _uiLista = false;
+
     function ensureUI() {
-        if ($('muebles-bienes-section')) return;
-        const host = $('coord-auditoria-section')?.parentElement;
-        if (!host) return;
-        host.insertAdjacentHTML('beforeend', `
-        <div id="muebles-bienes-section" class="content-section container-fluid">
-          <div id="mb-toast" class="position-fixed bottom-0 end-0 p-3" style="z-index:11000"></div>
-          <div class="rounded-4 mb-4 p-4 p-md-5 position-relative overflow-hidden" style="background:linear-gradient(135deg,#0a1f44,#1a3a6e 55%,#2c5282);">
-            <i class="fas fa-boxes-stacked position-absolute top-0 end-0 opacity-10 text-white" style="font-size:13rem;transform:translate(12%,-18%)"></i>
-            <span class="badge rounded-pill mb-3" style="background:rgba(232,119,10,.18);color:#ffad55">Coordinación de Auditoría</span>
-            <h1 class="fw-bold text-white mb-1">Muebles y Bienes</h1>
-            <p class="text-white-50 mb-0">Inventario de equipos de radiocomunicación, telecomunicaciones y resguardos documentales</p>
-            <button class="btn btn-sm btn-light rounded-circle position-absolute bottom-0 end-0 m-3" onclick="mueblesBienesModule.reload()" title="Actualizar"><i class="fas fa-sync-alt text-primary"></i></button>
-          </div>
-          <div id="mb-family-tabs" class="py-2 mb-4" role="tablist" aria-label="Filtrar por tipo de equipo"></div>
-          <div class="card border-0 shadow-sm rounded-4 mb-4"><div class="card-body p-3 d-flex flex-wrap gap-2 align-items-center">
-            <div class="input-group flex-grow-1" style="max-width:390px"><span class="input-group-text bg-white"><i class="fas fa-search"></i></span><input id="mb-search" class="form-control" placeholder="Buscar serie, equipo, área, responsable…"></div>
-            <select id="mb-filter-familia" class="form-select form-select-sm rounded-pill" style="width:auto"><option value="">Todos los equipos</option></select>
-            <select id="mb-filter-area" class="form-select form-select-sm rounded-pill" style="width:auto"><option value="">Todas las áreas</option></select>
-            <select id="mb-filter-disponibilidad" class="form-select form-select-sm rounded-pill" style="width:auto"><option value="">Toda disponibilidad</option><option value="asignado">Asignados</option><option value="disponible">Disponibles</option></select>
-            <select id="mb-filter-doc" class="form-select form-select-sm rounded-pill" style="width:auto"><option value="">Con y sin documento</option><option value="si">Con documento</option><option value="no">Sin documento</option></select>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill" id="mb-clear"><i class="fas fa-eraser me-1"></i>Limpiar</button>
-            <button id="mb-recent-history" type="button" class="btn btn-sm btn-outline-dark rounded-pill d-none" onclick="mueblesBienesModule.openRecentHistory()"><i class="fas fa-clock-rotate-left me-1"></i>Últimas modificaciones</button>
-            <div class="ms-auto btn-group btn-group-sm"><button id="mb-grid-btn" class="btn btn-primary" onclick="mueblesBienesModule.setView('grid')"><i class="fas fa-th-large"></i></button><button id="mb-table-btn" class="btn btn-outline-secondary" onclick="mueblesBienesModule.setView('table')"><i class="fas fa-list"></i></button></div>
-            <button id="mb-add" class="btn btn-sm rounded-pill d-none" style="background:#E8770A;color:white" onclick="mueblesBienesModule.openForm()"><i class="fas fa-plus me-1"></i>Agregar bien</button>
-            <button id="mb-import-pdfs" class="btn btn-sm btn-outline-primary rounded-pill d-none" onclick="document.getElementById('mb-import-files').click()"><i class="fas fa-file-import me-1"></i>Importar PDFs</button><input id="mb-import-files" type="file" accept="application/pdf,.pdf" multiple class="d-none"><input id="mb-quick-doc-file" type="file" accept="application/pdf,.pdf" class="d-none">
-            <button class="btn btn-sm btn-outline-success rounded-pill" onclick="mueblesBienesModule.exportCSV()"><i class="fas fa-file-csv me-1"></i>CSV</button>
-          </div></div>
-          <div id="mb-loading" class="text-center py-5"><div class="spinner-border text-primary"></div><p class="text-muted mt-2">Cargando inventario…</p></div>
-          <div id="mb-load-error" class="alert alert-danger text-center d-none" role="alert"><div id="mb-load-error-text">No se pudo cargar el inventario.</div><button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="mueblesBienesModule.reload()"><i class="fas fa-rotate-right me-1"></i>Reintentar</button></div>
-          <div id="mb-empty" class="text-center py-5 d-none"><i class="fas fa-box-open fa-3x text-muted"></i><p class="mt-3">No se encontraron bienes con los criterios seleccionados.</p></div>
-          <div id="mb-grid" class="row g-4"></div>
-          <div id="mb-table-wrap" class="card border-0 shadow-sm rounded-4 d-none"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-dark"><tr><th>Equipo</th><th>Serie / lote</th><th>Cantidad</th><th>Área responsable</th><th>Resguardo</th><th>Responsable</th><th>Documentación</th><th></th></tr></thead><tbody id="mb-tbody"></tbody></table></div></div>
-        </div>`);
+        // La vista ya esta puesta: la inyecta el loader antes de evaluar este
+        // archivo. Aqui solo quedan los modales y los estilos, que van a body
+        // y head, no al contenedor de la seccion.
+        //
+        // La guarda es nueva y hace falta: load() llama aqui en cada carga, y
+        // antes eso era inofensivo porque la primera linea comprobaba si ya
+        // existia el nodo que esta misma funcion creaba. Ahora el contenedor
+        // lo pone el shell, asi que sin _uiLista se apilaria un juego de
+        // modales en <body> por cada recarga de datos.
+        if (_uiLista) return;
+        const sec = $('muebles-bienes-section');
+        if (!sec) return;
+        _uiLista = true;
         document.body.insertAdjacentHTML('beforeend', modalHTML());
         document.body.insertAdjacentHTML('beforeend', duplicateModalHTML());
         document.head.insertAdjacentHTML('beforeend', `<style id="mb-doc-styles">#mb-family-tabs{display:flex;flex-wrap:nowrap;gap:1rem;align-items:stretch}.mb-family-tab{flex:1 1 0;min-width:0;padding:0;background:#fff;border-color:rgba(11,11,11,.1);cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}.mb-family-tab .card-body{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:.15rem;padding:.9rem .5rem}.mb-family-tab-chip{display:flex;align-items:center;justify-content:center;width:38px;height:38px;margin-bottom:.4rem;border-radius:50%;background:#f1f3f7;background:color-mix(in srgb,var(--mb-tab-color) 14%,#fff)}.mb-family-tab-icon{font-size:1.05rem;line-height:1;color:var(--mb-tab-color)}.mb-family-tab-count{color:#0b0b0b;line-height:1.1}.mb-family-tab-label{color:#52514e;font-size:.8rem;line-height:1.25;min-height:2.5em;display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;word-break:normal;overflow-wrap:break-word;hyphens:none}.mb-family-tab:hover{border-color:var(--mb-tab-color);transform:translateY(-2px)}.mb-family-tab:focus-visible{outline:2px solid var(--mb-tab-color);outline-offset:2px}.mb-family-tab-active{border-color:var(--mb-tab-color);background:#f7f9fc;background:color-mix(in srgb,var(--mb-tab-color) 7%,#fff);box-shadow:0 0 0 2px rgba(11,11,11,.12),0 .5rem 1rem rgba(11,11,11,.08)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--mb-tab-color) 34%,transparent),0 .5rem 1rem rgba(11,11,11,.08)!important}.mb-family-tab-active .mb-family-tab-chip{background:#e9edf5;background:color-mix(in srgb,var(--mb-tab-color) 26%,#fff)}@media(max-width:575.98px){#mb-family-tabs{grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:.65rem}.mb-family-tab .card-body{padding:.7rem .4rem}.mb-family-tab-label{font-size:.75rem}}@media(prefers-reduced-motion:reduce){.mb-family-tab{transition:none}.mb-family-tab:hover{transform:none}}.mb-doc-trigger{border:0}.mb-doc-clickable{cursor:pointer}.mb-doc-preview{position:fixed;z-index:12050;width:min(430px,calc(100vw - 20px));max-height:min(590px,calc(100vh - 20px));overflow:auto}.mb-preview-frame{height:300px;background:#e9ecef}.mb-preview-open iframe,.mb-preview-open img{pointer-events:none}.mb-doc-name{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left}.mb-card-visual{width:100%;height:112px;display:flex;align-items:center;justify-content:center}.mb-card-pdf-preview{padding:0!important;overflow:hidden;background:#eef4fb}.mb-card-pdf-thumb{display:block;width:100%;height:100%;object-fit:cover;object-position:center top;background:#fff}.mb-card-thumb-fallback{pointer-events:none}.mb-quick-uploading,.mb-quick-upload-success{background:#ecfdf3!important;box-shadow:0 0 0 3px rgba(25,135,84,.35),0 .5rem 1rem rgba(25,135,84,.16)!important}.mb-quick-uploading .mb-card-visual,.mb-quick-upload-success .mb-card-visual{background:linear-gradient(135deg,#e4f8eb,#d1f0dc)!important}.mb-quick-uploading .card-body,.mb-quick-uploading .card-footer,.mb-quick-upload-success .card-body,.mb-quick-upload-success .card-footer{background:transparent!important}.mb-quick-state{z-index:4;pointer-events:none}.mb-card-flash{animation:mbPdfFlash 4s ease}@keyframes mbPdfFlash{0%,45%{box-shadow:0 0 0 4px #20c997,0 12px 34px rgba(32,201,151,.35)!important}100%{box-shadow:var(--bs-box-shadow-sm)!important}}.mb-doc-flash{animation:mbBadgeFlash 4s ease}@keyframes mbBadgeFlash{0%,50%{background:#0d6efd!important;transform:scale(1.12)}100%{transform:none}}#mb-pdf-modal .modal-dialog{width:min(1500px,96vw);max-width:none;height:96vh;margin:2vh auto}#mb-pdf-modal .modal-content{height:100%;overflow:hidden}#mb-pdf-modal .modal-header{flex:0 0 auto}#mb-pdf-modal .mb-pdf-body{display:flex;flex-direction:column;min-height:0;overflow:hidden}#mb-pdf-modal .mb-pdf-toolbar{flex:0 0 auto;z-index:2}#mb-pdf-stage{position:relative;flex:1 1 auto;min-height:0;overflow:auto;background:#525659;overscroll-behavior:contain;touch-action:pan-x pan-y}#mb-pdf-canvas-wrap{box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-width:100%;min-height:100%;width:max-content;height:max-content;padding:16px}#mb-pdf-canvas{display:block;flex:none;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.35)}#mb-pdf-loading,#mb-pdf-fallback{z-index:3}@media(max-width:767.98px){#mb-pdf-modal .modal-dialog{width:100vw;max-width:none;height:100vh;height:100dvh;margin:0}#mb-pdf-modal .modal-content{border:0;border-radius:0}#mb-pdf-modal .modal-header{padding:.5rem .75rem}#mb-pdf-modal .mb-pdf-toolbar{padding:.4rem!important;gap:.3rem!important}#mb-pdf-modal .mb-pdf-toolbar .btn{padding:.25rem .45rem}#mb-pdf-canvas-wrap{padding:8px}}</style>`);
@@ -193,10 +175,6 @@
         } finally { state.loading = false; $('mb-loading')?.classList.add('d-none'); }
     }
 
-    function activateOnEntry() {
-        const section=$('muebles-bienes-section');
-        if(location.hash==='#muebles-bienes'||section?.classList.contains('active'))load();
-    }
 
     function populateFilters() {
         refreshFamilyFilterUI();
@@ -906,7 +884,21 @@
     function toast(message,type='success'){const id=`mbt-${Date.now()}`;$('mb-toast')?.insertAdjacentHTML('beforeend',`<div id="${id}" class="toast show text-bg-${type} border-0"><div class="d-flex"><div class="toast-body">${esc(message)}</div><button class="btn-close btn-close-white m-auto me-2" onclick="this.closest('.toast').remove()"></button></div></div>`);setTimeout(()=>$(`${id}`)?.remove(),4500);}
 
     window.mueblesBienesModule={init:()=>load(),reload:()=>load(true),setView,openDetail,openForm,openDocument,chooseQuickDocument,openPDF,openDocuments,deleteDocument,reclassifyDocument,reassignDocument,previewDocuments,selectPreview,schedulePreviewClose,cancelPreviewClose,closePreview,openViewer,viewerPage,viewerZoom,viewerFit,viewerFitPage,viewerReset,viewerOpenTab,viewerDownload,openRecentHistory,exportCSV,bulkImportDocuments};
-    ensureUI();
-    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',activateOnEntry,{once:true});
-    else queueMicrotask(activateOnEntry);
+
+    /* ============================================================
+     *  Contrato de ciclo de vida del modulo.
+     *
+     *  Antes este archivo pintaba su propia seccion al evaluarse y despues
+     *  miraba el hash o la clase "active" para decidir si cargar datos. Todo
+     *  eso corria en cada carga de la pagina. Ahora la vista la trae el
+     *  loader y load() se llama al abrir.
+     * ========================================================== */
+    window.initMueblesBienes = function () {
+        load();
+    };
+
+    // No hay graficas ni temporizadores que soltar. Los datos ya traidos se
+    // conservan: para recargarlos esta el boton de actualizar, que llama a
+    // reload() -> load(true).
+    window.destroyMueblesBienes = function () {};
 })();

@@ -1,3 +1,7 @@
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto } = require('../test-utils/modulos.js');
 /**
  * @jest-environment node
  *
@@ -174,7 +178,7 @@ describe('las instrucciones para quien captura', () => {
   test('el botón de instrucciones ya no aparece en la barra del módulo', () => {
     const fs = require('fs');
     const path = require('path');
-    const html = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
+    const html = htmlCompleto();
     expect(html).not.toContain('id="btn-conci-instrucciones"');
   });
 });

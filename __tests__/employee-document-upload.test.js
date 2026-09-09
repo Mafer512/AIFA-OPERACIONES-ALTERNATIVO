@@ -1,13 +1,20 @@
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto, archivoDeModulo } = require('../test-utils/modulos.js');
 
-global.employeePhotoUpload = require('../js/employee-photo-upload');
-const documentUpload = require('../js/employee-document-upload');
+global.employeePhotoUpload = require(archivoDeModulo('colaboradores', 'foto-upload.js'));
+const documentUpload = require(archivoDeModulo('colaboradores', 'documento-upload.js'));
 
 const root = path.join(__dirname, '..');
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+// Colaboradores reparte hoy su marcado (view.html) y su código (index.js) en
+// archivos distintos; hasta la modularización los dos vivían dentro de
+// index.html. Esta prueba siempre miró "lo que entrega el módulo".
+const html = htmlCompleto() + fs.readFileSync(archivoDeModulo('colaboradores'), 'utf8');
 const sql = fs.readFileSync(path.join(root, 'db', 'create_employee_document_images_bucket.sql'), 'utf8');
-const helperSource = fs.readFileSync(path.join(root, 'js', 'employee-document-upload.js'), 'utf8');
+const helperSource = fs.readFileSync(archivoDeModulo('colaboradores', 'documento-upload.js'), 'utf8');
 
 const SIGNATURES = {
     'image/jpeg': [0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0],

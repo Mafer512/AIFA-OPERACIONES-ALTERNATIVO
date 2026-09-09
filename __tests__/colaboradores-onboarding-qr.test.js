@@ -33,11 +33,20 @@
 
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto, archivoDeModulo } = require('../test-utils/modulos.js');
 
 const raiz = path.resolve(__dirname, '..');
 const sql = fs.readFileSync(path.join(raiz, 'db/create_colab_onboarding_portal.sql'), 'utf8');
 const portal = fs.readFileSync(path.join(raiz, 'colaborador-registro.html'), 'utf8');
-const app = fs.readFileSync(path.join(raiz, 'index.html'), 'utf8');
+// Colaboradores reparte hoy su marcado (view.html) y su codigo (index.js) en
+// archivos distintos; hasta la modularizacion los dos vivian dentro de
+// index.html, el segundo como un <script> incrustado de 8566 lineas. Estas
+// pruebas siempre miraron "lo que entrega el modulo", asi que se les sigue
+// dando eso: el documento compuesto mas el codigo del modulo.
+const app = htmlCompleto() + fs.readFileSync(archivoDeModulo('colaboradores'), 'utf8');
 
 // El numero de empleado va aparte: sale del token, no de un campo del alta.
 const CAMPOS_FIJOS = [
@@ -183,7 +192,10 @@ describe('los campos fijos son los mismos en los tres lados', () => {
   });
 
   test('el alta los exige para poder generar el QR', () => {
-    const arr = app.match(/const COLAB_ONBOARDING_FIJOS = \[([\s\S]*?)\n {24}\];/);
+    // La sangría era de 24 espacios cuando este código vivía dentro de
+    // index.html; al salir al módulo pasó a 4. Se busca el cierre a cualquier
+    // sangría, que es lo que de verdad importa aquí.
+    const arr = app.match(/const COLAB_ONBOARDING_FIJOS = \[([\s\S]*?)\n *\];/);
     expect(arr).not.toBeNull();
     const campos = [...arr[1].matchAll(/clave: '([^']+)',\s*input: '([^']+)'/g)];
     expect(campos.map(m => m[1]).sort()).toEqual([...CAMPOS_FIJOS].sort());

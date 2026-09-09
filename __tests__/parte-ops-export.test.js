@@ -21,6 +21,10 @@
 
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto } = require('../test-utils/modulos.js');
 
 require(path.resolve(__dirname, '..', 'js', 'parte-ops-export.js'));
 const api = window.parteOpsExport;
@@ -259,7 +263,7 @@ describe('la hoja tiene la forma pedida', () => {
 
 describe('la pantalla queda conectada', () => {
   const tab = fs.readFileSync(path.resolve(__dirname, '..', 'js', 'parte-ops-tab.js'), 'utf8');
-  const html = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
+  const html = htmlCompleto();
 
   test('el botón y el selector de año existen y el script se carga', () => {
     expect(html).toContain('id="btn-export-parte-ops"');

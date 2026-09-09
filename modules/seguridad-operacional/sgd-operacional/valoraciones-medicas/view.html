@@ -1,0 +1,311 @@
+
+        <!-- Estilos locales del módulo -->
+        <style>
+            .vm-kpi { border-radius: 1rem; color: #fff; padding: 1rem 1.25rem; position: relative; overflow: hidden; }
+            .vm-kpi::before { content: ''; position: absolute; right: -14px; top: -14px; width: 70px; height: 70px; border-radius: 50%; background: rgba(255,255,255,.12); }
+            .vm-kpi--blue   { background: linear-gradient(135deg, #2563eb, #1e3a8a); }
+            .vm-kpi--teal   { background: linear-gradient(135deg, #0d9488, #134e4a); }
+            .vm-kpi--green  { background: linear-gradient(135deg, #16a34a, #14532d); }
+            .vm-kpi--amber  { background: linear-gradient(135deg, #d97706, #92400e); }
+            .vm-kpi-icon    { font-size: 1.6rem; opacity: .85; margin-bottom: .3rem; }
+            .vm-kpi-val     { font-size: 2rem; font-weight: 800; line-height: 1; }
+            .vm-kpi-lbl     { font-size: .62rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; opacity: .85; margin-top: .25rem; }
+            .vm-chart-wrap  { position: relative; height: 220px; }
+            #vm-tbl thead th { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #475569; }
+        </style>
+
+        <div class="card border-0 shadow-sm" style="border-radius:1.2rem;">
+            <div class="card-body p-4">
+
+                <!-- Encabezado -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color:#1e293b;">
+                            <span class="badge me-2" style="background:#0d9488;font-size:.75rem;vertical-align:middle;">
+                                <i class="fas fa-stethoscope"></i>
+                            </span>
+                            Valoraciones Médicas del Personal
+                        </h5>
+                        <p class="text-muted mb-0" style="font-size:.78rem;">
+                            Registro histórico · Supabase en tiempo real
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button id="vm-refresh-btn" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar
+                        </button>
+                        <button id="vm-csv-btn" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                            <i class="fas fa-file-csv me-1"></i>Exportar CSV
+                        </button>
+                        <button id="vm-add-btn" class="btn btn-sm rounded-pill px-3 d-none"
+                                style="background:#0d9488;color:#fff;border:none;">
+                            <i class="fas fa-plus me-1"></i>Nueva Valoración
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alerta de estado -->
+                <div id="vm-status" class="alert d-none mb-3 py-2" role="alert"></div>
+
+                <!-- ── KPIs ── -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-sm-3">
+                        <div class="vm-kpi vm-kpi--teal">
+                            <div class="vm-kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+                            <div class="vm-kpi-val" id="vm-kpi-total">—</div>
+                            <div class="vm-kpi-lbl">Valoraciones</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="vm-kpi vm-kpi--blue">
+                            <div class="vm-kpi-icon"><i class="fas fa-users"></i></div>
+                            <div class="vm-kpi-val" id="vm-kpi-personas">—</div>
+                            <div class="vm-kpi-lbl">Personas valoradas</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="vm-kpi vm-kpi--green">
+                            <div class="vm-kpi-icon"><i class="fas fa-building"></i></div>
+                            <div class="vm-kpi-val" id="vm-kpi-empresas">—</div>
+                            <div class="vm-kpi-lbl">Empresas atendidas</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="vm-kpi vm-kpi--amber">
+                            <div class="vm-kpi-icon"><i class="fas fa-comment-medical"></i></div>
+                            <div class="vm-kpi-val" id="vm-kpi-obs">—</div>
+                            <div class="vm-kpi-lbl">Con recomendaciones</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── GRÁFICAS: fila 1 ── -->
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-lg-5">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-users me-1" style="color:#0d9488;"></i>Personas valoradas por empresa
+                            </div>
+                            <div class="vm-chart-wrap">
+                                <canvas id="vm-chart-empresa"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-7">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-calendar-alt me-1 text-info"></i>Personas valoradas por mes
+                            </div>
+                            <div class="vm-chart-wrap">
+                                <canvas id="vm-chart-mensual"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── GRÁFICAS: fila 2 ── -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-heartbeat me-1 text-danger"></i>Tipos de valoración aplicados
+                            </div>
+                            <div class="vm-chart-wrap">
+                                <canvas id="vm-chart-tipos"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="fw-semibold text-uppercase" style="font-size:.72rem;letter-spacing:.05em;color:#475569;margin-bottom:.5rem;">
+                                <i class="fas fa-building me-1 text-primary"></i>Eventos de valoración por empresa
+                            </div>
+                            <div class="vm-chart-wrap">
+                                <canvas id="vm-chart-eventos"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── FILTROS + TABLA ── -->
+                <div class="card border-0 bg-light rounded-4 p-3">
+                    <!-- Filtros -->
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-12 col-sm-4 col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Empresa</label>
+                            <select id="vm-fil-empresa" class="form-select form-select-sm">
+                                <option value="all">Todas</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-sm-3 col-md-2">
+                            <label class="form-label small fw-semibold mb-1">Año</label>
+                            <select id="vm-fil-anio" class="form-select form-select-sm">
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-sm-5 col-md-4">
+                            <label class="form-label small fw-semibold mb-1">Buscar</label>
+                            <input id="vm-fil-buscar" type="text" class="form-control form-control-sm"
+                                   placeholder="Empresa, valoración, observaciones…" />
+                        </div>
+                        <div class="col-12 col-md-3 d-flex align-items-end justify-content-end">
+                            <span id="vm-tbl-count" class="text-muted small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <div class="table-responsive">
+                        <table id="vm-tbl" class="table table-hover table-sm mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">No. Prog</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Hora</th>
+                                    <th>Empresa</th>
+                                    <th class="text-center">Personas</th>
+                                    <th>Valoraciones practicadas</th>
+                                    <th>Observaciones</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vm-tbl-body">
+                                <tr><td colspan="8" class="text-center text-muted py-4">
+                                    <i class="fas fa-spinner fa-spin me-1"></i>Cargando…
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             Modal: Nueva / Editar Valoración
+        ═══════════════════════════════════════════════════════════ -->
+        <div class="modal fade" id="vm-modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg" style="border-radius:1.2rem;">
+
+                    <!-- Cabecera -->
+                    <div class="modal-header text-white border-0 rounded-top-4"
+                         style="background:linear-gradient(135deg,#0d9488,#134e4a);">
+                        <h5 class="modal-title fw-bold" id="vm-modal-title">
+                            <i class="fas fa-stethoscope me-2"></i>Nueva Valoración
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <!-- Cuerpo -->
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+
+                            <!-- No. Programa / Fecha -->
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="vm-f-noprog">No. Programa</label>
+                                <input type="number" id="vm-f-noprog" class="form-control form-control-sm"
+                                       min="1" step="1" placeholder="Ej. 90" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="vm-f-fecha">
+                                    Fecha <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" id="vm-f-fecha" class="form-control form-control-sm" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="vm-f-hora">
+                                    Hora <span class="text-muted fw-normal">(HH:MM o HH:MM-HH:MM)</span>
+                                </label>
+                                <input type="text" id="vm-f-hora" class="form-control form-control-sm"
+                                       placeholder="09:00-10:30"
+                                       maxlength="11"
+                                       autocomplete="off" />
+                            </div>
+
+                            <!-- Empresa / Cantidad -->
+                            <div class="col-sm-8">
+                                <label class="form-label small fw-semibold" for="vm-f-empresa">
+                                    Empresa <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="vm-f-empresa" class="form-control form-control-sm"
+                                       placeholder="Nombre de la empresa prestadora" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label small fw-semibold" for="vm-f-cantidad">
+                                    Cantidad de personas
+                                </label>
+                                <input type="number" id="vm-f-cantidad" class="form-control form-control-sm"
+                                       min="1" step="1" placeholder="1" />
+                            </div>
+
+                            <!-- Tipos de valoración (checkboxes) -->
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Valoraciones practicadas</label>
+                                <div class="row g-2">
+                                    <div class="col-6 col-sm-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input vm-val-check" type="checkbox"
+                                                   id="vm-val-signos" value="Toma de signos vitales" />
+                                            <label class="form-check-label small" for="vm-val-signos">
+                                                Toma de signos vitales
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input vm-val-check" type="checkbox"
+                                                   id="vm-val-alcohol" value="Alcoholímetro" />
+                                            <label class="form-check-label small" for="vm-val-alcohol">
+                                                Alcoholímetro
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input vm-val-check" type="checkbox"
+                                                   id="vm-val-saturacion" value="Saturación de oxígeno" />
+                                            <label class="form-check-label small" for="vm-val-saturacion">
+                                                Saturación de oxígeno
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input vm-val-check" type="checkbox"
+                                                   id="vm-val-presion" value="Presión arterial" />
+                                            <label class="form-check-label small" for="vm-val-presion">
+                                                Presión arterial
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold" for="vm-f-obs">Observaciones</label>
+                                <textarea id="vm-f-obs" class="form-control form-control-sm" rows="3"
+                                          placeholder="Recomendaciones, hallazgos o notas adicionales…"></textarea>
+                            </div>
+
+                        </div><!-- /row -->
+
+                        <!-- Mensaje de estado del modal -->
+                        <div id="vm-modal-msg" class="d-none mt-3" role="alert"></div>
+                    </div>
+
+                    <!-- Pie -->
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                                data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" id="vm-modal-save"
+                                class="btn rounded-pill px-4 text-white fw-semibold"
+                                style="background:#0d9488;border:none;">
+                            <i class="fas fa-save me-1"></i>Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div><!-- /modal -->
+

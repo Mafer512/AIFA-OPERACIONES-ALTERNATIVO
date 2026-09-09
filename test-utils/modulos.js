@@ -58,4 +58,21 @@ function clavesModulares() {
     return [...registroDeModulos().keys()];
 }
 
-module.exports = { htmlCompleto, registroDeModulos, clavesModulares };
+/**
+ * Ruta absoluta de un archivo dentro de un módulo, preguntando al registro.
+ *
+ * Las pruebas que leen el código de un módulo no deben fijar su ruta: si el
+ * módulo se mueve —y en la modularización se han movido todos— lo que falla es
+ * la prueba, no el código, y el mensaje no dice por qué.
+ *
+ *   archivoDeModulo('colaboradores', 'directory-policy.js')
+ */
+function archivoDeModulo(clave, archivo) {
+    const base = registroDeModulos().get(clave);
+    if (!base) throw new Error(`No hay módulo registrado con la clave "${clave}"`);
+    const ruta = path.join(raiz, base, archivo || 'index.js');
+    if (!fs.existsSync(ruta)) throw new Error(`El módulo "${clave}" no tiene ${archivo || 'index.js'}`);
+    return ruta;
+}
+
+module.exports = { htmlCompleto, registroDeModulos, clavesModulares, archivoDeModulo };

@@ -1,10 +1,17 @@
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto, archivoDeModulo, registroDeModulos } = require('../test-utils/modulos.js');
 
 const root = path.join(__dirname, '..');
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = htmlCompleto();
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
-const moduleSource = fs.readFileSync(path.join(root, 'js', 'muebles-bienes.js'), 'utf8');
+// Lo que el modulo entrega, que antes iba todo junto: el codigo y el marcado.
+// La plantilla era un template literal dentro del JS y ahora es view.html.
+const moduleSource = fs.readFileSync(archivoDeModulo('muebles-bienes'), 'utf8')
+    + fs.readFileSync(archivoDeModulo('muebles-bienes', 'view.html'), 'utf8');
 const migration = fs.readFileSync(path.join(root, 'supabase', 'migrations', '011_muebles_bienes.sql'), 'utf8');
 const documentUpgrade = fs.readFileSync(path.join(root, 'supabase', 'migrations', '014_muebles_bienes_documentos_versiones.sql'), 'utf8');
 const quickUploadUpgrade = fs.readFileSync(path.join(root, 'supabase', 'migrations', '015_muebles_bienes_carga_historial.sql'), 'utf8');
@@ -21,22 +28,29 @@ describe('modulo Muebles y Bienes', () => {
     expect(html.slice(vehicle, goods).match(/<a\b/g)).toHaveLength(1);
   });
   test('tiene sección y permiso independientes sin modificar el módulo de vehículos', () => {
-    expect(script).toContain("targetKey === 'muebles-bienes'");
+    // El router ya no lo enciende con un hook propio: es una entrada del
+    // registro del loader, que lo abre y lo cierra como a los demas.
+    expect(registroDeModulos().has('muebles-bienes')).toBe(true);
+    expect(script).not.toContain("targetKey === 'muebles-bienes'");
     expect(script).toContain("{ key: 'muebles-bienes'");
     expect(moduleSource).toContain("const SECTION = 'muebles-bienes'");
     expect(moduleSource).toContain(".from('muebles_bienes')");
   });
-  test('inicia el inventario al entrar directamente por hash o restaurar la sección activa', () => {
-    expect(html).toContain('js/muebles-bienes.js?v=4');
-    expect(moduleSource).toContain("document.addEventListener('DOMContentLoaded',activateOnEntry,{once:true})");
-    const start=moduleSource.indexOf('function activateOnEntry()');
-    const end=moduleSource.indexOf('function populateFilters()',start);
-    const build=new Function('$','location','load',`${moduleSource.slice(start,end)}; return activateOnEntry;`);
-    let calls=0;
-    build(()=>({classList:{contains:()=>false}}),{hash:'#muebles-bienes'},()=>{calls++;})();
-    build(()=>({classList:{contains:()=>true}}),{hash:'#otra'},()=>{calls++;})();
-    build(()=>({classList:{contains:()=>false}}),{hash:'#otra'},()=>{calls++;})();
-    expect(calls).toBe(2);
+  test('el inventario se carga al abrir el módulo, no adivinando la entrada', () => {
+    // Antes esto lo resolvia activateOnEntry(): miraba location.hash y la clase
+    // "active" de la seccion para decidir si cargar. Era la forma de enterarse
+    // de que alguien entraba, y solo funcionaba en los dos casos que se le
+    // ocurrieron a quien la escribio.
+    //
+    // El loader llama a init() SIEMPRE que se abre el modulo, tambien al
+    // llegar por URL directa, asi que ese rodeo sobra y se retiro.
+    expect(moduleSource).not.toContain('function activateOnEntry()');
+    expect(moduleSource).not.toContain("addEventListener('DOMContentLoaded'");
+
+    // Lo que si tiene que seguir siendo cierto: que abrir el modulo cargue.
+    expect(moduleSource).toContain('window.initMueblesBienes = function ()');
+    const i = moduleSource.indexOf('window.initMueblesBienes');
+    expect(moduleSource.slice(i, i + 200)).toContain('load()');
   });
   test('limita la espera de Supabase y ofrece reintento en lugar de dejar el spinner permanente', async () => {
     expect(moduleSource).toContain('id="mb-load-error"');
@@ -750,7 +764,10 @@ describe('modulo Muebles y Bienes', () => {
   });
 
   test('evita desbordamiento, texto corrupto y múltiples filas por hash', () => {
-    expect(moduleSource).toContain('class="content-section container-fluid"');
+    // El contenedor con sus clases pasó al shell: antes lo creaba el propio JS
+    // colgándose del padre de la sección de Vehículos, y por eso el marcado sólo
+    // existía si el archivo se había evaluado.
+    expect(html).toContain('id="muebles-bienes-section" class="content-section container-fluid"');
     expect(moduleSource).not.toMatch(/#muebles-bienes-section[^}]*overflow-x\s*:\s*hidden/);
     expect(moduleSource).not.toMatch(/Ã|Â|â/);
     expect(moduleSource).toContain(".eq('sha256',hash).order('version',{ascending:false}).order('created_at',{ascending:false}).limit(1).maybeSingle()");

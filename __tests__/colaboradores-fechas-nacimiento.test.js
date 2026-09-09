@@ -1,10 +1,19 @@
 const fs = require('fs');
 const path = require('path');
+// Con el modulo extraido, index.html a secas ya no trae este marcado y el
+// codigo ya no vive en js/. Se pregunta al registro del loader donde estan,
+// para que esta prueba siga a su modulo si vuelve a moverse.
+const { htmlCompleto, archivoDeModulo } = require('../test-utils/modulos.js');
 
 const root = path.join(__dirname, '..');
 const audit = JSON.parse(fs.readFileSync(path.join(root, 'agenda_2026_corrige_fechas_nacimiento_20260728_auditoria.json'), 'utf8'));
 const sql = fs.readFileSync(path.join(root, 'agenda_2026_corrige_fechas_nacimiento_20260728.sql'), 'utf8');
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+// Colaboradores reparte hoy su marcado (view.html) y su codigo (index.js) en
+// archivos distintos; hasta la modularizacion los dos vivian dentro de
+// index.html, el segundo como un <script> incrustado de 8566 lineas. Estas
+// pruebas siempre miraron "lo que entrega el modulo", asi que se les sigue
+// dando eso: el documento compuesto mas el codigo del modulo.
+const html = htmlCompleto() + fs.readFileSync(archivoDeModulo('colaboradores'), 'utf8');
 
 describe('correccion masiva de fechas de nacimiento', () => {
     test('cubre los 459 empleados del Excel sin duplicados', () => {
