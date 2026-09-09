@@ -86,25 +86,14 @@ describe('pasada móvil para teléfonos', () => {
         expect(declaration(block, '.nav-tabs,\n   .nav-pills {', 'flex-wrap')).toBe('nowrap');
     });
 
-    test('la pasada de teléfono no se filtra a las tabletas', () => {
+    test('nada de la pasada nueva alcanza a las tabletas', () => {
         const queries = [...pasada.matchAll(/@media ([^{]+)\{/g)].map(m => m[1].trim());
         expect(queries.length).toBeGreaterThan(0);
         queries.forEach(q => {
             expect(q).toMatch(/max-width:\s*(991\.98px|575\.98px|360px)/);
         });
-
-        // Un bloque que llega al ancho de tableta sólo vale si es uno de los dos
-        // que arreglan defectos que también se daban ahí —el encimamiento de
-        // capas y el modelo del deck— o si está acotado POR ABAJO con un
-        // min-width, que es como se escribió la pasada de tableta del apartado 9.
-        //
-        // Antes esto exigía que fueran exactamente dos, cuando la decisión era
-        // no tocar tableta en absoluto. Ya no lo es: hay una pasada propia para
-        // ese ancho. Lo que sigue valiendo, y es lo que se comprueba, es que las
-        // medidas pensadas para un teléfono no se le apliquen a una tableta.
-        const alcanzanTableta = queries
-            .filter(q => q.includes('991.98px'))
-            .filter(q => !/min-width:\s*576px/.test(q));
-        expect(alcanzanTableta).toHaveLength(2);
+        // Los únicos ≤ 991.98 px son los dos que arreglan defectos que también
+        // se daban en tableta: el encimamiento de capas y el modelo del deck.
+        expect(queries.filter(q => q.includes('991.98px'))).toHaveLength(2);
     });
 });
