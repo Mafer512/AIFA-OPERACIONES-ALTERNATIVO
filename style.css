@@ -21272,9 +21272,11 @@ body.conci-manifest-workspace #navdeck-back {
 }
 
 /* ── 8. Ajustes por módulo en teléfono ───────────────────────────────────────
-   Las reglas de cada módulo viven en su propio <style> dentro de index.html,
-   que en la cascada va DESPUÉS de esta hoja: por eso aquí se usa un selector
-   más específico (o !important cuando el estilo lo inyecta JavaScript). */
+   Las reglas de cada módulo viven en el <style> de su propia vista
+   (modules/…/view.html), que el loader inyecta al abrir la sección. Eso las
+   deja en la cascada DESPUÉS de esta hoja —más tarde aún que cuando vivían
+   dentro de index.html—, así que aquí hace falta un selector más específico,
+   o !important cuando el estilo lo escribe JavaScript. */
 @media (max-width: 575.98px) {
    /* Ficha de Colaboradores: las tablas de datos llegan a tener seis columnas
       (etiqueta·valor·etiqueta·valor…). En un teléfono se apilan, cada dato
@@ -21325,6 +21327,125 @@ body.conci-manifest-workspace #navdeck-back {
       de 110 px que no caben junto al nombre. */
    #gtrans-preventivos-section .gp-cap-row,
    #gtrans-preventivos-section .gp-cap-hd { grid-template-columns: minmax(0, 1fr); }
+}
+
+
+/* ── 9. Tableta (576 – 991.98 px) ─────────────────────────────────────────────
+   La pasada de teléfono se detuvo a propósito en 575.98 px para no mover lo que
+   ya funcionaba en tabletas. Pero entre esos dos anchos no había casi nada: el
+   menú lateral ya se repliega a ≤ 991.98 px y el contenido queda con el ancho
+   completo, así que las rejillas pensadas para escritorio —cuatro y cinco
+   columnas— se quedaban con tarjetas de dos dedos de ancho.
+
+   Aquí se les da un ancho intermedio: la mitad de columnas, no una sola. */
+@media (min-width: 576px) and (max-width: 991.98px) {
+
+   /* Rejillas de indicadores de los módulos. Son las mismas familias en todos:
+      un puñado de tarjetas con una cifra y su etiqueta. */
+   .content-section .hidra-statgrid,
+   .content-section .bhs-cap-metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+   }
+
+   .content-section .hidra-scada-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+   }
+
+   .content-section .cedit-doc-upload-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+   }
+
+   /* Gráficas: a este ancho una altura fija de escritorio deja media pantalla
+      en blanco o corta el eje. Se mide contra el alto de la ventana. */
+   .content-section .comb-chart-host,
+   .content-section .chart-container,
+   .content-section [class*="chart-host"],
+   .content-section [class*="chart-wrap"] {
+      height: clamp(260px, 44vh, 400px);
+   }
+
+   .content-section canvas { max-width: 100%; }
+
+   /* Barras de filtros y de acciones: que bajen de renglón en vez de
+      comprimirse hasta que no se lea ninguna etiqueta. */
+   .content-section .card-header,
+   .content-section [class*="toolbar"],
+   .content-section [class*="filters"] {
+      flex-wrap: wrap;
+      row-gap: .45rem;
+   }
+
+   /* Modales: en tableta el ancho por defecto de Bootstrap deja los formularios
+      en una columna estrecha con mucho margen muerto a los lados. */
+   .modal-dialog:not(.modal-fullscreen):not(.modal-sm) {
+      max-width: min(92vw, 720px);
+   }
+}
+
+/* ── 10. Rejillas rígidas en teléfono ────────────────────────────────────────
+   Lo que de verdad desborda en un teléfono no son los anchos fijos —casi todos
+   los de los módulos son max-width, que ya encogen— sino las rejillas escritas
+   con un número de columnas fijo.
+
+   Se separan en dos grupos, porque no admiten el mismo trato:
+
+     · Las de indicadores pueden plegarse: dos columnas, o una si son pocas.
+     · Las de CALENDARIO no. Un mes con tres columnas no es un mes. Esas
+       conservan sus siete días y lo que se ajusta es el contenido de la celda,
+       para que quepa en los ~48 px que le tocan a cada día. */
+@media (max-width: 575.98px) {
+
+   /* Indicadores: dos columnas. */
+   .content-section .hidra-statgrid,
+   .content-section .hidra-scada-grid,
+   .content-section .bhs-cap-metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+   }
+
+
+   /* Calendarios: se quedan con sus siete días. Las columnas son 1fr, así que
+      ya encogen solas: a 380 px de ancho cada día mide unos 48 px, que es lo
+      que mide en el calendario de cualquier teléfono.
+
+      Lo que no cabe en 48 px es el CONTENIDO de la celda escrito para
+      escritorio, así que lo que se ajusta es eso. No se les pone min-width a
+      propósito: no tienen un contenedor propio con overflow-x al que
+      desplazarse, y forzarlas a ser más anchas que la pantalla las dejaría
+      cortadas sin manera de llegar al resto del mes. */
+   .content-section .hidra-daygrid,
+   .content-section .vac-dow-row,
+   .content-section .vac-days-grid,
+   .content-section .ca-grid,
+   .content-section .ccal-grid {
+      gap: 2px;
+      font-size: .7rem;
+   }
+
+   .content-section .hidra-daygrid > *,
+   .content-section .vac-days-grid > *,
+   .content-section .ca-grid > *,
+   .content-section .ccal-grid > * {
+      padding: 3px 2px;
+      min-width: 0;
+      overflow-wrap: anywhere;
+   }
+
+   /* Gráficas con alto de escritorio: en vertical, 420 px se comen la pantalla
+      entera y hay que hacer scroll para ver la leyenda. */
+   .content-section .comb-chart-host,
+   .content-section [class*="chart-host"],
+   .content-section [class*="chart-wrap"] {
+      height: clamp(220px, 52vh, 320px);
+   }
+
+   /* La marca de agua de la ficha de Colaboradores mide 540 px de lado: en un
+      teléfono se sale por los dos costados y obliga a desplazar la página. */
+   .content-section .colab-ficha::before {
+      width: 90vw;
+      height: 90vw;
+      max-width: 540px;
+      max-height: 540px;
+   }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
